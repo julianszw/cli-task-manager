@@ -93,4 +93,16 @@ class TaskServiceTest {
         assertDoesNotThrow(() -> service.completeTask(task.getId()));
         assertEquals(TaskStatus.COMPLETED, task.getStatus());
     }
+
+    @Test
+    void purgeCompletedTasksRemovesCompletedAndKeepsPending() {
+        Task pending = service.addTask("Pendiente");
+        Task completed = service.addTask("Completada");
+        service.completeTask(completed.getId());
+
+        List<Task> removed = service.purgeCompletedTasks();
+
+        assertEquals(List.of(completed), removed);
+        assertEquals(List.of(pending), service.listTasks());
+    }
 }

@@ -29,4 +29,8 @@ public class TaskService {
                 .orElseThrow(() -> new TaskNotFoundException(id));
         task.markCompleted();
     }
+
+    public List<Task> purgeCompletedTasks() {
+        return repository.removeCompleted();
+    }
 }

@@ -60,4 +60,26 @@ class InMemoryTaskRepositoryTest {
 
         assertTrue(repository.findById(99).isEmpty());
     }
+
+    @Test
+    void removeCompletedRemovesOnlyCompletedTasks() {
+        InMemoryTaskRepository repository = new InMemoryTaskRepository();
+        Task pending = repository.save(new Task("Pendiente"));
+        Task completed = repository.save(new Task("Completada"));
+        completed.markCompleted();
+
+        List<Task> removed = repository.removeCompleted();
+
+        assertEquals(List.of(completed), removed);
+        assertEquals(List.of(pending), repository.findAll());
+    }
+
+    @Test
+    void removeCompletedReturnsEmptyWhenNoCompletedTasks() {
+        InMemoryTaskRepository repository = new InMemoryTaskRepository();
+        repository.save(new Task("Pendiente"));
+
+        assertTrue(repository.removeCompleted().isEmpty());
+        assertEquals(1, repository.findAll().size());
+    }
 }

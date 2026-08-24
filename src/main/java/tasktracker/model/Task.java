@@ -30,4 +30,8 @@ public class Task {
     public void markCompleted() {
         this.status = TaskStatus.COMPLETED;
     }
+
+    public boolean isCompleted() {
+        return status == TaskStatus.COMPLETED;
+    }
 }

@@ -53,3 +53,19 @@ El sistema DEBE permitir marcar una tarea existente como completada.
 - **WHEN** se solicita completar esa tarea nuevamente
 - **THEN** el sistema deja la tarea en estado `COMPLETED` sin error
   (o alternativamente, lanza una excepción de estado inválido — a definir)
+
+### Requirement: Eliminar tareas completadas
+El sistema DEBE permitir eliminar todas las tareas que estén en estado `COMPLETED`.
+
+#### Scenario: Eliminar con tareas completadas
+- **GIVEN** una o más tareas en estado `COMPLETED`
+- **WHEN** se solicita eliminar las tareas completadas
+- **THEN** el sistema elimina las tareas completadas
+- **AND** devuelve las tareas eliminadas
+- **AND** las tareas en estado `PENDING` permanecen disponibles para ser listadas
+
+#### Scenario: Eliminar sin tareas completadas
+- **GIVEN** que no hay tareas en estado `COMPLETED`
+- **WHEN** se solicita eliminar las tareas completadas
+- **THEN** el sistema no elimina ninguna tarea
+- **AND** devuelve una lista vacía

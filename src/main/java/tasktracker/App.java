@@ -8,6 +8,7 @@ import tasktracker.cli.CommandRegistry;
 import tasktracker.cli.CompleteTaskCommand;
 import tasktracker.cli.HelpCommand;
 import tasktracker.cli.ListTasksCommand;
+import tasktracker.cli.PurgeCompletedCommand;
 import tasktracker.exception.TaskNotFoundException;
 import tasktracker.repository.InMemoryTaskRepository;
 import tasktracker.repository.TaskRepository;
@@ -23,6 +24,7 @@ public class App {
         registry.register(new AddTaskCommand(service));
         registry.register(new ListTasksCommand(service));
         registry.register(new CompleteTaskCommand(service));
+        registry.register(new PurgeCompletedCommand(service));
         registry.register(new HelpCommand(registry));
 
         run(registry);

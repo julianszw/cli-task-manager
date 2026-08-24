@@ -9,7 +9,7 @@ Define cómo el usuario interactúa por terminal con las capacidades de `task-ma
 El sistema DEBE exponer un conjunto fijo de comandos conocidos por nombre.
 
 #### Scenario: Comando reconocido
-- **GIVEN** un nombre de comando registrado (`add`, `list`, `complete`)
+- **GIVEN** un nombre de comando registrado (`add`, `list`, `complete`, `purge`)
 - **WHEN** el usuario lo ingresa
 - **THEN** el sistema ejecuta la acción correspondiente
 
@@ -65,3 +65,17 @@ El comando `complete` DEBE marcar como completada la tarea cuyo id se pasa como 
 - **GIVEN** el comando `complete` seguido de un id numérico que no existe
 - **WHEN** se ejecuta
 - **THEN** se muestra un mensaje indicando que no existe una tarea con ese id
+
+### Requirement: Comando purge
+El comando `purge` DEBE eliminar todas las tareas completadas.
+
+#### Scenario: Con tareas completadas
+- **GIVEN** tareas en estado `COMPLETED`
+- **WHEN** se ejecuta `purge`
+- **THEN** se eliminan las tareas completadas
+- **AND** se muestra la lista de tareas eliminadas
+
+#### Scenario: Sin tareas completadas
+- **GIVEN** que no hay tareas completadas
+- **WHEN** se ejecuta `purge`
+- **THEN** se muestra un mensaje indicando que no hay tareas completadas para eliminar

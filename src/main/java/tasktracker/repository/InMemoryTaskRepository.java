@@ -29,4 +29,13 @@ public class InMemoryTaskRepository implements TaskRepository {
     public Optional<Task> findById(long id) {
         return Optional.ofNullable(tasks.get(id));
     }
+
+    @Override
+    public List<Task> removeCompleted() {
+        List<Task> removed = tasks.values().stream()
+                .filter(Task::isCompleted)
+                .toList();
+        removed.forEach(task -> tasks.remove(task.getId()));
+        return removed;
+    }
 }

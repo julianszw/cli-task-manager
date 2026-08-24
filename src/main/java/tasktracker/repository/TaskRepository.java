@@ -11,4 +11,6 @@ public interface TaskRepository {
     List<Task> findAll();
 
     Optional<Task> findById(long id);
+
+    List<Task> removeCompleted();
 }
