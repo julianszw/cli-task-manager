@@ -12,6 +12,7 @@ public final class KeyMapper {
             case 'c', 'C' -> Key.COMPLETE;
             case 'd', 'D' -> Key.DELETE;
             case 'p', 'P' -> Key.PURGE;
+            case 'b', 'B' -> Key.BACK;
             case 'q', 'Q' -> Key.EXIT;
             default -> null;
         };

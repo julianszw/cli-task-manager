@@ -104,6 +104,29 @@ class InteractiveTaskBrowserTest {
         assertEquals(1, service.listTasks().size());
     }
 
+    @Test
+    void helpLineIsAlwaysVisible() {
+        service.addTask("A");
+        FakeKeySource source = new FakeKeySource(Key.EXIT);
+
+        String output = runBrowser(source);
+
+        assertTrue(output.contains("Teclas:"));
+        assertTrue(output.contains("b atrás"));
+        assertTrue(output.contains("q/Esc salir"));
+    }
+
+    @Test
+    void backKeyExitsBrowser() {
+        service.addTask("A");
+        FakeKeySource source = new FakeKeySource(Key.BACK);
+
+        String output = runBrowser(source);
+
+        assertTrue(output.contains("ID"));
+        assertEquals(1, service.listTasks().size());
+    }
+
     private String runBrowser(FakeKeySource source) {
         PrintStream original = System.out;
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();

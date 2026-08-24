@@ -20,6 +20,8 @@ class KeyMapperTest {
         assertEquals(Key.COMPLETE, KeyMapper.fromChar('c'));
         assertEquals(Key.DELETE, KeyMapper.fromChar('d'));
         assertEquals(Key.PURGE, KeyMapper.fromChar('p'));
+        assertEquals(Key.BACK, KeyMapper.fromChar('b'));
+        assertEquals(Key.BACK, KeyMapper.fromChar('B'));
         assertEquals(Key.EXIT, KeyMapper.fromChar('q'));
     }
 

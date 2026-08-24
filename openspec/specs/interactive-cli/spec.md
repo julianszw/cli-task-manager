@@ -34,6 +34,15 @@ El sistema DEBE permitir moverse por la lista de tareas con las teclas `↑`/`k`
 - **WHEN** el usuario intenta moverse más allá del límite
 - **THEN** la selección se mantiene sin salir de la lista
 
+### Requirement: Limpieza de pantalla al cambiar la selección
+El sistema DEBE borrar la terminal cada vez que se selecciona una opción distinta y redibujar la vista con la nueva selección, sin acumular contenido residual en pantalla.
+
+#### Scenario: Navegar entre tareas
+- **GIVEN** el modo interactivo activo con una o más tareas
+- **WHEN** el usuario cambia la selección con `↑`/`k` o `↓`/`j`
+- **THEN** la terminal se borra
+- **AND** se redibuja la tabla con la nueva tarea seleccionada
+
 ### Requirement: Completar tarea seleccionada
 La tecla `c` DEBE marcar como completada la tarea seleccionada.
 
@@ -71,6 +80,24 @@ La tecla `p` DEBE eliminar todas las tareas en estado `COMPLETED`.
 - **WHEN** el usuario presiona `p`
 - **THEN** no se elimina ninguna tarea
 - **AND** se muestra un mensaje indicando que no hay tareas completadas
+
+### Requirement: Ayuda permanente de teclas
+El sistema DEBE mostrar siempre una ayuda visible con las teclas disponibles mientras el modo interactivo esté activo.
+
+#### Scenario: Ayuda siempre visible
+- **GIVEN** el modo interactivo activo
+- **WHEN** se muestra la vista
+- **THEN** se muestra una línea de ayuda con las teclas disponibles: `↑`/`k` (subir), `↓`/`j` (bajar), `c` (completar), `d` (eliminar), `p` (purgar), `b` (atrás) y `q`/`Esc` (salir)
+- **AND** la ayuda permanece visible en todo momento, sin necesidad de presionar una tecla para mostrarla
+
+### Requirement: Volver atrás
+El sistema DEBE permitir volver atrás al prompt de comandos con la tecla `b`, como alternativa a las teclas de salida.
+
+#### Scenario: Volver atrás con b
+- **GIVEN** el modo interactivo activo
+- **WHEN** el usuario presiona `b`
+- **THEN** se sale del modo interactivo
+- **AND** se vuelve al prompt de comandos
 
 ### Requirement: Salir del modo interactivo
 Las teclas `q` y `Esc` DEBEN salir del modo interactivo.

@@ -10,6 +10,8 @@ public class InteractiveTaskBrowser {
 
     private static final String NO_TASKS = "No hay tareas cargadas";
     private static final String NO_COMPLETED_TO_PURGE = "No hay tareas completadas para eliminar";
+    private static final String HELP =
+            "Teclas: ↑/k subir · ↓/j bajar · c completar · d eliminar · p purgar · b atrás · q/Esc salir";
 
     private final TaskService taskService;
     private final PrintStream out;
@@ -24,6 +26,7 @@ public class InteractiveTaskBrowser {
         List<Task> tasks = taskService.listTasks();
         if (tasks.isEmpty()) {
             out.println(NO_TASKS);
+            out.println(HELP);
             waitForExit(source);
             return;
         }
@@ -63,7 +66,7 @@ public class InteractiveTaskBrowser {
                     }
                     selected = Math.min(selected, tasks.size() - 1);
                 }
-                case EXIT -> running = false;
+                case EXIT, BACK -> running = false;
             }
         }
     }
@@ -88,6 +91,7 @@ public class InteractiveTaskBrowser {
             out.println(message);
         }
         out.println(formatter.render(tasks, selected));
+        out.println(HELP);
     }
 
     private void clearScreen() {

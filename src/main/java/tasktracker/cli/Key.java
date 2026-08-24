@@ -6,5 +6,6 @@ public enum Key {
     COMPLETE,
     DELETE,
     PURGE,
+    BACK,
     EXIT
 }
