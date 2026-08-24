@@ -8,7 +8,9 @@ cada commit.
 
 ## Pendientes de commit
 
-_(ninguno)_
+- `004-interactive-navigation`
+- `005-package-runnable-jar`
+- `006-interactive-help-and-back`
 
 ## Commiteados
 
@@ -16,3 +18,4 @@ _(ninguno)_
 |--------|--------------|---------|
 | `001-implement-task-management-and-cli` | `58c144d` | implementar task-management y cli-interface |
 | `002-purge-completed-tasks` | `efd7486` | agregar comando purge |
+| `003-pretty-output-formatting` | `996fc9f` | formatear salida en tabla con color y tachado |
