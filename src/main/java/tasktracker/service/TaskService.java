@@ -30,6 +30,11 @@ public class TaskService {
         task.markCompleted();
     }
 
+    public void deleteTask(long id) {
+        repository.removeById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+    }
+
     public List<Task> purgeCompletedTasks() {
         return repository.removeCompleted();
     }

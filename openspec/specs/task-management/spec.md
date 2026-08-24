@@ -54,6 +54,21 @@ El sistema DEBE permitir marcar una tarea existente como completada.
 - **THEN** el sistema deja la tarea en estado `COMPLETED` sin error
   (o alternativamente, lanza una excepción de estado inválido — a definir)
 
+### Requirement: Eliminar tarea
+El sistema DEBE permitir eliminar una tarea existente por su id.
+
+#### Scenario: Eliminar tarea existente
+- **GIVEN** una tarea con id válido
+- **WHEN** se solicita eliminar esa tarea
+- **THEN** la tarea se elimina
+- **AND** deja de estar disponible para ser listada
+
+#### Scenario: Eliminar tarea inexistente
+- **GIVEN** un id que no corresponde a ninguna tarea
+- **WHEN** se solicita eliminar esa tarea
+- **THEN** el sistema lanza `TaskNotFoundException`
+- **AND** ninguna tarea se elimina
+
 ### Requirement: Eliminar tareas completadas
 El sistema DEBE permitir eliminar todas las tareas que estén en estado `COMPLETED`.
 

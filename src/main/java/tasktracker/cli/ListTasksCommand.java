@@ -1,7 +1,6 @@
 package tasktracker.cli;
 
-import java.util.List;
-import tasktracker.model.Task;
+import java.io.IOException;
 import tasktracker.service.TaskService;
 
 public class ListTasksCommand implements Command {
@@ -14,13 +13,10 @@ public class ListTasksCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        List<Task> tasks = taskService.listTasks();
-        if (tasks.isEmpty()) {
-            System.out.println("No hay tareas cargadas");
-            return;
-        }
-        for (Task task : tasks) {
-            System.out.printf("#%-4d [%s] %s%n", task.getId(), task.getStatus(), task.getTitle());
+        try (KeyReader keyReader = new KeyReader()) {
+            new InteractiveTaskBrowser(taskService, System.out).run(keyReader);
+        } catch (IOException e) {
+            System.out.println("No se pudo iniciar el modo interactivo: " + e.getMessage());
         }
     }
 
@@ -31,6 +27,6 @@ public class ListTasksCommand implements Command {
 
     @Override
     public String getDescription() {
-        return "Lista todas las tareas. Uso: list";
+        return "Navega las tareas de forma interactiva. Uso: list";
     }
 }

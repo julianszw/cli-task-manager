@@ -35,17 +35,17 @@ El comando `add` DEBE crear una tarea a partir de los argumentos recibidos.
 - **AND** no se crea ninguna tarea
 
 ### Requirement: Comando list
-El comando `list` DEBE mostrar todas las tareas existentes en formato legible.
+El comando `list` DEBE iniciar el modo de navegación interactiva definido en `interactive-cli`.
 
 #### Scenario: Con tareas
 - **GIVEN** tareas existentes
 - **WHEN** se ejecuta `list`
-- **THEN** se muestra cada tarea con id, estado y título alineados
+- **THEN** se inicia el modo interactivo con la tabla de tareas
 
 #### Scenario: Sin tareas
 - **GIVEN** que no hay tareas
 - **WHEN** se ejecuta `list`
-- **THEN** se muestra un mensaje indicando que no hay tareas cargadas
+- **THEN** el modo interactivo muestra un mensaje indicando que no hay tareas cargadas
 
 ### Requirement: Comando complete
 El comando `complete` DEBE marcar como completada la tarea cuyo id se pasa como argumento.

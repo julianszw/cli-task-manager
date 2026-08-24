@@ -5,9 +5,10 @@ CLI Task Tracker: aplicación de terminal en Java para crear, listar y completar
 Proyecto de práctica orientado a reforzar arquitectura en capas y manejo de estado en memoria (o persistencia simple, según se defina en `repository`).
 
 ## Tech Stack
-- Java (sin frameworks externos)
-- Maven/Gradle (ajustar según corresponda)
+- Java 21 (sin frameworks externos)
+- Maven (build y tests)
 - JUnit para tests (`src/test/java/tasktracker`)
+- JLine (`org.jline:jline`) para entrada raw y modo interactivo de `list`
 
 ## Architecture
 Estructura en capas, sin dependencias circulares:

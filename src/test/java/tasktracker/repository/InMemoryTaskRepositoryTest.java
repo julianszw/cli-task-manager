@@ -62,6 +62,25 @@ class InMemoryTaskRepositoryTest {
     }
 
     @Test
+    void removeByIdRemovesAndReturnsTask() {
+        InMemoryTaskRepository repository = new InMemoryTaskRepository();
+        Task task = repository.save(new Task("A"));
+
+        Optional<Task> removed = repository.removeById(task.getId());
+
+        assertTrue(removed.isPresent());
+        assertEquals(task, removed.get());
+        assertTrue(repository.findAll().isEmpty());
+    }
+
+    @Test
+    void removeByIdReturnsEmptyWhenAbsent() {
+        InMemoryTaskRepository repository = new InMemoryTaskRepository();
+
+        assertTrue(repository.removeById(99).isEmpty());
+    }
+
+    @Test
     void removeCompletedRemovesOnlyCompletedTasks() {
         InMemoryTaskRepository repository = new InMemoryTaskRepository();
         Task pending = repository.save(new Task("Pendiente"));

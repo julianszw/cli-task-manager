@@ -95,6 +95,20 @@ class TaskServiceTest {
     }
 
     @Test
+    void deleteTaskRemovesExistingTask() {
+        Task task = service.addTask("Comprar leche");
+
+        service.deleteTask(task.getId());
+
+        assertTrue(service.listTasks().isEmpty());
+    }
+
+    @Test
+    void deleteTaskThrowsWhenTaskDoesNotExist() {
+        assertThrows(TaskNotFoundException.class, () -> service.deleteTask(99));
+    }
+
+    @Test
     void purgeCompletedTasksRemovesCompletedAndKeepsPending() {
         Task pending = service.addTask("Pendiente");
         Task completed = service.addTask("Completada");

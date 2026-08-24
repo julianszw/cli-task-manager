@@ -12,5 +12,7 @@ public interface TaskRepository {
 
     Optional<Task> findById(long id);
 
+    Optional<Task> removeById(long id);
+
     List<Task> removeCompleted();
 }
