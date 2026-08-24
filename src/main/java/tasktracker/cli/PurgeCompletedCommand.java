@@ -20,9 +20,7 @@ public class PurgeCompletedCommand implements Command {
             return;
         }
         System.out.println("Tareas completadas eliminadas:");
-        for (Task task : removed) {
-            System.out.printf("#%-4d %s%n", task.getId(), task.getTitle());
-        }
+        System.out.println(new TaskTableFormatter().render(removed));
     }
 
     @Override
