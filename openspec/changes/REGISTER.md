@@ -8,10 +8,11 @@ cada commit.
 
 ## Pendientes de commit
 
-- `002-purge-completed-tasks`
+_(ninguno)_
 
 ## Commiteados
 
 | Change | Commit (SHA) | Resumen |
 |--------|--------------|---------|
 | `001-implement-task-management-and-cli` | `58c144d` | implementar task-management y cli-interface |
+| `002-purge-completed-tasks` | `efd7486` | agregar comando purge |
