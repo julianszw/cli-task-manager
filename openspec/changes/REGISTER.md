@@ -22,3 +22,4 @@ _(ninguno)_
 | `006-interactive-help-and-back` | `43d760e` | agregar ayuda permanente y tecla atrás |
 | `007-lanterna-tui` | `5e0e93d` | refactor de la capa de presentación a Lanterna |
 | `008-json-persistence` | `f1adc60` | persistir tareas en archivo json |
+| `009-navigable-main-menu` | `439d551` | agregar menú principal navegable |
