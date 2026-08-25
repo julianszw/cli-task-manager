@@ -1,7 +1,6 @@
 package tasktracker.cli;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.googlecode.lanterna.input.KeyStroke;
@@ -118,14 +117,15 @@ class TaskListWindowTest {
     }
 
     @Test
-    void themeKeyTogglesDarkTheme() {
+    void arrowDownMovesSelection() {
         service.addTask("A");
+        service.addTask("B");
         TaskListWindow window = new TaskListWindow(service);
 
-        assertFalse(window.isDarkTheme());
+        window.handleInput(new KeyStroke(KeyType.ArrowDown));
+        window.handleInput(new KeyStroke('c', false, false));
 
-        window.handleInput(new KeyStroke('t', false, false));
-
-        assertTrue(window.isDarkTheme());
+        assertEquals(TaskStatus.PENDING, service.listTasks().get(0).getStatus());
+        assertEquals(TaskStatus.COMPLETED, service.listTasks().get(1).getStatus());
     }
 }

@@ -50,7 +50,7 @@ La tecla `c` DEBE marcar como completada la tarea seleccionada.
 - **GIVEN** una tarea seleccionada en estado `PENDING`
 - **WHEN** el usuario presiona `c`
 - **THEN** la tarea pasa a `COMPLETED`
-- **AND** la vista se actualiza aplicando tachado y color según `output-formatting`
+- **AND** la vista se actualiza aplicando atenuado y color según `output-formatting`
 
 #### Scenario: Completar selección ya completada
 - **GIVEN** una tarea seleccionada en estado `COMPLETED`
@@ -112,12 +112,12 @@ La tecla `a` DEBE abrir un campo de entrada para crear una tarea.
 - **AND** se muestra un mensaje de error
 
 ### Requirement: Ayuda permanente de teclas
-El sistema DEBE mostrar siempre una ayuda visible con las teclas disponibles.
+El sistema DEBE mostrar siempre una ayuda visible con las teclas disponibles, en la fila de atajos de la barra de estado (según `visual-style`).
 
 #### Scenario: Ayuda siempre visible
 - **GIVEN** la vista única visible
 - **WHEN** se muestra la vista
-- **THEN** se muestra una línea de ayuda con las teclas disponibles: `↑`/`k` (up), `↓`/`j` (down), `a` (add), `c` (complete), `r` (reopen), `d` (delete), `p` (purge), `t` (theme), `q`/`Esc` (exit)
+- **THEN** se muestra la fila de atajos con las teclas disponibles: `↑`/`k` (up), `↓`/`j` (down), `a` (add), `c` (complete), `r` (reopen), `d` (delete), `p` (purge), `q`/`Esc` (exit)
 - **AND** la ayuda permanece visible en todo momento, sin necesidad de presionar una tecla para mostrarla
 
 ### Requirement: Salir de la aplicación

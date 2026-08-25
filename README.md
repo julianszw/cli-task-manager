@@ -21,7 +21,9 @@ Genera un jar autocontenido (incluye dependencias) en `target/cli-task-tracker-1
 java -jar target/cli-task-tracker-1.0.0.jar
 ```
 
-La app abre directamente la vista única de tareas (completadas tachadas y con color).
+La app abre directamente la vista única de tareas con un tema oscuro, una lista con
+íconos de estado (`○` pendiente, `✓` verde completado) y una barra de estado inferior
+con título, contador y atajos.
 
 ## Teclas
 
@@ -34,7 +36,6 @@ La app abre directamente la vista única de tareas (completadas tachadas y con c
 | `r` | Reabrir la tarea seleccionada |
 | `d` | Eliminar la tarea seleccionada |
 | `p` | Purgar tareas completadas |
-| `t` | Alternar tema claro/oscuro |
 | `q` / `Esc` | Salir |
 
 ## Tests

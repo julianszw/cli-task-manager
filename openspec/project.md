@@ -10,7 +10,9 @@ persistencia en un archivo JSON local (definido en `repository`).
 - Maven (build y tests)
 - JUnit para tests (`src/test/java/tasktracker`)
 - Lanterna (`com.googlecode.lanterna:lanterna`) para la TUI: ventanas, paneles,
-  componentes (tabla, caja de texto) y manejo de teclado.
+  componentes (lista con render custom, caja de texto) y manejo de teclado.
+- Lenguaje visual definido en `visual-style`: tema oscuro único, bordes redondeados,
+  lista con íconos de estado y barra de estado inferior fija.
 
 ## Architecture
 Estructura en capas, sin dependencias circulares:
@@ -26,6 +28,7 @@ Regla de dependencia: `cli` → `service` → `repository` → `model`. Nunca al
 ## Conventions
 - La interacción es una vista única de tareas (TUI) con atajos de teclado; no hay
   prompt de texto ni comandos por nombre.
+- La presentación sigue `visual-style` (tema oscuro único, sin alternancia de tema).
 - Excepciones de dominio son unchecked y se muestran como mensajes legibles al usuario.
 - Tests unitarios por capa (`repository`, `service`, `cli`): la capa `cli` se testea
   con foco en la vista/entrada, no en lógica de negocio.

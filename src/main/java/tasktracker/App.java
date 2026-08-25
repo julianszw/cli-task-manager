@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import tasktracker.cli.LanternaTaskTrackerView;
+import tasktracker.cli.VisualStyle;
 import tasktracker.repository.JsonTaskRepository;
 import tasktracker.service.TaskService;
 
@@ -31,6 +32,7 @@ public class App {
         screen.startScreen();
         try {
             WindowBasedTextGUI gui = new MultiWindowTextGUI(screen);
+            gui.setTheme(VisualStyle.theme());
 
             LanternaTaskTrackerView view = new LanternaTaskTrackerView(gui, service);
             view.start(startupWarnings);

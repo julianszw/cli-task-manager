@@ -1,17 +1,13 @@
 package tasktracker.cli;
 
 import com.googlecode.lanterna.gui2.BasicWindow;
-import com.googlecode.lanterna.gui2.Borders;
 import com.googlecode.lanterna.gui2.Direction;
-import com.googlecode.lanterna.gui2.Label;
 import com.googlecode.lanterna.gui2.LinearLayout;
 import com.googlecode.lanterna.gui2.Panel;
 import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.googlecode.lanterna.gui2.table.Table;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import tasktracker.model.Task;
@@ -20,77 +16,76 @@ import tasktracker.service.TaskService;
 public class TaskListWindow extends BasicWindow {
 
     private static final String TITLE = "Tareas";
-    private static final String HELP =
-            "Teclas: ↑/k subir · ↓/j bajar · a crear · c completar · r reabrir · d eliminar · p purgar · t tema · q/Esc salir";
     private static final String NO_TASKS = "No hay tareas cargadas";
     private static final String NO_COMPLETED_TO_PURGE = "No hay tareas completadas para eliminar";
 
     private final TaskService service;
     private final WindowBasedTextGUI gui;
-    private final ThemeManager themeManager;
+    private final TaskViewComponent view = new TaskViewComponent();
     private final List<Task> tasks = new ArrayList<>();
-    private final Table<String> table = new Table<>("ID", "ESTADO", "TÍTULO");
-    private final Label status = new Label("");
+    private int selected;
+    private String status = "";
+    private MessageKind kind = MessageKind.INFO;
 
     public TaskListWindow(TaskService service) {
-        this(service, null, new ThemeManager());
+        this(service, null);
     }
 
     public TaskListWindow(TaskService service, WindowBasedTextGUI gui) {
-        this(service, gui, new ThemeManager());
-    }
-
-    public TaskListWindow(TaskService service, WindowBasedTextGUI gui, ThemeManager themeManager) {
         super(TITLE);
         this.service = service;
         this.gui = gui;
-        this.themeManager = themeManager;
 
         setHints(List.of(Window.Hint.FULL_SCREEN));
 
         Panel content = new Panel(new LinearLayout(Direction.VERTICAL));
-        content.addComponent(table.withBorder(Borders.singleLine("Tareas")));
-        content.addComponent(status);
-        content.addComponent(new Label(HELP));
+        content.addComponent(view,
+                LinearLayout.createLayoutData(LinearLayout.Alignment.Fill, LinearLayout.GrowPolicy.CanGrow));
         setComponent(content);
 
-        table.setTableCellRenderer(new TaskCellRenderer(tasks, themeManager::isDark));
         refresh();
-        setFocusedInteractable(table);
-    }
-
-    public boolean isDarkTheme() {
-        return themeManager.isDark();
     }
 
     void setStatus(String message) {
-        status.setText(message);
+        setMessage(message, MessageKind.INFO);
+    }
+
+    void setWarning(String message) {
+        setMessage(message, MessageKind.WARN);
+    }
+
+    void setError(String message) {
+        setMessage(message, MessageKind.ERROR);
     }
 
     String getStatusText() {
-        return status.getText();
+        return status;
+    }
+
+    private void setMessage(String message, MessageKind kind) {
+        this.status = message == null ? "" : message;
+        this.kind = kind;
+        render();
     }
 
     private void refresh() {
         tasks.clear();
         tasks.addAll(service.listTasks());
-
-        table.getTableModel().clear();
-        for (Task task : tasks) {
-            table.getTableModel().addRow(
-                    Long.toString(task.getId()),
-                    task.getStatus().name(),
-                    task.getTitle());
+        if (selected >= tasks.size()) {
+            selected = Math.max(0, tasks.size() - 1);
         }
-
         if (tasks.isEmpty()) {
-            status.setText(NO_TASKS);
-            return;
+            status = NO_TASKS;
+            kind = MessageKind.INFO;
+        } else {
+            status = "";
+            kind = MessageKind.INFO;
         }
-        if (table.getSelectedRow() >= tasks.size()) {
-            table.setSelectedRow(tasks.size() - 1);
-        }
-        status.setText("");
+        render();
+    }
+
+    private void render() {
+        view.setModel(tasks, selected, status, kind);
     }
 
     @Override
@@ -127,10 +122,6 @@ public class TaskListWindow extends BasicWindow {
                         purgeCompleted();
                         return true;
                     }
-                    case 't' -> {
-                        toggleTheme();
-                        return true;
-                    }
                     case 'q' -> {
                         close();
                         return true;
@@ -139,6 +130,12 @@ public class TaskListWindow extends BasicWindow {
                     }
                 }
             }
+        } else if (key.getKeyType() == KeyType.ArrowUp) {
+            moveUp();
+            return true;
+        } else if (key.getKeyType() == KeyType.ArrowDown) {
+            moveDown();
+            return true;
         } else if (key.getKeyType() == KeyType.Escape) {
             close();
             return true;
@@ -147,14 +144,16 @@ public class TaskListWindow extends BasicWindow {
     }
 
     private void moveUp() {
-        if (!tasks.isEmpty()) {
-            table.setSelectedRow(Math.max(0, table.getSelectedRow() - 1));
+        if (!tasks.isEmpty() && selected > 0) {
+            selected--;
+            render();
         }
     }
 
     private void moveDown() {
-        if (!tasks.isEmpty()) {
-            table.setSelectedRow(Math.min(tasks.size() - 1, table.getSelectedRow() + 1));
+        if (!tasks.isEmpty() && selected < tasks.size() - 1) {
+            selected++;
+            render();
         }
     }
 
@@ -166,20 +165,7 @@ public class TaskListWindow extends BasicWindow {
         refresh();
     }
 
-    private void toggleTheme() {
-        themeManager.toggle();
-        if (gui != null) {
-            gui.setTheme(themeManager.current());
-            try {
-                gui.updateScreen();
-            } catch (IOException e) {
-                // el repintado se reintentará en el siguiente evento de la GUI
-            }
-        }
-    }
-
     private void completeSelected() {
-        int selected = table.getSelectedRow();
         if (selected < 0 || selected >= tasks.size()) {
             return;
         }
@@ -188,7 +174,6 @@ public class TaskListWindow extends BasicWindow {
     }
 
     private void reopenSelected() {
-        int selected = table.getSelectedRow();
         if (selected < 0 || selected >= tasks.size()) {
             return;
         }
@@ -197,7 +182,6 @@ public class TaskListWindow extends BasicWindow {
     }
 
     private void deleteSelected() {
-        int selected = table.getSelectedRow();
         if (selected < 0 || selected >= tasks.size()) {
             return;
         }
@@ -209,9 +193,9 @@ public class TaskListWindow extends BasicWindow {
         List<Task> removed = service.purgeCompletedTasks();
         refresh();
         if (removed.isEmpty()) {
-            status.setText(NO_COMPLETED_TO_PURGE);
+            setStatus(NO_COMPLETED_TO_PURGE);
         } else {
-            status.setText("Tareas completadas eliminadas: " + removed.size());
+            setStatus("Tareas completadas eliminadas: " + removed.size());
         }
     }
 }

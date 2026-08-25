@@ -17,7 +17,7 @@ public class LanternaTaskTrackerView {
     public void start(List<String> startupWarnings) {
         TaskListWindow window = new TaskListWindow(service, gui);
         if (!startupWarnings.isEmpty()) {
-            window.setStatus(String.join(" · ", startupWarnings));
+            window.setWarning(String.join(" · ", startupWarnings));
         }
         gui.addWindowAndWait(window);
     }
