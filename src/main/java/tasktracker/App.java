@@ -7,6 +7,11 @@ import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import tasktracker.cli.AddTaskCommand;
 import tasktracker.cli.CommandDispatcher;
 import tasktracker.cli.CommandRegistry;
@@ -17,13 +22,21 @@ import tasktracker.cli.LanternaTaskTrackerView;
 import tasktracker.cli.ListTasksCommand;
 import tasktracker.cli.MainWindow;
 import tasktracker.cli.PurgeCompletedCommand;
-import tasktracker.repository.InMemoryTaskRepository;
+import tasktracker.repository.JsonTaskRepository;
 import tasktracker.service.TaskService;
 
 public class App {
 
+    private static final String DATA_FILE = "tasks.json";
+
     public static void main(String[] args) throws IOException {
-        TaskService service = new TaskService(new InMemoryTaskRepository());
+        List<String> startupWarnings = new ArrayList<>();
+        AtomicReference<Consumer<String>> warningSink = new AtomicReference<>(startupWarnings::add);
+
+        JsonTaskRepository repository = new JsonTaskRepository(
+                Path.of(DATA_FILE),
+                message -> warningSink.get().accept(message));
+        TaskService service = new TaskService(repository);
 
         Terminal terminal = new DefaultTerminalFactory().createTerminal();
         Screen screen = new TerminalScreen(terminal);
@@ -37,6 +50,9 @@ public class App {
 
             MainWindow mainWindow = new MainWindow(dispatcher, view);
             view.setMainWindow(mainWindow);
+
+            warningSink.set(view::showMessage);
+            startupWarnings.forEach(view::showMessage);
 
             gui.addWindowAndWait(mainWindow);
         } finally {

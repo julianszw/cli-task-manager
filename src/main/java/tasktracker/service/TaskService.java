@@ -28,6 +28,7 @@ public class TaskService {
         Task task = repository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
         task.markCompleted();
+        repository.persist();
     }
 
     public void deleteTask(long id) {

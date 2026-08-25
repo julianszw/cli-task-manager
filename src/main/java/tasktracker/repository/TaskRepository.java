@@ -15,4 +15,6 @@ public interface TaskRepository {
     Optional<Task> removeById(long id);
 
     List<Task> removeCompleted();
+
+    void persist();
 }

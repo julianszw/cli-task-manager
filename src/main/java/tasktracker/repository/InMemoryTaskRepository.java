@@ -43,4 +43,8 @@ public class InMemoryTaskRepository implements TaskRepository {
         removed.forEach(task -> tasks.remove(task.getId()));
         return removed;
     }
+
+    @Override
+    public void persist() {
+    }
 }

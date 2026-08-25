@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import tasktracker.exception.TaskNotFoundException;
 import tasktracker.model.Task;
 import tasktracker.model.TaskStatus;
 import tasktracker.repository.InMemoryTaskRepository;
+import tasktracker.repository.TaskRepository;
 
 class TaskServiceTest {
 
@@ -118,5 +120,22 @@ class TaskServiceTest {
 
         assertEquals(List.of(completed), removed);
         assertEquals(List.of(pending), service.listTasks());
+    }
+
+    @Test
+    void completeTaskTriggersPersistence() {
+        List<String> persisted = new ArrayList<>();
+        TaskRepository repository = new InMemoryTaskRepository() {
+            @Override
+            public void persist() {
+                persisted.add("persisted");
+            }
+        };
+        TaskService service = new TaskService(repository);
+        Task task = service.addTask("Tarea");
+
+        service.completeTask(task.getId());
+
+        assertEquals(List.of("persisted"), persisted);
     }
 }

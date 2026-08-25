@@ -2,7 +2,8 @@
 
 ## Purpose
 CLI Task Tracker: aplicación de terminal en Java para crear, listar y completar tareas.
-Proyecto de práctica orientado a reforzar arquitectura en capas y manejo de estado en memoria (o persistencia simple, según se defina en `repository`).
+Proyecto de práctica orientado a reforzar arquitectura en capas y manejo de estado con
+persistencia en un archivo JSON local (definido en `repository`).
 
 ## Tech Stack
 - Java 21 (sin frameworks externos)
@@ -15,7 +16,7 @@ Proyecto de práctica orientado a reforzar arquitectura en capas y manejo de est
 Estructura en capas, sin dependencias circulares:
 
 - `model` — entidades del dominio (`Task`, `TaskStatus`). Sin lógica de negocio, solo estado y comportamiento propio de la entidad.
-- `repository` — acceso y persistencia de datos. Abstrae dónde y cómo se guardan las tareas.
+- `repository` — acceso y persistencia de datos (en memoria o archivo JSON). Abstrae dónde y cómo se guardan las tareas.
 - `service` — lógica de negocio y orquestación. Valida reglas, coordina `repository`, expone operaciones a `cli`.
 - `cli` — interacción con el usuario por terminal. Comandos, parsing de input, formato de output. Sin lógica de negocio ni acceso a datos directo.
 - `exception` — excepciones propias del dominio (ej: `TaskNotFoundException`).
@@ -29,6 +30,6 @@ Regla de dependencia: `cli` → `service` → `repository` → `model`. Nunca al
 - Tests unitarios por capa (`repository`, `service`) — la capa `cli` se testea con foco en parsing/dispatch, no en lógica de negocio.
 
 ## Out of scope (por ahora)
-- Persistencia en base de datos (arranca en memoria).
+- Persistencia en base de datos (usa un archivo JSON local).
 - Interfaz gráfica o web.
 - Multi-usuario.
