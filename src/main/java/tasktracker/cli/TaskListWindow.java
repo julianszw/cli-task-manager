@@ -7,6 +7,7 @@ import com.googlecode.lanterna.gui2.Label;
 import com.googlecode.lanterna.gui2.LinearLayout;
 import com.googlecode.lanterna.gui2.Panel;
 import com.googlecode.lanterna.gui2.Window;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.gui2.table.Table;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
@@ -19,18 +20,24 @@ public class TaskListWindow extends BasicWindow {
 
     private static final String TITLE = "Tareas";
     private static final String HELP =
-            "Teclas: ↑/k subir · ↓/j bajar · c completar · r reabrir · d eliminar · p purgar · b/q/Esc salir";
+            "Teclas: ↑/k subir · ↓/j bajar · a crear · c completar · r reabrir · d eliminar · p purgar · q/Esc salir";
     private static final String NO_TASKS = "No hay tareas cargadas";
     private static final String NO_COMPLETED_TO_PURGE = "No hay tareas completadas para eliminar";
 
     private final TaskService service;
+    private final WindowBasedTextGUI gui;
     private final List<Task> tasks = new ArrayList<>();
     private final Table<String> table = new Table<>("ID", "ESTADO", "TÍTULO");
     private final Label status = new Label("");
 
     public TaskListWindow(TaskService service) {
+        this(service, null);
+    }
+
+    public TaskListWindow(TaskService service, WindowBasedTextGUI gui) {
         super(TITLE);
         this.service = service;
+        this.gui = gui;
 
         setHints(List.of(Window.Hint.FULL_SCREEN));
 
@@ -43,6 +50,10 @@ public class TaskListWindow extends BasicWindow {
         table.setTableCellRenderer(new TaskCellRenderer(tasks));
         refresh();
         setFocusedInteractable(table);
+    }
+
+    void setStatus(String message) {
+        status.setText(message);
     }
 
     String getStatusText() {
@@ -85,6 +96,10 @@ public class TaskListWindow extends BasicWindow {
                         moveDown();
                         return true;
                     }
+                    case 'a' -> {
+                        openAddTask();
+                        return true;
+                    }
                     case 'c' -> {
                         completeSelected();
                         return true;
@@ -101,7 +116,7 @@ public class TaskListWindow extends BasicWindow {
                         purgeCompleted();
                         return true;
                     }
-                    case 'b', 'q' -> {
+                    case 'q' -> {
                         close();
                         return true;
                     }
@@ -126,6 +141,14 @@ public class TaskListWindow extends BasicWindow {
         if (!tasks.isEmpty()) {
             table.setSelectedRow(Math.min(tasks.size() - 1, table.getSelectedRow() + 1));
         }
+    }
+
+    private void openAddTask() {
+        if (gui == null) {
+            return;
+        }
+        gui.addWindowAndWait(new AddTaskWindow(service));
+        refresh();
     }
 
     private void completeSelected() {

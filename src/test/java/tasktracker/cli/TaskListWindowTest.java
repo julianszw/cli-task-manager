@@ -103,8 +103,16 @@ class TaskListWindowTest {
         TaskListWindow window = new TaskListWindow(service);
 
         assertTrue(window.handleInput(new KeyStroke('q', false, false)));
-        assertTrue(window.handleInput(new KeyStroke('b', false, false)));
         assertTrue(window.handleInput(new KeyStroke(KeyType.Escape)));
+        assertEquals(1, service.listTasks().size());
+    }
+
+    @Test
+    void addKeyIsHandledWithoutGui() {
+        service.addTask("A");
+        TaskListWindow window = new TaskListWindow(service);
+
+        assertTrue(window.handleInput(new KeyStroke('a', false, false)));
         assertEquals(1, service.listTasks().size());
     }
 }

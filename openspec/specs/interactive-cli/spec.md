@@ -1,30 +1,30 @@
-# Interactive CLI
+# Unified Task View
 
 ## Purpose
-Define el modo de navegación interactiva de tareas, al que se accede desde el menú principal: permite recorrer, completar, reabrir, eliminar y purgar tareas mediante teclas, mostrando la salida con el formato definido en `output-formatting`.
+Define la vista única de la aplicación: una lista de tareas siempre visible que se muestra al iniciar la aplicación y sobre la que se navega y se ejecutan acciones (completar, reabrir, eliminar, purgar y crear) mediante atajos de teclado. Reemplaza al menú principal (`main-menu`): ya no existe una pantalla separada de opciones.
 
 ## Requirements
 
-### Requirement: Activación del modo interactivo
-La opción `List tasks` del menú principal DEBE iniciar el modo de navegación interactiva.
+### Requirement: Vista única al iniciar
+La aplicación DEBE abrir directamente en la vista de lista de tareas, sin un menú principal separado.
 
-#### Scenario: Abrir lista de tareas
-- **GIVEN** la opción `List tasks` activada
-- **WHEN** se ejecuta
-- **THEN** se inicia el modo interactivo
-- **AND** se muestra la tabla de tareas con la primera tarea seleccionada
+#### Scenario: Apertura de la aplicación
+- **GIVEN** la aplicación iniciada
+- **WHEN** se muestra la ventana principal
+- **THEN** se muestra la lista de tareas
+- **AND** no se muestra un menú principal de opciones
 
-#### Scenario: Sin tareas
+#### Scenario: Sin tareas al iniciar
 - **GIVEN** que no hay tareas
-- **WHEN** se inicia el modo interactivo
+- **WHEN** se muestra la vista
 - **THEN** se muestra un mensaje indicando que no hay tareas
-- **AND** el usuario puede salir del modo
+- **AND** el usuario puede crear una tarea o salir de la aplicación
 
 ### Requirement: Navegación por teclado
 El sistema DEBE permitir moverse por la lista de tareas con las teclas `↑`/`k` (arriba) y `↓`/`j` (abajo), manteniendo visible la tarea seleccionada.
 
 #### Scenario: Mover selección
-- **GIVEN** el modo interactivo activo con una o más tareas
+- **GIVEN** la vista activa con una o más tareas
 - **WHEN** el usuario presiona `↓` o `j`
 - **THEN** la selección se mueve a la siguiente tarea
 - **AND** la selección se resalta visualmente
@@ -34,12 +34,11 @@ El sistema DEBE permitir moverse por la lista de tareas con las teclas `↑`/`k`
 - **WHEN** el usuario intenta moverse más allá del límite
 - **THEN** la selección se mantiene sin salir de la lista
 
-### Requirement: Redibujado de la vista al cambiar la selección
-El sistema DEBE redibujar la vista cada vez que cambia el estado (selección,
-completado, borrado o purga), sin acumular contenido residual en pantalla.
+### Requirement: Redibujado de la vista al cambiar el estado
+El sistema DEBE redibujar la vista cada vez que cambia el estado (selección, completado, borrado, purga o creación), sin acumular contenido residual en pantalla.
 
 #### Scenario: Navegar entre tareas
-- **GIVEN** el modo interactivo activo con una o más tareas
+- **GIVEN** la vista activa con una o más tareas
 - **WHEN** el usuario cambia la selección con `↑`/`k` o `↓`/`j`
 - **THEN** la vista se redibuja con la nueva tarea seleccionada
 - **AND** no queda contenido residual en pantalla
@@ -96,29 +95,36 @@ La tecla `p` DEBE eliminar todas las tareas en estado `COMPLETED`.
 - **THEN** no se elimina ninguna tarea
 - **AND** se muestra un mensaje indicando que no hay tareas completadas
 
+### Requirement: Crear tarea desde la vista
+La tecla `a` DEBE abrir un campo de entrada para crear una tarea.
+
+#### Scenario: Crear tarea
+- **GIVEN** la vista única visible
+- **WHEN** el usuario presiona `a`
+- **THEN** se abre un campo de entrada para ingresar el título
+- **AND** al confirmar un título no vacío, se crea la tarea (según `task-management`)
+- **AND** la vista se actualiza mostrando la tarea creada
+
+#### Scenario: Título vacío
+- **GIVEN** el campo de entrada abierto
+- **WHEN** el usuario confirma un título vacío o compuesto solo por espacios
+- **THEN** no se crea ninguna tarea
+- **AND** se muestra un mensaje de error
+
 ### Requirement: Ayuda permanente de teclas
-El sistema DEBE mostrar siempre una ayuda visible con las teclas disponibles mientras el modo interactivo esté activo.
+El sistema DEBE mostrar siempre una ayuda visible con las teclas disponibles.
 
 #### Scenario: Ayuda siempre visible
-- **GIVEN** el modo interactivo activo
+- **GIVEN** la vista única visible
 - **WHEN** se muestra la vista
-- **THEN** se muestra una línea de ayuda con las teclas disponibles: `↑`/`k` (up), `↓`/`j` (down), `c` (complete), `r` (reopen), `d` (delete), `p` (purge), `b` (back) and `q`/`Esc` (exit)
+- **THEN** se muestra una línea de ayuda con las teclas disponibles: `↑`/`k` (up), `↓`/`j` (down), `a` (add), `c` (complete), `r` (reopen), `d` (delete), `p` (purge), `t` (theme), `q`/`Esc` (exit)
 - **AND** la ayuda permanece visible en todo momento, sin necesidad de presionar una tecla para mostrarla
 
-### Requirement: Volver atrás
-El sistema DEBE permitir volver atrás al menú principal con la tecla `b`, como alternativa a las teclas de salida.
-
-#### Scenario: Volver atrás con b
-- **GIVEN** el modo interactivo activo
-- **WHEN** el usuario presiona `b`
-- **THEN** se sale del modo interactivo
-- **AND** se vuelve al menú principal
-
-### Requirement: Salir del modo interactivo
-Las teclas `q` y `Esc` DEBEN salir del modo interactivo.
+### Requirement: Salir de la aplicación
+Las teclas `q` y `Esc` DEBEN cerrar la aplicación.
 
 #### Scenario: Salir
-- **GIVEN** el modo interactivo activo
+- **GIVEN** la vista única visible
 - **WHEN** el usuario presiona `q` o `Esc`
-- **THEN** se sale del modo interactivo
-- **AND** se vuelve al menú principal
+- **THEN** se cierra la aplicación
+- **AND** no hay un menú al que volver

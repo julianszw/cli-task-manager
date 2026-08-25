@@ -10,10 +10,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import tasktracker.cli.LanternaTaskTrackerView;
-import tasktracker.cli.MainMenuWindow;
 import tasktracker.repository.JsonTaskRepository;
 import tasktracker.service.TaskService;
 
@@ -23,11 +20,10 @@ public class App {
 
     public static void main(String[] args) throws IOException {
         List<String> startupWarnings = new ArrayList<>();
-        AtomicReference<Consumer<String>> warningSink = new AtomicReference<>(startupWarnings::add);
 
         JsonTaskRepository repository = new JsonTaskRepository(
                 Path.of(DATA_FILE),
-                message -> warningSink.get().accept(message));
+                startupWarnings::add);
         TaskService service = new TaskService(repository);
 
         Terminal terminal = new DefaultTerminalFactory().createTerminal();
@@ -37,14 +33,7 @@ public class App {
             WindowBasedTextGUI gui = new MultiWindowTextGUI(screen);
 
             LanternaTaskTrackerView view = new LanternaTaskTrackerView(gui, service);
-
-            MainMenuWindow mainMenuWindow = new MainMenuWindow(view, service);
-            view.setMainWindow(mainMenuWindow);
-
-            warningSink.set(view::showMessage);
-            startupWarnings.forEach(view::showMessage);
-
-            gui.addWindowAndWait(mainMenuWindow);
+            view.start(startupWarnings);
         } finally {
             screen.stopScreen();
         }
