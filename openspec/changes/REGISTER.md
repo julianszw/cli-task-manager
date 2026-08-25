@@ -26,3 +26,4 @@ _(ninguno)_
 | `010-launch-scripts` | `7f5559a` | agregar scripts de lanzamiento |
 | `011-unified-task-view` | `3c0dc1a` | unificar vista de tareas y quitar menú principal |
 | `012-dark-theme` | `bdbecaa` | agregar tema oscuro alternable |
+| `013-remove-unused-code` | `1440fe4` | eliminar capa de comandos cli no usada |
