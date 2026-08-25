@@ -21,3 +21,4 @@ _(ninguno)_
 | `005-package-runnable-jar` | `36ae571` | empaquetar jar ejecutable con shade |
 | `006-interactive-help-and-back` | `43d760e` | agregar ayuda permanente y tecla atrás |
 | `007-lanterna-tui` | `5e0e93d` | refactor de la capa de presentación a Lanterna |
+| `008-json-persistence` | `f1adc60` | persistir tareas en archivo json |
