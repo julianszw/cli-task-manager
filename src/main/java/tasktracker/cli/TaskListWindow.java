@@ -11,6 +11,7 @@ import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.gui2.table.Table;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import tasktracker.model.Task;
@@ -20,24 +21,30 @@ public class TaskListWindow extends BasicWindow {
 
     private static final String TITLE = "Tareas";
     private static final String HELP =
-            "Teclas: ↑/k subir · ↓/j bajar · a crear · c completar · r reabrir · d eliminar · p purgar · q/Esc salir";
+            "Teclas: ↑/k subir · ↓/j bajar · a crear · c completar · r reabrir · d eliminar · p purgar · t tema · q/Esc salir";
     private static final String NO_TASKS = "No hay tareas cargadas";
     private static final String NO_COMPLETED_TO_PURGE = "No hay tareas completadas para eliminar";
 
     private final TaskService service;
     private final WindowBasedTextGUI gui;
+    private final ThemeManager themeManager;
     private final List<Task> tasks = new ArrayList<>();
     private final Table<String> table = new Table<>("ID", "ESTADO", "TÍTULO");
     private final Label status = new Label("");
 
     public TaskListWindow(TaskService service) {
-        this(service, null);
+        this(service, null, new ThemeManager());
     }
 
     public TaskListWindow(TaskService service, WindowBasedTextGUI gui) {
+        this(service, gui, new ThemeManager());
+    }
+
+    public TaskListWindow(TaskService service, WindowBasedTextGUI gui, ThemeManager themeManager) {
         super(TITLE);
         this.service = service;
         this.gui = gui;
+        this.themeManager = themeManager;
 
         setHints(List.of(Window.Hint.FULL_SCREEN));
 
@@ -47,9 +54,13 @@ public class TaskListWindow extends BasicWindow {
         content.addComponent(new Label(HELP));
         setComponent(content);
 
-        table.setTableCellRenderer(new TaskCellRenderer(tasks));
+        table.setTableCellRenderer(new TaskCellRenderer(tasks, themeManager::isDark));
         refresh();
         setFocusedInteractable(table);
+    }
+
+    public boolean isDarkTheme() {
+        return themeManager.isDark();
     }
 
     void setStatus(String message) {
@@ -116,6 +127,10 @@ public class TaskListWindow extends BasicWindow {
                         purgeCompleted();
                         return true;
                     }
+                    case 't' -> {
+                        toggleTheme();
+                        return true;
+                    }
                     case 'q' -> {
                         close();
                         return true;
@@ -149,6 +164,18 @@ public class TaskListWindow extends BasicWindow {
         }
         gui.addWindowAndWait(new AddTaskWindow(service));
         refresh();
+    }
+
+    private void toggleTheme() {
+        themeManager.toggle();
+        if (gui != null) {
+            gui.setTheme(themeManager.current());
+            try {
+                gui.updateScreen();
+            } catch (IOException e) {
+                // el repintado se reintentará en el siguiente evento de la GUI
+            }
+        }
     }
 
     private void completeSelected() {
