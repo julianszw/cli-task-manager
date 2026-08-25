@@ -24,3 +24,4 @@ _(ninguno)_
 | `008-json-persistence` | `f1adc60` | persistir tareas en archivo json |
 | `009-navigable-main-menu` | `439d551` | agregar menú principal navegable |
 | `010-launch-scripts` | `7f5559a` | agregar scripts de lanzamiento |
+| `011-unified-task-view` | `3c0dc1a` | unificar vista de tareas y quitar menú principal |
