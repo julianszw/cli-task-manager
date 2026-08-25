@@ -23,3 +23,4 @@ _(ninguno)_
 | `007-lanterna-tui` | `5e0e93d` | refactor de la capa de presentación a Lanterna |
 | `008-json-persistence` | `f1adc60` | persistir tareas en archivo json |
 | `009-navigable-main-menu` | `439d551` | agregar menú principal navegable |
+| `010-launch-scripts` | `7f5559a` | agregar scripts de lanzamiento |
