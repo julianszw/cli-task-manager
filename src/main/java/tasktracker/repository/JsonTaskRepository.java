@@ -18,11 +18,6 @@ public class JsonTaskRepository implements TaskRepository {
     private final Map<Long, Task> tasks = new LinkedHashMap<>();
     private final AtomicLong sequence = new AtomicLong();
 
-    public JsonTaskRepository(Path file) {
-        this(file, message -> {
-        });
-    }
-
     public JsonTaskRepository(Path file, Consumer<String> warningConsumer) {
         this.file = file;
         this.warningConsumer = warningConsumer;

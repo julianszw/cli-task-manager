@@ -21,29 +21,20 @@ Genera un jar autocontenido (incluye dependencias) en `target/cli-task-tracker-1
 java -jar target/cli-task-tracker-1.0.0.jar
 ```
 
-La app abre un prompt (`> `) donde se ingresan comandos.
+La app abre directamente la vista única de tareas (completadas tachadas y con color).
 
-## Comandos
-
-| Comando | Descripción |
-|---------|-------------|
-| `add <título>` | Crea una tarea nueva |
-| `list` | Abre el modo de navegación interactiva |
-| `complete <id>` | Marca una tarea como completada |
-| `purge` | Elimina todas las tareas completadas |
-| `help` | Muestra los comandos disponibles |
-
-## Modo interactivo (`list`)
-
-Muestra las tareas en una tabla (completadas tachadas y con color). Navegación:
+## Teclas
 
 | Tecla | Acción |
 |-------|--------|
 | `↑` / `k` | Subir selección |
 | `↓` / `j` | Bajar selección |
+| `a` | Crear una tarea nueva |
 | `c` | Completar la tarea seleccionada |
+| `r` | Reabrir la tarea seleccionada |
 | `d` | Eliminar la tarea seleccionada |
 | `p` | Purgar tareas completadas |
+| `t` | Alternar tema claro/oscuro |
 | `q` / `Esc` | Salir |
 
 ## Tests

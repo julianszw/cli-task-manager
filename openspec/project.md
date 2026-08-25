@@ -24,10 +24,11 @@ Estructura en capas, sin dependencias circulares:
 Regla de dependencia: `cli` → `service` → `repository` → `model`. Nunca al revés.
 
 ## Conventions
-- Nombres de comandos en minúscula, un verbo (`add`, `list`, `complete`).
-- Cada comando implementa la interfaz `Command` (`cli/Command.java`).
-- Excepciones de dominio son unchecked, se capturan en la capa `cli` para mostrar mensajes legibles al usuario.
-- Tests unitarios por capa (`repository`, `service`) — la capa `cli` se testea con foco en parsing/dispatch, no en lógica de negocio.
+- La interacción es una vista única de tareas (TUI) con atajos de teclado; no hay
+  prompt de texto ni comandos por nombre.
+- Excepciones de dominio son unchecked y se muestran como mensajes legibles al usuario.
+- Tests unitarios por capa (`repository`, `service`, `cli`): la capa `cli` se testea
+  con foco en la vista/entrada, no en lógica de negocio.
 
 ## Out of scope (por ahora)
 - Persistencia en base de datos (usa un archivo JSON local).
