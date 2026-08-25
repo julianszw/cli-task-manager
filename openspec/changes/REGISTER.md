@@ -20,3 +20,4 @@ _(ninguno)_
 | `004-interactive-navigation` | `00a21ea` | agregar navegación interactiva para list |
 | `005-package-runnable-jar` | `36ae571` | empaquetar jar ejecutable con shade |
 | `006-interactive-help-and-back` | `43d760e` | agregar ayuda permanente y tecla atrás |
+| `007-lanterna-tui` | `5e0e93d` | refactor de la capa de presentación a Lanterna |
