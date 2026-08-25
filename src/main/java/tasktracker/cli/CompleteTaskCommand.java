@@ -11,9 +11,9 @@ public class CompleteTaskCommand implements Command {
     }
 
     @Override
-    public void execute(String[] args) {
+    public void execute(String[] args, TaskTrackerView view) {
         if (args.length == 0) {
-            System.out.println("Uso: complete <id>");
+            view.showMessage("Uso: complete <id>");
             return;
         }
 
@@ -21,12 +21,12 @@ public class CompleteTaskCommand implements Command {
         try {
             id = Long.parseLong(args[0]);
         } catch (NumberFormatException e) {
-            System.out.println("El id debe ser un número");
+            view.showMessage("El id debe ser un número");
             return;
         }
 
         taskService.completeTask(id);
-        System.out.printf("Tarea #%d completada%n", id);
+        view.showMessage(String.format("Tarea #%d completada", id));
     }
 
     @Override

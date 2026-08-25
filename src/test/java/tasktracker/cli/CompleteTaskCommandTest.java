@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import org.junit.jupiter.api.Test;
 import tasktracker.exception.TaskNotFoundException;
 import tasktracker.model.Task;
@@ -19,39 +17,31 @@ class CompleteTaskCommandTest {
     private final CompleteTaskCommand command = new CompleteTaskCommand(service);
 
     @Test
-    void executeWithNonNumericIdPrintsErrorAndDoesNotModify() {
+    void executeWithNonNumericIdShowsErrorAndDoesNotModify() {
         service.addTask("A");
+        FakeTaskTrackerView view = new FakeTaskTrackerView();
 
-        String output = captureOutput(() -> command.execute(new String[]{"abc"}));
+        command.execute(new String[]{"abc"}, view);
 
-        assertTrue(output.contains("El id debe ser un número"));
+        assertTrue(view.lastMessage().contains("El id debe ser un número"));
         assertEquals(1, service.listTasks().size());
     }
 
     @Test
     void executeWithValidIdCompletesTask() {
         Task task = service.addTask("A");
+        FakeTaskTrackerView view = new FakeTaskTrackerView();
 
-        String output = captureOutput(() -> command.execute(new String[]{String.valueOf(task.getId())}));
+        command.execute(new String[]{String.valueOf(task.getId())}, view);
 
-        assertTrue(output.contains("completada"));
+        assertTrue(view.lastMessage().contains("completada"));
         assertEquals(TaskStatus.COMPLETED, task.getStatus());
     }
 
     @Test
     void executeWithNonexistentIdPropagatesNotFoundException() {
-        assertThrows(TaskNotFoundException.class, () -> command.execute(new String[]{"99"}));
-    }
+        FakeTaskTrackerView view = new FakeTaskTrackerView();
 
-    private String captureOutput(Runnable action) {
-        PrintStream original = System.out;
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(buffer));
-        try {
-            action.run();
-        } finally {
-            System.setOut(original);
-        }
-        return buffer.toString();
+        assertThrows(TaskNotFoundException.class, () -> command.execute(new String[]{"99"}, view));
     }
 }

@@ -3,8 +3,6 @@ package tasktracker.cli;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import org.junit.jupiter.api.Test;
 import tasktracker.repository.InMemoryTaskRepository;
 import tasktracker.service.TaskService;
@@ -23,25 +21,14 @@ class HelpCommandTest {
     @Test
     void executeListsAllRegisteredCommands() {
         registry.register(new AddTaskCommand(service));
-        registry.register(new ListTasksCommand(service));
+        registry.register(new ListTasksCommand());
         registry.register(command);
 
-        String output = captureOutput(() -> command.execute(new String[0]));
+        FakeTaskTrackerView view = new FakeTaskTrackerView();
+        command.execute(new String[0], view);
 
-        assertTrue(output.contains("add"));
-        assertTrue(output.contains("list"));
-        assertTrue(output.contains("help"));
-    }
-
-    private String captureOutput(Runnable action) {
-        PrintStream original = System.out;
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(buffer));
-        try {
-            action.run();
-        } finally {
-            System.setOut(original);
-        }
-        return buffer.toString();
+        assertTrue(view.lastMessage().contains("add"));
+        assertTrue(view.lastMessage().contains("list"));
+        assertTrue(view.lastMessage().contains("help"));
     }
 }

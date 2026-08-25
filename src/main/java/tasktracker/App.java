@@ -1,64 +1,57 @@
 package tasktracker;
 
-import java.util.Arrays;
-import java.util.Scanner;
+import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.screen.TerminalScreen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.terminal.Terminal;
+import java.io.IOException;
 import tasktracker.cli.AddTaskCommand;
-import tasktracker.cli.Command;
+import tasktracker.cli.CommandDispatcher;
 import tasktracker.cli.CommandRegistry;
 import tasktracker.cli.CompleteTaskCommand;
+import tasktracker.cli.ExitCommand;
 import tasktracker.cli.HelpCommand;
+import tasktracker.cli.LanternaTaskTrackerView;
 import tasktracker.cli.ListTasksCommand;
+import tasktracker.cli.MainWindow;
 import tasktracker.cli.PurgeCompletedCommand;
-import tasktracker.exception.TaskNotFoundException;
 import tasktracker.repository.InMemoryTaskRepository;
-import tasktracker.repository.TaskRepository;
 import tasktracker.service.TaskService;
 
 public class App {
 
-    public static void main(String[] args) {
-        TaskRepository repository = new InMemoryTaskRepository();
-        TaskService service = new TaskService(repository);
+    public static void main(String[] args) throws IOException {
+        TaskService service = new TaskService(new InMemoryTaskRepository());
 
+        Terminal terminal = new DefaultTerminalFactory().createTerminal();
+        Screen screen = new TerminalScreen(terminal);
+        screen.startScreen();
+        try {
+            WindowBasedTextGUI gui = new MultiWindowTextGUI(screen);
+
+            LanternaTaskTrackerView view = new LanternaTaskTrackerView(gui, service);
+
+            CommandDispatcher dispatcher = new CommandDispatcher(buildRegistry(service));
+
+            MainWindow mainWindow = new MainWindow(dispatcher, view);
+            view.setMainWindow(mainWindow);
+
+            gui.addWindowAndWait(mainWindow);
+        } finally {
+            screen.stopScreen();
+        }
+    }
+
+    private static CommandRegistry buildRegistry(TaskService service) {
         CommandRegistry registry = new CommandRegistry();
         registry.register(new AddTaskCommand(service));
-        registry.register(new ListTasksCommand(service));
+        registry.register(new ListTasksCommand());
         registry.register(new CompleteTaskCommand(service));
         registry.register(new PurgeCompletedCommand(service));
         registry.register(new HelpCommand(registry));
-
-        run(registry);
-    }
-
-    private static void run(CommandRegistry registry) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            while (true) {
-                System.out.print("> ");
-                if (!scanner.hasNextLine()) {
-                    break;
-                }
-
-                String line = scanner.nextLine().trim();
-                if (line.isEmpty()) {
-                    continue;
-                }
-
-                String[] tokens = line.split("\\s+");
-                String name = tokens[0];
-                String[] args = Arrays.copyOfRange(tokens, 1, tokens.length);
-
-                Command command = registry.find(name);
-                if (command == null) {
-                    System.out.println("Comando no reconocido: " + name);
-                    continue;
-                }
-
-                try {
-                    command.execute(args);
-                } catch (IllegalArgumentException | TaskNotFoundException e) {
-                    System.out.println(e.getMessage());
-                }
-            }
-        }
+        registry.register(new ExitCommand());
+        return registry;
     }
 }

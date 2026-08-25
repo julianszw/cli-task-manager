@@ -1,0 +1,182 @@
+package tasktracker.cli;
+
+import com.googlecode.lanterna.SGR;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.gui2.BasicWindow;
+import com.googlecode.lanterna.gui2.Borders;
+import com.googlecode.lanterna.gui2.Direction;
+import com.googlecode.lanterna.gui2.Label;
+import com.googlecode.lanterna.gui2.LinearLayout;
+import com.googlecode.lanterna.gui2.Panel;
+import com.googlecode.lanterna.gui2.TextGUIGraphics;
+import com.googlecode.lanterna.gui2.Window;
+import com.googlecode.lanterna.gui2.table.DefaultTableCellRenderer;
+import com.googlecode.lanterna.gui2.table.Table;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
+import java.util.ArrayList;
+import java.util.List;
+import tasktracker.model.Task;
+import tasktracker.service.TaskService;
+
+public class TaskListWindow extends BasicWindow {
+
+    private static final String TITLE = "Tareas";
+    private static final String HELP =
+            "Teclas: ↑/k subir · ↓/j bajar · c completar · d eliminar · p purgar · b/q/Esc salir";
+    private static final String NO_TASKS = "No hay tareas cargadas";
+    private static final String NO_COMPLETED_TO_PURGE = "No hay tareas completadas para eliminar";
+
+    private final TaskService service;
+    private final List<Task> tasks = new ArrayList<>();
+    private final Table<String> table = new Table<>("ID", "ESTADO", "TÍTULO");
+    private final Label status = new Label("");
+
+    public TaskListWindow(TaskService service) {
+        super(TITLE);
+        this.service = service;
+
+        setHints(List.of(Window.Hint.FULL_SCREEN));
+
+        Panel content = new Panel(new LinearLayout(Direction.VERTICAL));
+        content.addComponent(table.withBorder(Borders.singleLine("Tareas")));
+        content.addComponent(status);
+        content.addComponent(new Label(HELP));
+        setComponent(content);
+
+        table.setTableCellRenderer(new TaskCellRenderer(tasks));
+        refresh();
+        setFocusedInteractable(table);
+    }
+
+    String getStatusText() {
+        return status.getText();
+    }
+
+    private void refresh() {
+        tasks.clear();
+        tasks.addAll(service.listTasks());
+
+        table.getTableModel().clear();
+        for (Task task : tasks) {
+            table.getTableModel().addRow(
+                    Long.toString(task.getId()),
+                    task.getStatus().name(),
+                    task.getTitle());
+        }
+
+        if (tasks.isEmpty()) {
+            status.setText(NO_TASKS);
+            return;
+        }
+        if (table.getSelectedRow() >= tasks.size()) {
+            table.setSelectedRow(tasks.size() - 1);
+        }
+        status.setText("");
+    }
+
+    @Override
+    public boolean handleInput(KeyStroke key) {
+        if (key.getKeyType() == KeyType.Character) {
+            Character c = key.getCharacter();
+            if (c != null) {
+                switch (c) {
+                    case 'k' -> {
+                        moveUp();
+                        return true;
+                    }
+                    case 'j' -> {
+                        moveDown();
+                        return true;
+                    }
+                    case 'c' -> {
+                        completeSelected();
+                        return true;
+                    }
+                    case 'd' -> {
+                        deleteSelected();
+                        return true;
+                    }
+                    case 'p' -> {
+                        purgeCompleted();
+                        return true;
+                    }
+                    case 'b', 'q' -> {
+                        close();
+                        return true;
+                    }
+                    default -> {
+                    }
+                }
+            }
+        } else if (key.getKeyType() == KeyType.Escape) {
+            close();
+            return true;
+        }
+        return super.handleInput(key);
+    }
+
+    private void moveUp() {
+        if (!tasks.isEmpty()) {
+            table.setSelectedRow(Math.max(0, table.getSelectedRow() - 1));
+        }
+    }
+
+    private void moveDown() {
+        if (!tasks.isEmpty()) {
+            table.setSelectedRow(Math.min(tasks.size() - 1, table.getSelectedRow() + 1));
+        }
+    }
+
+    private void completeSelected() {
+        int selected = table.getSelectedRow();
+        if (selected < 0 || selected >= tasks.size()) {
+            return;
+        }
+        service.completeTask(tasks.get(selected).getId());
+        refresh();
+    }
+
+    private void deleteSelected() {
+        int selected = table.getSelectedRow();
+        if (selected < 0 || selected >= tasks.size()) {
+            return;
+        }
+        service.deleteTask(tasks.get(selected).getId());
+        refresh();
+    }
+
+    private void purgeCompleted() {
+        List<Task> removed = service.purgeCompletedTasks();
+        refresh();
+        if (removed.isEmpty()) {
+            status.setText(NO_COMPLETED_TO_PURGE);
+        } else {
+            status.setText("Tareas completadas eliminadas: " + removed.size());
+        }
+    }
+
+    private static class TaskCellRenderer extends DefaultTableCellRenderer<String> {
+
+        private final List<Task> tasks;
+
+        TaskCellRenderer(List<Task> tasks) {
+            this.tasks = tasks;
+        }
+
+        @Override
+        protected void applyStyle(Table<String> table, String cell, int columnIndex, int rowIndex,
+                boolean isSelected, TextGUIGraphics graphics) {
+            super.applyStyle(table, cell, columnIndex, rowIndex, isSelected, graphics);
+            if (rowIndex >= 0 && rowIndex < tasks.size()) {
+                Task task = tasks.get(rowIndex);
+                if (task.isCompleted()) {
+                    graphics.setForegroundColor(TextColor.ANSI.GREEN);
+                    graphics.enableModifiers(SGR.CROSSED_OUT);
+                } else {
+                    graphics.setForegroundColor(TextColor.ANSI.YELLOW);
+                }
+            }
+        }
+    }
+}

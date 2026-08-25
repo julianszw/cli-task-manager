@@ -1,19 +1,19 @@
 package tasktracker.cli;
 
-public class ListTasksCommand implements Command {
+public class ExitCommand implements Command {
 
     @Override
     public void execute(String[] args, TaskTrackerView view) {
-        view.showTaskList();
+        view.exit();
     }
 
     @Override
     public String getName() {
-        return "list";
+        return "exit";
     }
 
     @Override
     public String getDescription() {
-        return "Navega las tareas de forma interactiva. Uso: list";
+        return "Sale de la aplicación. Uso: exit";
     }
 }

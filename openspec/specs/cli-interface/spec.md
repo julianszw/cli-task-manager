@@ -9,7 +9,8 @@ Define cómo el usuario interactúa por terminal con las capacidades de `task-ma
 El sistema DEBE exponer un conjunto fijo de comandos conocidos por nombre.
 
 #### Scenario: Comando reconocido
-- **GIVEN** un nombre de comando registrado (`add`, `list`, `complete`, `purge`)
+- **GIVEN** un nombre de comando registrado (`add`, `list`, `complete`, `purge`,
+  `help`, `exit`)
 - **WHEN** el usuario lo ingresa
 - **THEN** el sistema ejecuta la acción correspondiente
 
@@ -79,3 +80,11 @@ El comando `purge` DEBE eliminar todas las tareas completadas.
 - **GIVEN** que no hay tareas completadas
 - **WHEN** se ejecuta `purge`
 - **THEN** se muestra un mensaje indicando que no hay tareas completadas para eliminar
+
+### Requirement: Comando exit
+El comando `exit` DEBE cerrar la aplicación.
+
+#### Scenario: Salir de la aplicación
+- **GIVEN** la aplicación en ejecución
+- **WHEN** el usuario ingresa `exit`
+- **THEN** se cierra la aplicación

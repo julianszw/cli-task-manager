@@ -3,8 +3,6 @@ package tasktracker.cli;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import org.junit.jupiter.api.Test;
 import tasktracker.model.Task;
 import tasktracker.repository.InMemoryTaskRepository;
@@ -19,33 +17,23 @@ class PurgeCompletedCommandTest {
     void executeWithCompletedTasksListsRemoved() {
         Task task = service.addTask("Completada");
         service.completeTask(task.getId());
+        FakeTaskTrackerView view = new FakeTaskTrackerView();
 
-        String output = captureOutput(() -> command.execute(new String[0]));
+        command.execute(new String[0], view);
 
-        assertTrue(output.contains("eliminadas"));
-        assertTrue(output.contains(task.getTitle()));
+        assertTrue(view.lastMessage().contains("eliminadas"));
+        assertTrue(view.lastMessage().contains(task.getTitle()));
         assertTrue(service.listTasks().isEmpty());
     }
 
     @Test
-    void executeWithoutCompletedTasksPrintsInformativeMessage() {
+    void executeWithoutCompletedTasksShowsInformativeMessage() {
         service.addTask("Pendiente");
+        FakeTaskTrackerView view = new FakeTaskTrackerView();
 
-        String output = captureOutput(() -> command.execute(new String[0]));
+        command.execute(new String[0], view);
 
-        assertTrue(output.contains("No hay tareas completadas"));
+        assertTrue(view.lastMessage().contains("No hay tareas completadas"));
         assertEquals(1, service.listTasks().size());
-    }
-
-    private String captureOutput(Runnable action) {
-        PrintStream original = System.out;
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(buffer));
-        try {
-            action.run();
-        } finally {
-            System.setOut(original);
-        }
-        return buffer.toString();
     }
 }

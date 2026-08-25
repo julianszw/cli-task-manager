@@ -1,7 +1,10 @@
 # Output Formatting
 
 ## Purpose
-Define cómo se formatea por terminal la salida que muestra tareas: tabla con columnas alineadas, tachado de las filas completadas y colores para distinguir estados. Aplica de forma consistente a todo comando o vista que liste tareas.
+Define cómo se formatea por terminal la salida que muestra tareas: tabla con
+columnas alineadas, tachado de las filas completadas y colores para distinguir
+estados. La tabla se renderiza con el componente `Table` de Lanterna y se estiliza
+mediante un `TableCellRenderer` (colores `TextColor` y `SGR.CROSSED_OUT`).
 
 ## Requirements
 
@@ -43,9 +46,15 @@ El sistema DEBE distinguir visualmente el estado de cada tarea mediante colores.
 - **THEN** cada estado se muestra con un color que lo distingue del otro
 
 ### Requirement: Aplicación consistente del formato
-El sistema DEBE aplicar el formato de tabla, tachado y color en toda salida que muestre tareas, tanto en el modo interactivo como en la salida de comandos que listan tareas (por ejemplo `purge`).
+El sistema DEBE aplicar el formato de tabla, tachado y color en la vista
+interactiva de tareas (la vista principal que lista tareas).
 
-#### Scenario: Salida de comandos que listan tareas
-- **GIVEN** un comando cuya salida incluye tareas (por ejemplo `purge`)
+#### Scenario: Vista interactiva de tareas
+- **GIVEN** el modo interactivo activo con tareas
+- **WHEN** se muestra la tabla
+- **THEN** las filas siguen el formato de tabla, tachado y color definido
+
+#### Scenario: Resumen de tareas eliminadas
+- **GIVEN** un comando cuya salida reporta tareas eliminadas (por ejemplo `purge`)
 - **WHEN** se ejecuta
-- **THEN** las tareas mostradas siguen el mismo formato de tabla, tachado y color
+- **THEN** se muestra un resumen con las tareas eliminadas (id y título)

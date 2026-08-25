@@ -15,7 +15,7 @@ class CommandRegistryTest {
         CommandRegistry registry = new CommandRegistry();
         TaskService service = new TaskService(new InMemoryTaskRepository());
         registry.register(new AddTaskCommand(service));
-        registry.register(new ListTasksCommand(service));
+        registry.register(new ListTasksCommand());
         registry.register(new CompleteTaskCommand(service));
         registry.register(new PurgeCompletedCommand(service));
 

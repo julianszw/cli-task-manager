@@ -11,11 +11,14 @@ public class HelpCommand implements Command {
     }
 
     @Override
-    public void execute(String[] args) {
+    public void execute(String[] args, TaskTrackerView view) {
         List<Command> commands = registry.getAll();
+        StringBuilder help = new StringBuilder("Comandos disponibles:");
         for (Command command : commands) {
-            System.out.printf("%-10s %s%n", command.getName(), command.getDescription());
+            help.append('\n')
+                    .append(String.format("%-10s %s", command.getName(), command.getDescription()));
         }
+        view.showMessage(help.toString());
     }
 
     @Override

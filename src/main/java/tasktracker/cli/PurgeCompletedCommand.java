@@ -13,14 +13,17 @@ public class PurgeCompletedCommand implements Command {
     }
 
     @Override
-    public void execute(String[] args) {
+    public void execute(String[] args, TaskTrackerView view) {
         List<Task> removed = taskService.purgeCompletedTasks();
         if (removed.isEmpty()) {
-            System.out.println("No hay tareas completadas para eliminar");
+            view.showMessage("No hay tareas completadas para eliminar");
             return;
         }
-        System.out.println("Tareas completadas eliminadas:");
-        System.out.println(new TaskTableFormatter().render(removed));
+
+        List<String> lines = removed.stream()
+                .map(task -> String.format("  - [#%d] %s", task.getId(), task.getTitle()))
+                .toList();
+        view.showMessage("Tareas completadas eliminadas:\n" + String.join("\n", lines));
     }
 
     @Override

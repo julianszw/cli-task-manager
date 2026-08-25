@@ -34,14 +34,15 @@ El sistema DEBE permitir moverse por la lista de tareas con las teclas `↑`/`k`
 - **WHEN** el usuario intenta moverse más allá del límite
 - **THEN** la selección se mantiene sin salir de la lista
 
-### Requirement: Limpieza de pantalla al cambiar la selección
-El sistema DEBE borrar la terminal cada vez que se selecciona una opción distinta y redibujar la vista con la nueva selección, sin acumular contenido residual en pantalla.
+### Requirement: Redibujado de la vista al cambiar la selección
+El sistema DEBE redibujar la vista cada vez que cambia el estado (selección,
+completado, borrado o purga), sin acumular contenido residual en pantalla.
 
 #### Scenario: Navegar entre tareas
 - **GIVEN** el modo interactivo activo con una o más tareas
 - **WHEN** el usuario cambia la selección con `↑`/`k` o `↓`/`j`
-- **THEN** la terminal se borra
-- **AND** se redibuja la tabla con la nueva tarea seleccionada
+- **THEN** la vista se redibuja con la nueva tarea seleccionada
+- **AND** no queda contenido residual en pantalla
 
 ### Requirement: Completar tarea seleccionada
 La tecla `c` DEBE marcar como completada la tarea seleccionada.

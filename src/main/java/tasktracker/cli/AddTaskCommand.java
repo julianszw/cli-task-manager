@@ -12,15 +12,15 @@ public class AddTaskCommand implements Command {
     }
 
     @Override
-    public void execute(String[] args) {
+    public void execute(String[] args, TaskTrackerView view) {
         if (args.length == 0) {
-            System.out.println("Uso: add <título de la tarea>");
+            view.showMessage("Uso: add <título de la tarea>");
             return;
         }
 
         String title = String.join(" ", args);
         Task task = taskService.addTask(title);
-        System.out.printf("Tarea creada [#%d]: %s%n", task.getId(), task.getTitle());
+        view.showMessage(String.format("Tarea creada [#%d]: %s", task.getId(), task.getTitle()));
     }
 
     @Override

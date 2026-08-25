@@ -8,7 +8,8 @@ Proyecto de práctica orientado a reforzar arquitectura en capas y manejo de est
 - Java 21 (sin frameworks externos)
 - Maven (build y tests)
 - JUnit para tests (`src/test/java/tasktracker`)
-- JLine (`org.jline:jline`) para entrada raw y modo interactivo de `list`
+- Lanterna (`com.googlecode.lanterna:lanterna`) para la TUI: ventanas, paneles,
+  componentes (tabla, caja de texto) y manejo de teclado.
 
 ## Architecture
 Estructura en capas, sin dependencias circulares:
