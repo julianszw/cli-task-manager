@@ -9,5 +9,8 @@
         "Authorization": "Bearer {env:GITHUB_TOKEN}"
       }
     }
+  },
+  "permission": {
+    "bash": { "*": "allow", "git *": "deny" }
   }
 }

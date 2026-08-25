@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/java-springboot/SKILL.md",
       "computedHash": "f1b9c6b1277178fc33e5a612761c1cd1cf6ab5f946d05d69d52026d142c0a0c1"
+    },
+    "unit-test-json-serialization": {
+      "source": "giuseppe-trisciuoglio/developer-kit",
+      "sourceType": "github",
+      "skillPath": "plugins/developer-kit-java/skills/unit-test-json-serialization/SKILL.md",
+      "computedHash": "f239ec36503816c28237fcc02fe12b666364337843a8b7088550a5d4ccf13e61"
     }
   }
 }
