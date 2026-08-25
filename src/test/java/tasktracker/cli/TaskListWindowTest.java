@@ -62,6 +62,17 @@ class TaskListWindowTest {
     }
 
     @Test
+    void reopenSelectedTask() {
+        Task task = service.addTask("A");
+        service.completeTask(task.getId());
+        TaskListWindow window = new TaskListWindow(service);
+
+        window.handleInput(new KeyStroke('r', false, false));
+
+        assertEquals(TaskStatus.PENDING, service.listTasks().get(0).getStatus());
+    }
+
+    @Test
     void purgeRemovesCompletedTasks() {
         service.addTask("Pendiente");
         Task completed = service.addTask("Completada");

@@ -9,13 +9,13 @@ mediante un `TableCellRenderer` (colores `TextColor` y `SGR.CROSSED_OUT`).
 ## Requirements
 
 ### Requirement: Formato de tabla
-El sistema DEBE mostrar las tareas en formato de tabla con columnas alineadas para id, estado y título.
+El sistema DEBE mostrar las tareas en formato de tabla con columnas alineadas para `ID`, `STATUS` y `TITLE`.
 
 #### Scenario: Tabla con tareas
 - **GIVEN** una o más tareas existentes
 - **WHEN** se muestra el listado de tareas
 - **THEN** las tareas se presentan como filas de una tabla
-- **AND** las columnas id, estado y título quedan alineadas
+- **AND** las columnas `ID`, `STATUS` y `TITLE` quedan alineadas
 - **AND** la tabla incluye un encabezado que identifica cada columna
 
 #### Scenario: Tabla sin tareas
@@ -30,7 +30,7 @@ El sistema DEBE tachar la fila completa de toda tarea en estado `COMPLETED`.
 #### Scenario: Tarea completada
 - **GIVEN** una tarea en estado `COMPLETED`
 - **WHEN** se muestra en la tabla
-- **THEN** toda la fila (id, estado y título) se muestra tachada
+- **THEN** toda la fila (`ID`, `STATUS` y `TITLE`) se muestra tachada
 
 #### Scenario: Tarea pendiente
 - **GIVEN** una tarea en estado `PENDING`
@@ -57,4 +57,4 @@ interactiva de tareas (la vista principal que lista tareas).
 #### Scenario: Resumen de tareas eliminadas
 - **GIVEN** un comando cuya salida reporta tareas eliminadas (por ejemplo `purge`)
 - **WHEN** se ejecuta
-- **THEN** se muestra un resumen con las tareas eliminadas (id y título)
+- **THEN** se muestra un resumen con las tareas eliminadas (`ID` y `TITLE`)

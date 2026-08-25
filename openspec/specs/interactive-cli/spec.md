@@ -1,15 +1,15 @@
 # Interactive CLI
 
 ## Purpose
-Define el modo de navegación interactiva de la terminal, que reemplaza al comando `list`: permite recorrer, completar, eliminar y purgar tareas mediante teclas, mostrando la salida con el formato definido en `output-formatting`.
+Define el modo de navegación interactiva de tareas, al que se accede desde el menú principal: permite recorrer, completar, reabrir, eliminar y purgar tareas mediante teclas, mostrando la salida con el formato definido en `output-formatting`.
 
 ## Requirements
 
 ### Requirement: Activación del modo interactivo
-El comando `list` DEBE iniciar el modo de navegación interactiva en lugar de imprimir un listado estático.
+La opción `List tasks` del menú principal DEBE iniciar el modo de navegación interactiva.
 
-#### Scenario: Ejecutar list
-- **GIVEN** el comando `list` ingresado
+#### Scenario: Abrir lista de tareas
+- **GIVEN** la opción `List tasks` activada
 - **WHEN** se ejecuta
 - **THEN** se inicia el modo interactivo
 - **AND** se muestra la tabla de tareas con la primera tarea seleccionada
@@ -58,6 +58,20 @@ La tecla `c` DEBE marcar como completada la tarea seleccionada.
 - **WHEN** el usuario presiona `c`
 - **THEN** no se produce ningún cambio ni error
 
+### Requirement: Reabrir tarea seleccionada
+La tecla `r` DEBE volver a estado `PENDING` (reabrir) la tarea seleccionada.
+
+#### Scenario: Reabrir selección completada
+- **GIVEN** una tarea seleccionada en estado `COMPLETED`
+- **WHEN** el usuario presiona `r`
+- **THEN** la tarea pasa a `PENDING`
+- **AND** la vista se actualiza aplicando el formato de tarea pendiente según `output-formatting`
+
+#### Scenario: Reabrir selección ya pendiente
+- **GIVEN** una tarea seleccionada en estado `PENDING`
+- **WHEN** el usuario presiona `r`
+- **THEN** no se produce ningún cambio ni error
+
 ### Requirement: Eliminar tarea seleccionada
 La tecla `d` DEBE eliminar la tarea seleccionada.
 
@@ -88,17 +102,17 @@ El sistema DEBE mostrar siempre una ayuda visible con las teclas disponibles mie
 #### Scenario: Ayuda siempre visible
 - **GIVEN** el modo interactivo activo
 - **WHEN** se muestra la vista
-- **THEN** se muestra una línea de ayuda con las teclas disponibles: `↑`/`k` (subir), `↓`/`j` (bajar), `c` (completar), `d` (eliminar), `p` (purgar), `b` (atrás) y `q`/`Esc` (salir)
+- **THEN** se muestra una línea de ayuda con las teclas disponibles: `↑`/`k` (up), `↓`/`j` (down), `c` (complete), `r` (reopen), `d` (delete), `p` (purge), `b` (back) and `q`/`Esc` (exit)
 - **AND** la ayuda permanece visible en todo momento, sin necesidad de presionar una tecla para mostrarla
 
 ### Requirement: Volver atrás
-El sistema DEBE permitir volver atrás al prompt de comandos con la tecla `b`, como alternativa a las teclas de salida.
+El sistema DEBE permitir volver atrás al menú principal con la tecla `b`, como alternativa a las teclas de salida.
 
 #### Scenario: Volver atrás con b
 - **GIVEN** el modo interactivo activo
 - **WHEN** el usuario presiona `b`
 - **THEN** se sale del modo interactivo
-- **AND** se vuelve al prompt de comandos
+- **AND** se vuelve al menú principal
 
 ### Requirement: Salir del modo interactivo
 Las teclas `q` y `Esc` DEBEN salir del modo interactivo.
@@ -107,4 +121,4 @@ Las teclas `q` y `Esc` DEBEN salir del modo interactivo.
 - **GIVEN** el modo interactivo activo
 - **WHEN** el usuario presiona `q` o `Esc`
 - **THEN** se sale del modo interactivo
-- **AND** se vuelve al prompt de comandos
+- **AND** se vuelve al menú principal

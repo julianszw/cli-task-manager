@@ -6,5 +6,11 @@ public interface TaskTrackerView {
 
     void showTaskList();
 
+    void showAddTask();
+
+    void showCompleteTask();
+
+    void showReopenTask();
+
     void exit();
 }

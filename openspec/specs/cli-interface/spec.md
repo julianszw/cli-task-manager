@@ -1,7 +1,7 @@
 # CLI Interface
 
 ## Purpose
-Define cómo el usuario interactúa por terminal con las capacidades de `task-management`: comandos disponibles, formato de entrada/salida y manejo de errores de input.
+Define la interacción por terminal de la **variante CLI básica** (prompt de texto) con las capacidades de `task-management`: comandos disponibles, formato de entrada/salida y manejo de errores de input. La variante TUI-DOS (menú navegable sin prompt) se describe en `main-menu`.
 
 ## Requirements
 

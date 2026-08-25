@@ -7,6 +7,9 @@ class FakeTaskTrackerView implements TaskTrackerView {
 
     private final List<String> messages = new ArrayList<>();
     private boolean taskListShown;
+    private boolean addTaskShown;
+    private boolean completeTaskShown;
+    private boolean reopenTaskShown;
     private boolean exited;
 
     @Override
@@ -17,6 +20,21 @@ class FakeTaskTrackerView implements TaskTrackerView {
     @Override
     public void showTaskList() {
         taskListShown = true;
+    }
+
+    @Override
+    public void showAddTask() {
+        addTaskShown = true;
+    }
+
+    @Override
+    public void showCompleteTask() {
+        completeTaskShown = true;
+    }
+
+    @Override
+    public void showReopenTask() {
+        reopenTaskShown = true;
     }
 
     @Override
@@ -34,6 +52,18 @@ class FakeTaskTrackerView implements TaskTrackerView {
 
     boolean isTaskListShown() {
         return taskListShown;
+    }
+
+    boolean isAddTaskShown() {
+        return addTaskShown;
+    }
+
+    boolean isCompleteTaskShown() {
+        return completeTaskShown;
+    }
+
+    boolean isReopenTaskShown() {
+        return reopenTaskShown;
     }
 
     boolean isExited() {

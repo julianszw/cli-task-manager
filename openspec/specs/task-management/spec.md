@@ -1,7 +1,7 @@
 # Task Management
 
 ## Purpose
-Define el comportamiento esperado para crear, consultar y completar tareas, independientemente de cómo se invoquen (CLI u otro cliente futuro).
+Define el comportamiento esperado para crear, consultar, completar y reabrir tareas, independientemente de cómo se invoquen (CLI u otro cliente futuro).
 
 ## Requirements
 
@@ -53,6 +53,25 @@ El sistema DEBE permitir marcar una tarea existente como completada.
 - **WHEN** se solicita completar esa tarea nuevamente
 - **THEN** el sistema deja la tarea en estado `COMPLETED` sin error
   (o alternativamente, lanza una excepción de estado inválido — a definir)
+
+### Requirement: Reabrir tarea
+El sistema DEBE permitir marcar una tarea existente en estado `COMPLETED` como pendiente nuevamente (reabrirla).
+
+#### Scenario: Reabrir tarea completada
+- **GIVEN** una tarea con id válido en estado `COMPLETED`
+- **WHEN** se solicita reabrir esa tarea
+- **THEN** el estado de la tarea cambia a `PENDING`
+
+#### Scenario: Reabrir tarea inexistente
+- **GIVEN** un id que no corresponde a ninguna tarea
+- **WHEN** se solicita reabrir esa tarea
+- **THEN** el sistema lanza `TaskNotFoundException`
+- **AND** ninguna tarea cambia de estado
+
+#### Scenario: Reabrir tarea pendiente
+- **GIVEN** una tarea con id válido en estado `PENDING`
+- **WHEN** se solicita reabrir esa tarea nuevamente
+- **THEN** el sistema deja la tarea en estado `PENDING` sin error
 
 ### Requirement: Eliminar tarea
 El sistema DEBE permitir eliminar una tarea existente por su id.

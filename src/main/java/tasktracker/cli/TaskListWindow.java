@@ -1,16 +1,12 @@
 package tasktracker.cli;
 
-import com.googlecode.lanterna.SGR;
-import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.BasicWindow;
 import com.googlecode.lanterna.gui2.Borders;
 import com.googlecode.lanterna.gui2.Direction;
 import com.googlecode.lanterna.gui2.Label;
 import com.googlecode.lanterna.gui2.LinearLayout;
 import com.googlecode.lanterna.gui2.Panel;
-import com.googlecode.lanterna.gui2.TextGUIGraphics;
 import com.googlecode.lanterna.gui2.Window;
-import com.googlecode.lanterna.gui2.table.DefaultTableCellRenderer;
 import com.googlecode.lanterna.gui2.table.Table;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
@@ -23,7 +19,7 @@ public class TaskListWindow extends BasicWindow {
 
     private static final String TITLE = "Tareas";
     private static final String HELP =
-            "Teclas: ↑/k subir · ↓/j bajar · c completar · d eliminar · p purgar · b/q/Esc salir";
+            "Teclas: ↑/k subir · ↓/j bajar · c completar · r reabrir · d eliminar · p purgar · b/q/Esc salir";
     private static final String NO_TASKS = "No hay tareas cargadas";
     private static final String NO_COMPLETED_TO_PURGE = "No hay tareas completadas para eliminar";
 
@@ -93,6 +89,10 @@ public class TaskListWindow extends BasicWindow {
                         completeSelected();
                         return true;
                     }
+                    case 'r' -> {
+                        reopenSelected();
+                        return true;
+                    }
                     case 'd' -> {
                         deleteSelected();
                         return true;
@@ -137,6 +137,15 @@ public class TaskListWindow extends BasicWindow {
         refresh();
     }
 
+    private void reopenSelected() {
+        int selected = table.getSelectedRow();
+        if (selected < 0 || selected >= tasks.size()) {
+            return;
+        }
+        service.reopenTask(tasks.get(selected).getId());
+        refresh();
+    }
+
     private void deleteSelected() {
         int selected = table.getSelectedRow();
         if (selected < 0 || selected >= tasks.size()) {
@@ -153,30 +162,6 @@ public class TaskListWindow extends BasicWindow {
             status.setText(NO_COMPLETED_TO_PURGE);
         } else {
             status.setText("Tareas completadas eliminadas: " + removed.size());
-        }
-    }
-
-    private static class TaskCellRenderer extends DefaultTableCellRenderer<String> {
-
-        private final List<Task> tasks;
-
-        TaskCellRenderer(List<Task> tasks) {
-            this.tasks = tasks;
-        }
-
-        @Override
-        protected void applyStyle(Table<String> table, String cell, int columnIndex, int rowIndex,
-                boolean isSelected, TextGUIGraphics graphics) {
-            super.applyStyle(table, cell, columnIndex, rowIndex, isSelected, graphics);
-            if (rowIndex >= 0 && rowIndex < tasks.size()) {
-                Task task = tasks.get(rowIndex);
-                if (task.isCompleted()) {
-                    graphics.setForegroundColor(TextColor.ANSI.GREEN);
-                    graphics.enableModifiers(SGR.CROSSED_OUT);
-                } else {
-                    graphics.setForegroundColor(TextColor.ANSI.YELLOW);
-                }
-            }
         }
     }
 }

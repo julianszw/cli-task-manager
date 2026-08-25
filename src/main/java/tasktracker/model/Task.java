@@ -31,6 +31,10 @@ public class Task {
         this.status = TaskStatus.COMPLETED;
     }
 
+    public void markPending() {
+        this.status = TaskStatus.PENDING;
+    }
+
     public boolean isCompleted() {
         return status == TaskStatus.COMPLETED;
     }

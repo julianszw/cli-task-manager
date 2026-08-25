@@ -97,6 +97,29 @@ class TaskServiceTest {
     }
 
     @Test
+    void reopenTaskMarksCompletedTaskPending() {
+        Task task = service.addTask("Comprar leche");
+        service.completeTask(task.getId());
+
+        service.reopenTask(task.getId());
+
+        assertEquals(TaskStatus.PENDING, task.getStatus());
+    }
+
+    @Test
+    void reopenTaskThrowsWhenTaskDoesNotExist() {
+        assertThrows(TaskNotFoundException.class, () -> service.reopenTask(99));
+    }
+
+    @Test
+    void reopenTaskIsIdempotentForPendingTask() {
+        Task task = service.addTask("Comprar leche");
+
+        assertDoesNotThrow(() -> service.reopenTask(task.getId()));
+        assertEquals(TaskStatus.PENDING, task.getStatus());
+    }
+
+    @Test
     void deleteTaskRemovesExistingTask() {
         Task task = service.addTask("Comprar leche");
 
