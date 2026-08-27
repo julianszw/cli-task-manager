@@ -1,6 +1,18 @@
 {
   "version": 1,
   "skills": {
+    "clean-architecture": {
+      "source": "giuseppe-trisciuoglio/developer-kit",
+      "sourceType": "github",
+      "skillPath": "plugins/developer-kit-java/skills/clean-architecture/SKILL.md",
+      "computedHash": "930e4d5639e1a0afcebb0f2d43c6d90fedcbacb2c6844d6396ad0d324f758982"
+    },
+    "clean-code": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/clean-code/SKILL.md",
+      "computedHash": "74bf6ded4f61ddcb593e7a29beb96c284f888cbe0639ad6e23710447c36ff19a"
+    },
     "java-springboot": {
       "source": "github/awesome-copilot",
       "sourceType": "github",

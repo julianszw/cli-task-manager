@@ -17,6 +17,6 @@ Para registrar un cambio:
 4. Si el cambio modifica o agrega una capacidad, refleja el delta en
    `openspec/specs/` o como delta dentro del propio directorio del cambio.
 
-Solo el agente `git` está habilitado para ejecutar comandos de git. La fuente
+Solo el agente `git-manager` está habilitado para ejecutar comandos de git. La fuente
 de verdad de qué changes ya fueron commiteados es `openspec/changes/REGISTER.md`
 (mensajes de commit con prefijo `openspec <nnn>-<id>: <resumen>`).

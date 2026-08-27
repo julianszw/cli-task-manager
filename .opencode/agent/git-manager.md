@@ -1,5 +1,5 @@
 ---
-description: Git operations: commits, branches, merges, diffs, and pull requests.
+description: Git Manager: operaciones de git (commits, ramas, merges, diffs y pull requests).
 mode: primary
 permission:
   bash:

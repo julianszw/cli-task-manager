@@ -1,5 +1,5 @@
 ---
-description: Crea y mantiene especificaciones en openspec/specs. Solo documenta; no escribe código, no ejecuta comandos ni toca cambios.
+description: Specs Generator: crea y mantiene especificaciones en openspec/specs. Solo documenta; no escribe código, no ejecuta comandos ni toca cambios.
 mode: primary
 permission:
   edit:
