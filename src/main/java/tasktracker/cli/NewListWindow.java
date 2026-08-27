@@ -11,31 +11,29 @@ import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import java.util.List;
-import tasktracker.model.Task;
+import tasktracker.model.TaskList;
 import tasktracker.service.TaskService;
 
-public class AddTaskWindow extends BasicWindow {
+public class NewListWindow extends BasicWindow {
 
-    private static final String TITLE = "Nueva tarea";
-    private static final String EMPTY_TITLE = "⚠ El título no puede estar vacío";
+    private static final String TITLE = "Nueva lista";
+    private static final String EMPTY_NAME = "⚠ El nombre no puede estar vacío";
 
     private final TaskService service;
-    private final long listId;
     private final TextBox input = new TextBox(new TerminalSize(60, 1));
     private final Label message = new Label("");
-    private Task created;
+    private TaskList created;
 
-    public AddTaskWindow(TaskService service, long listId) {
+    public NewListWindow(TaskService service) {
         super(TITLE);
         this.service = service;
-        this.listId = listId;
 
         setHints(List.of(Window.Hint.CENTERED));
 
         message.setForegroundColor(VisualStyle.ERROR);
 
         Panel content = new Panel(new LinearLayout(Direction.VERTICAL));
-        content.addComponent(new Label("Título de la tarea:"));
+        content.addComponent(new Label("Nombre de la lista:"));
         content.addComponent(input.withBorder(new RoundedBorder()));
         content.addComponent(new Label("Enter para confirmar · Esc para cancelar"));
         content.addComponent(message);
@@ -44,7 +42,7 @@ public class AddTaskWindow extends BasicWindow {
         setFocusedInteractable(input);
     }
 
-    public Task getCreatedTask() {
+    TaskList getCreatedList() {
         return created;
     }
 
@@ -55,12 +53,12 @@ public class AddTaskWindow extends BasicWindow {
     @Override
     public boolean handleInput(KeyStroke key) {
         if (key.getKeyType() == KeyType.Enter) {
-            String title = input.getText().trim();
-            if (title.isEmpty()) {
-                message.setText(EMPTY_TITLE);
+            String name = input.getText().trim();
+            if (name.isEmpty()) {
+                message.setText(EMPTY_NAME);
                 return true;
             }
-            created = service.addTask(listId, title);
+            created = service.createList(name);
             close();
             return true;
         }

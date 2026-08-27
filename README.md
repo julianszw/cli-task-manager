@@ -21,9 +21,10 @@ Genera un jar autocontenido (incluye dependencias) en `target/cli-task-tracker-1
 java -jar target/cli-task-tracker-1.0.0.jar
 ```
 
-La app abre directamente la vista única de tareas con un tema oscuro, una lista con
-íconos de estado (`○` pendiente, `✓` verde completado) y una barra de estado inferior
-con título, contador y atajos.
+La app abre directamente la vista única de tareas con un tema oscuro, un logo
+"Task Manager" en la cabecera, listas de tareas navegables (cada tarea pertenece a
+una lista), íconos de estado (`○` pendiente, `✓` verde completado) y una barra de
+estado inferior con título, contador y atajos.
 
 ## Teclas
 
@@ -31,11 +32,14 @@ con título, contador y atajos.
 |-------|--------|
 | `↑` / `k` | Subir selección |
 | `↓` / `j` | Bajar selección |
-| `a` | Crear una tarea nueva |
+| `Enter` | Abrir menú de acciones |
+| `Tab` / `Shift+Tab` | Cambiar a la lista siguiente / anterior |
+| `a` | Crear una tarea nueva en la lista activa |
+| `n` | Crear una lista nueva |
 | `c` | Completar la tarea seleccionada |
 | `r` | Reabrir la tarea seleccionada |
 | `d` | Eliminar la tarea seleccionada |
-| `p` | Purgar tareas completadas |
+| `p` | Purgar tareas completadas de la lista activa |
 | `q` / `Esc` | Salir |
 
 ## Tests

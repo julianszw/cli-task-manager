@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tasktracker.exception.TaskListNotFoundException;
 import tasktracker.exception.TaskNotFoundException;
 import tasktracker.model.Task;
+import tasktracker.model.TaskList;
 import tasktracker.model.TaskStatus;
 import tasktracker.repository.InMemoryTaskRepository;
 import tasktracker.repository.TaskRepository;
@@ -25,10 +27,46 @@ class TaskServiceTest {
         service = new TaskService(new InMemoryTaskRepository());
     }
 
+    private long inboxId() {
+        return service.createList("Inbox").getId();
+    }
+
+    @Test
+    void createListCreatesListWithUniqueId() {
+        TaskList first = service.createList("Inbox");
+        TaskList second = service.createList("Trabajo");
+
+        assertNotEquals(first.getId(), second.getId());
+        assertEquals("Inbox", first.getName());
+        assertEquals("Trabajo", second.getName());
+    }
+
+    @Test
+    void createListRejectsEmptyName() {
+        assertThrows(IllegalArgumentException.class, () -> service.createList(""));
+    }
+
+    @Test
+    void createListRejectsBlankName() {
+        assertThrows(IllegalArgumentException.class, () -> service.createList("   "));
+    }
+
+    @Test
+    void createListRejectsNullName() {
+        assertThrows(IllegalArgumentException.class, () -> service.createList(null));
+    }
+
+    @Test
+    void listListsReturnsEmptyWhenNoLists() {
+        assertTrue(service.listLists().isEmpty());
+    }
+
     @Test
     void addTaskCreatesPendingTaskWithUniqueId() {
-        Task first = service.addTask("Comprar leche");
-        Task second = service.addTask("Pagar facturas");
+        long listId = inboxId();
+
+        Task first = service.addTask(listId, "Comprar leche");
+        Task second = service.addTask(listId, "Pagar facturas");
 
         assertNotEquals(first.getId(), second.getId());
         assertEquals(TaskStatus.PENDING, first.getStatus());
@@ -36,46 +74,74 @@ class TaskServiceTest {
     }
 
     @Test
+    void addTaskAssociatesTaskToList() {
+        long inbox = inboxId();
+        long work = service.createList("Trabajo").getId();
+
+        Task task = service.addTask(inbox, "A");
+
+        assertEquals(inbox, task.getListId());
+        assertEquals(List.of(task), service.listTasks(inbox));
+        assertTrue(service.listTasks(work).isEmpty());
+    }
+
+    @Test
+    void addTaskThrowsWhenListDoesNotExist() {
+        assertThrows(TaskListNotFoundException.class, () -> service.addTask(99, "A"));
+    }
+
+    @Test
     void addTaskRejectsEmptyTitle() {
-        assertThrows(IllegalArgumentException.class, () -> service.addTask(""));
+        long listId = inboxId();
+        assertThrows(IllegalArgumentException.class, () -> service.addTask(listId, ""));
     }
 
     @Test
     void addTaskRejectsBlankTitle() {
-        assertThrows(IllegalArgumentException.class, () -> service.addTask("   "));
+        long listId = inboxId();
+        assertThrows(IllegalArgumentException.class, () -> service.addTask(listId, "   "));
     }
 
     @Test
     void addTaskRejectsNullTitle() {
-        assertThrows(IllegalArgumentException.class, () -> service.addTask(null));
+        long listId = inboxId();
+        assertThrows(IllegalArgumentException.class, () -> service.addTask(listId, null));
     }
 
     @Test
     void addTaskRejectsEmptyTitleAndDoesNotCreateTask() {
-        service.addTask("Única");
+        long listId = inboxId();
+        service.addTask(listId, "Única");
 
-        assertThrows(IllegalArgumentException.class, () -> service.addTask(" "));
-        assertEquals(1, service.listTasks().size());
+        assertThrows(IllegalArgumentException.class, () -> service.addTask(listId, " "));
+        assertEquals(1, service.listTasks(listId).size());
     }
 
     @Test
     void listTasksReturnsEmptyWhenNoTasks() {
-        assertTrue(service.listTasks().isEmpty());
+        long listId = inboxId();
+        assertTrue(service.listTasks(listId).isEmpty());
     }
 
     @Test
-    void listTasksReturnsAllCreatedTasks() {
-        service.addTask("A");
-        service.addTask("B");
+    void listTasksReturnsOnlyTasksOfGivenList() {
+        long inbox = inboxId();
+        long work = service.createList("Trabajo").getId();
+        service.addTask(inbox, "A");
+        service.addTask(inbox, "B");
+        service.addTask(work, "C");
 
-        List<Task> tasks = service.listTasks();
+        List<Task> inboxTasks = service.listTasks(inbox);
+        List<Task> workTasks = service.listTasks(work);
 
-        assertEquals(2, tasks.size());
+        assertEquals(2, inboxTasks.size());
+        assertEquals(1, workTasks.size());
+        assertEquals("C", workTasks.get(0).getTitle());
     }
 
     @Test
     void completeTaskMarksExistingTaskCompleted() {
-        Task task = service.addTask("Comprar leche");
+        Task task = service.addTask(inboxId(), "Comprar leche");
 
         service.completeTask(task.getId());
 
@@ -89,7 +155,7 @@ class TaskServiceTest {
 
     @Test
     void completeTaskIsIdempotentForAlreadyCompletedTask() {
-        Task task = service.addTask("Comprar leche");
+        Task task = service.addTask(inboxId(), "Comprar leche");
         service.completeTask(task.getId());
 
         assertDoesNotThrow(() -> service.completeTask(task.getId()));
@@ -98,7 +164,7 @@ class TaskServiceTest {
 
     @Test
     void reopenTaskMarksCompletedTaskPending() {
-        Task task = service.addTask("Comprar leche");
+        Task task = service.addTask(inboxId(), "Comprar leche");
         service.completeTask(task.getId());
 
         service.reopenTask(task.getId());
@@ -113,7 +179,7 @@ class TaskServiceTest {
 
     @Test
     void reopenTaskIsIdempotentForPendingTask() {
-        Task task = service.addTask("Comprar leche");
+        Task task = service.addTask(inboxId(), "Comprar leche");
 
         assertDoesNotThrow(() -> service.reopenTask(task.getId()));
         assertEquals(TaskStatus.PENDING, task.getStatus());
@@ -121,11 +187,12 @@ class TaskServiceTest {
 
     @Test
     void deleteTaskRemovesExistingTask() {
-        Task task = service.addTask("Comprar leche");
+        long listId = inboxId();
+        Task task = service.addTask(listId, "Comprar leche");
 
         service.deleteTask(task.getId());
 
-        assertTrue(service.listTasks().isEmpty());
+        assertTrue(service.listTasks(listId).isEmpty());
     }
 
     @Test
@@ -135,14 +202,39 @@ class TaskServiceTest {
 
     @Test
     void purgeCompletedTasksRemovesCompletedAndKeepsPending() {
-        Task pending = service.addTask("Pendiente");
-        Task completed = service.addTask("Completada");
+        long listId = inboxId();
+        Task pending = service.addTask(listId, "Pendiente");
+        Task completed = service.addTask(listId, "Completada");
         service.completeTask(completed.getId());
 
-        List<Task> removed = service.purgeCompletedTasks();
+        List<Task> removed = service.purgeCompletedTasks(listId);
 
         assertEquals(List.of(completed), removed);
-        assertEquals(List.of(pending), service.listTasks());
+        assertEquals(List.of(pending), service.listTasks(listId));
+    }
+
+    @Test
+    void purgeCompletedTasksOnlyAffectsGivenList() {
+        long inbox = inboxId();
+        long work = service.createList("Trabajo").getId();
+        Task inboxDone = service.addTask(inbox, "A");
+        Task workDone = service.addTask(work, "B");
+        service.completeTask(inboxDone.getId());
+        service.completeTask(workDone.getId());
+
+        service.purgeCompletedTasks(inbox);
+
+        assertTrue(service.listTasks(inbox).isEmpty());
+        assertEquals(List.of(workDone), service.listTasks(work));
+    }
+
+    @Test
+    void purgeCompletedTasksReturnsEmptyWhenNoCompletedTasks() {
+        long listId = inboxId();
+        service.addTask(listId, "Pendiente");
+
+        assertTrue(service.purgeCompletedTasks(listId).isEmpty());
+        assertEquals(1, service.listTasks(listId).size());
     }
 
     @Test
@@ -155,7 +247,8 @@ class TaskServiceTest {
             }
         };
         TaskService service = new TaskService(repository);
-        Task task = service.addTask("Tarea");
+        TaskList list = service.createList("Inbox");
+        Task task = service.addTask(list.getId(), "Tarea");
 
         service.completeTask(task.getId());
 
@@ -164,7 +257,8 @@ class TaskServiceTest {
 
     @Test
     void renameTaskUpdatesTitleAndKeepsIdAndStatus() {
-        Task task = service.addTask("Original");
+        long listId = inboxId();
+        Task task = service.addTask(listId, "Original");
         long id = task.getId();
         service.completeTask(task.getId());
 
@@ -177,7 +271,7 @@ class TaskServiceTest {
 
     @Test
     void renameTaskRejectsBlankTitle() {
-        Task task = service.addTask("Original");
+        Task task = service.addTask(inboxId(), "Original");
 
         assertThrows(IllegalArgumentException.class, () -> service.renameTask(task.getId(), "   "));
         assertEquals("Original", task.getTitle());
@@ -185,7 +279,7 @@ class TaskServiceTest {
 
     @Test
     void renameTaskRejectsNullTitle() {
-        Task task = service.addTask("Original");
+        Task task = service.addTask(inboxId(), "Original");
 
         assertThrows(IllegalArgumentException.class, () -> service.renameTask(task.getId(), null));
         assertEquals("Original", task.getTitle());
@@ -206,7 +300,8 @@ class TaskServiceTest {
             }
         };
         TaskService service = new TaskService(repository);
-        Task task = service.addTask("Tarea");
+        TaskList list = service.createList("Inbox");
+        Task task = service.addTask(list.getId(), "Tarea");
 
         service.renameTask(task.getId(), "Renombrada");
 

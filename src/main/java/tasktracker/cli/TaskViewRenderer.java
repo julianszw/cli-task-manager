@@ -10,7 +10,6 @@ import tasktracker.model.Task;
 final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
 
     private static final String APP_TITLE = "CLI TASK TRACKER";
-    private static final String LIST_TITLE = "T A R E A S";
     private static final String NO_TASKS = "No hay tareas cargadas";
 
     private static final int STATUS_BAR_HEIGHT = 5;
@@ -32,7 +31,9 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
             new ShortcutBar.Shortcut("↑/k", "subir"),
             new ShortcutBar.Shortcut("↓/j", "bajar"),
             new ShortcutBar.Shortcut("Enter", "acciones"),
+            new ShortcutBar.Shortcut("Tab", "lista"),
             new ShortcutBar.Shortcut("a", "crear"),
+            new ShortcutBar.Shortcut("n", "nueva lista"),
             new ShortcutBar.Shortcut("c", "completar"),
             new ShortcutBar.Shortcut("r", "reabrir"),
             new ShortcutBar.Shortcut("d", "eliminar"),
@@ -60,64 +61,90 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
         int separatorRow = rows - STATUS_BAR_HEIGHT - 1;
         int statusBarTop = separatorRow + 1;
 
-        drawList(g, component, cols, separatorRow);
+        List<String> logo = AppLogo.fit(cols);
+        int logoHeight = logo.isEmpty() ? 0 : logo.size() + 1;
+
+        if (logoHeight > 0) {
+            drawLogo(g, logo, cols);
+        }
+
+        int listTop = logoHeight;
+        int listHeight = separatorRow - listTop;
+        if (listHeight >= 2) {
+            drawList(g, component, cols, listTop, listHeight);
+        }
         drawSeparator(g, cols, separatorRow);
         drawStatusBar(g, component, cols, statusBarTop);
     }
 
-    private void drawList(TextGUIGraphics g, TaskViewComponent component, int cols, int height) {
+    private void drawLogo(TextGUIGraphics g, List<String> logo, int cols) {
+        g.setForegroundColor(VisualStyle.ACCENT);
+        for (int i = 0; i < logo.size(); i++) {
+            String line = logo.get(i);
+            int x = Math.max(0, (cols - line.length()) / 2);
+            g.putString(x, i, line);
+        }
+    }
+
+    private void drawList(TextGUIGraphics g, TaskViewComponent component, int cols, int top, int height) {
         if (height < 2 || cols < 2) {
             return;
         }
-        drawBox(g, cols, height);
+        drawBox(g, cols, top, height);
+
+        String indicator = component.listIndicator();
+        if (!indicator.isEmpty() && cols >= indicator.length() + 4) {
+            g.setForegroundColor(VisualStyle.ACCENT);
+            g.enableModifiers(SGR.BOLD);
+            g.putString(2, top, " " + indicator + " ");
+            g.clearModifiers();
+        }
 
         List<Task> tasks = component.tasks();
         if (tasks.isEmpty()) {
             g.setForegroundColor(VisualStyle.DIM);
             int x = Math.max(1, (cols - NO_TASKS.length()) / 2);
-            g.putString(x, 1, NO_TASKS);
+            g.putString(x, top + 1, NO_TASKS);
             return;
         }
         int contentRows = height - 2;
         for (int i = 0; i < contentRows && i < tasks.size(); i++) {
-            drawTaskRow(g, tasks.get(i), i == component.selected(), cols, 1 + i);
+            drawTaskRow(g, tasks.get(i), i == component.selected(), cols, top, 1 + i);
         }
     }
 
-    private void drawBox(TextGUIGraphics g, int cols, int height) {
+    private void drawBox(TextGUIGraphics g, int cols, int top, int height) {
         g.setForegroundColor(VisualStyle.ACCENT);
-        g.putString(0, 0, String.valueOf(BOX_TL));
-        g.putString(cols - 1, 0, String.valueOf(BOX_TR));
-        g.putString(0, height - 1, String.valueOf(BOX_BL));
-        g.putString(cols - 1, height - 1, String.valueOf(BOX_BR));
-        hline(g, 1, 0, cols - 2, BOX_H);
-        hline(g, 1, height - 1, cols - 2, BOX_H);
+        g.putString(0, top, String.valueOf(BOX_TL));
+        g.putString(cols - 1, top, String.valueOf(BOX_TR));
+        g.putString(0, top + height - 1, String.valueOf(BOX_BL));
+        g.putString(cols - 1, top + height - 1, String.valueOf(BOX_BR));
+        hline(g, 1, top, cols - 2, BOX_H);
+        hline(g, 1, top + height - 1, cols - 2, BOX_H);
         for (int r = 1; r < height - 1; r++) {
-            g.putString(0, r, String.valueOf(BOX_V));
-            g.putString(cols - 1, r, String.valueOf(BOX_V));
-        }
-        if (cols >= LIST_TITLE.length() + 4) {
-            g.putString(2, 0, " " + LIST_TITLE + " ");
+            g.putString(0, top + r, String.valueOf(BOX_V));
+            g.putString(cols - 1, top + r, String.valueOf(BOX_V));
         }
     }
 
-    private void drawTaskRow(TextGUIGraphics g, Task task, boolean selected, int cols, int row) {
+    private void drawTaskRow(TextGUIGraphics g, Task task, boolean selected, int cols, int top, int row) {
+        int y = top + row;
         if (selected) {
             g.setForegroundColor(VisualStyle.ACCENT);
-            g.putString(1, row, String.valueOf(ACCENT_BAR));
+            g.putString(1, y, String.valueOf(ACCENT_BAR));
         }
         if (task.isCompleted()) {
             g.setForegroundColor(VisualStyle.DONE);
-            g.putString(3, row, ICON_DONE);
+            g.putString(3, y, ICON_DONE);
             g.setForegroundColor(VisualStyle.DIM);
         } else {
             g.setForegroundColor(VisualStyle.FOREGROUND);
-            g.putString(3, row, ICON_PENDING);
+            g.putString(3, y, ICON_PENDING);
         }
         if (selected) {
             g.enableModifiers(SGR.BOLD);
         }
-        g.putString(5, row, truncateEnd(task.getTitle(), Math.max(0, cols - 5 - 2)));
+        g.putString(5, y, truncateEnd(task.getTitle(), Math.max(0, cols - 5 - 2)));
         g.clearModifiers();
     }
 

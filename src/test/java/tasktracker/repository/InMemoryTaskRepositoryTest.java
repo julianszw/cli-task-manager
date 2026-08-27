@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import tasktracker.model.Task;
+import tasktracker.model.TaskList;
 
 class InMemoryTaskRepositoryTest {
 
@@ -81,24 +82,78 @@ class InMemoryTaskRepositoryTest {
     }
 
     @Test
-    void removeCompletedRemovesOnlyCompletedTasks() {
+    void saveListAssignsUniqueIncrementalIds() {
+        InMemoryTaskRepository repository = new InMemoryTaskRepository();
+
+        TaskList first = repository.saveList(new TaskList("Inbox"));
+        TaskList second = repository.saveList(new TaskList("Trabajo"));
+
+        assertNotEquals(first.getId(), second.getId());
+        assertEquals(1, first.getId());
+        assertEquals(2, second.getId());
+    }
+
+    @Test
+    void findAllListsReturnsEmptyWhenNoLists() {
+        InMemoryTaskRepository repository = new InMemoryTaskRepository();
+
+        assertTrue(repository.findAllLists().isEmpty());
+    }
+
+    @Test
+    void findAllListsReturnsListsInInsertionOrder() {
+        InMemoryTaskRepository repository = new InMemoryTaskRepository();
+        TaskList first = repository.saveList(new TaskList("Inbox"));
+        TaskList second = repository.saveList(new TaskList("Trabajo"));
+
+        List<TaskList> lists = repository.findAllLists();
+
+        assertEquals(List.of(first, second), lists);
+    }
+
+    @Test
+    void findListByIdReturnsListWhenPresent() {
+        InMemoryTaskRepository repository = new InMemoryTaskRepository();
+        TaskList list = repository.saveList(new TaskList("Inbox"));
+
+        Optional<TaskList> found = repository.findListById(list.getId());
+
+        assertTrue(found.isPresent());
+        assertEquals(list, found.get());
+    }
+
+    @Test
+    void findListByIdReturnsEmptyWhenAbsent() {
+        InMemoryTaskRepository repository = new InMemoryTaskRepository();
+
+        assertTrue(repository.findListById(99).isEmpty());
+    }
+
+    @Test
+    void removeCompletedRemovesOnlyCompletedTasksOfList() {
         InMemoryTaskRepository repository = new InMemoryTaskRepository();
         Task pending = repository.save(new Task("Pendiente"));
+        pending.setListId(1);
         Task completed = repository.save(new Task("Completada"));
+        completed.setListId(1);
         completed.markCompleted();
+        Task otherCompleted = repository.save(new Task("Otra lista"));
+        otherCompleted.setListId(2);
+        otherCompleted.markCompleted();
 
-        List<Task> removed = repository.removeCompleted();
+        List<Task> removed = repository.removeCompleted(1);
 
         assertEquals(List.of(completed), removed);
-        assertEquals(List.of(pending), repository.findAll());
+        assertEquals(List.of(pending, otherCompleted), repository.findAll());
     }
 
     @Test
     void removeCompletedReturnsEmptyWhenNoCompletedTasks() {
         InMemoryTaskRepository repository = new InMemoryTaskRepository();
-        repository.save(new Task("Pendiente"));
+        Task pending = repository.save(new Task("Pendiente"));
+        pending.setListId(1);
 
-        assertTrue(repository.removeCompleted().isEmpty());
+        assertTrue(repository.removeCompleted(1).isEmpty());
         assertEquals(1, repository.findAll().size());
     }
 }

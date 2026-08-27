@@ -81,16 +81,16 @@ La tecla `d` DEBE eliminar la tarea seleccionada.
 - **AND** la vista se actualiza sin mostrar la tarea eliminada
 
 ### Requirement: Purgar tareas completadas
-La tecla `p` DEBE eliminar todas las tareas en estado `COMPLETED`.
+La tecla `p` DEBE eliminar todas las tareas en estado `COMPLETED` de la lista activa.
 
 #### Scenario: Con tareas completadas
-- **GIVEN** una o más tareas en estado `COMPLETED`
+- **GIVEN** una o más tareas en estado `COMPLETED` en la lista activa
 - **WHEN** el usuario presiona `p`
-- **THEN** se eliminan todas las tareas completadas
+- **THEN** se eliminan todas las tareas completadas de la lista activa
 - **AND** la vista se actualiza mostrando solo las tareas pendientes
 
 #### Scenario: Sin tareas completadas
-- **GIVEN** que no hay tareas en estado `COMPLETED`
+- **GIVEN** que no hay tareas en estado `COMPLETED` en la lista activa
 - **WHEN** el usuario presiona `p`
 - **THEN** no se elimina ninguna tarea
 - **AND** se muestra un mensaje indicando que no hay tareas completadas
@@ -99,10 +99,10 @@ La tecla `p` DEBE eliminar todas las tareas en estado `COMPLETED`.
 La tecla `a` DEBE abrir un campo de entrada para crear una tarea.
 
 #### Scenario: Crear tarea
-- **GIVEN** la vista única visible
+- **GIVEN** la vista única visible con una lista activa
 - **WHEN** el usuario presiona `a`
 - **THEN** se abre un campo de entrada para ingresar el título
-- **AND** al confirmar un título no vacío, se crea la tarea (según `task-management`)
+- **AND** al confirmar un título no vacío, se crea la tarea en la lista activa (según `task-management`)
 - **AND** la vista se actualiza mostrando la tarea creada
 
 #### Scenario: Título vacío
@@ -117,7 +117,7 @@ El sistema DEBE mostrar siempre una ayuda visible con las teclas disponibles, en
 #### Scenario: Ayuda siempre visible
 - **GIVEN** la vista única visible
 - **WHEN** se muestra la vista
-- **THEN** se muestra la fila de atajos con las teclas disponibles: `↑`/`k` (up), `↓`/`j` (down), `Enter` (acciones), `a` (add), `c` (complete), `r` (reopen), `d` (delete), `p` (purge), `q`/`Esc` (exit)
+- **THEN** se muestra la fila de atajos con las teclas disponibles: `↑`/`k` (subir), `↓`/`j` (bajar), `Enter` (acciones), `Tab` (lista), `a` (crear), `n` (nueva lista), `c` (completar), `r` (reabrir), `d` (eliminar), `p` (purgar), `q`/`Esc` (salir)
 - **AND** la ayuda permanece visible en todo momento, sin necesidad de presionar una tecla para mostrarla
 
 ### Requirement: Salir de la aplicación

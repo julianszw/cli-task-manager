@@ -26,6 +26,9 @@ public class App {
                 Path.of(DATA_FILE),
                 startupWarnings::add);
         TaskService service = new TaskService(repository);
+        if (service.listLists().isEmpty()) {
+            service.createList("Inbox");
+        }
 
         Terminal terminal = new DefaultTerminalFactory().createTerminal();
         Screen screen = new TerminalScreen(terminal);

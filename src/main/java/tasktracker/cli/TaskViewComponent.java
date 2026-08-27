@@ -12,13 +12,15 @@ final class TaskViewComponent extends AbstractComponent<TaskViewComponent> {
     private int selected;
     private String message = "";
     private MessageKind kind = MessageKind.INFO;
+    private String listIndicator = "";
 
-    void setModel(List<Task> tasks, int selected, String message, MessageKind kind) {
+    void setModel(List<Task> tasks, int selected, String message, MessageKind kind, String listIndicator) {
         this.tasks.clear();
         this.tasks.addAll(tasks);
         this.selected = selected;
         this.message = message == null ? "" : message;
         this.kind = kind == null ? MessageKind.INFO : kind;
+        this.listIndicator = listIndicator == null ? "" : listIndicator;
         invalidate();
     }
 
@@ -36,6 +38,10 @@ final class TaskViewComponent extends AbstractComponent<TaskViewComponent> {
 
     MessageKind kind() {
         return kind;
+    }
+
+    String listIndicator() {
+        return listIndicator;
     }
 
     @Override

@@ -11,6 +11,7 @@ import com.googlecode.lanterna.input.KeyType;
 import java.util.ArrayList;
 import java.util.List;
 import tasktracker.model.Task;
+import tasktracker.model.TaskList;
 import tasktracker.service.TaskService;
 
 public class TaskListWindow extends BasicWindow {
@@ -22,7 +23,9 @@ public class TaskListWindow extends BasicWindow {
     private final TaskService service;
     private final WindowBasedTextGUI gui;
     private final TaskViewComponent view = new TaskViewComponent();
+    private final List<TaskList> lists = new ArrayList<>();
     private final List<Task> tasks = new ArrayList<>();
+    private int activeIndex;
     private int selected;
     private String status = "";
     private MessageKind kind = MessageKind.INFO;
@@ -35,6 +38,7 @@ public class TaskListWindow extends BasicWindow {
         super(TITLE);
         this.service = service;
         this.gui = gui;
+        lists.addAll(service.listLists());
 
         setHints(List.of(Window.Hint.FULL_SCREEN));
 
@@ -58,6 +62,18 @@ public class TaskListWindow extends BasicWindow {
         return status;
     }
 
+    int activeListIndex() {
+        return activeIndex;
+    }
+
+    long activeListId() {
+        return activeList().getId();
+    }
+
+    int taskCount() {
+        return tasks.size();
+    }
+
     private void setMessage(String message, MessageKind kind) {
         this.status = message == null ? "" : message;
         this.kind = kind;
@@ -66,7 +82,9 @@ public class TaskListWindow extends BasicWindow {
 
     private void refresh() {
         tasks.clear();
-        tasks.addAll(service.listTasks());
+        if (!lists.isEmpty()) {
+            tasks.addAll(service.listTasks(activeList().getId()));
+        }
         if (selected >= tasks.size()) {
             selected = Math.max(0, tasks.size() - 1);
         }
@@ -81,7 +99,18 @@ public class TaskListWindow extends BasicWindow {
     }
 
     private void render() {
-        view.setModel(tasks, selected, status, kind);
+        view.setModel(tasks, selected, status, kind, listIndicator());
+    }
+
+    private TaskList activeList() {
+        return lists.get(activeIndex);
+    }
+
+    String listIndicator() {
+        if (lists.isEmpty()) {
+            return "";
+        }
+        return activeList().getName() + " · " + (activeIndex + 1) + "/" + lists.size();
     }
 
     @Override
@@ -100,6 +129,10 @@ public class TaskListWindow extends BasicWindow {
                     }
                     case 'a' -> {
                         openAddTask();
+                        return true;
+                    }
+                    case 'n' -> {
+                        openNewList();
                         return true;
                     }
                     case 'c' -> {
@@ -126,6 +159,12 @@ public class TaskListWindow extends BasicWindow {
                     }
                 }
             }
+        } else if (key.getKeyType() == KeyType.Tab) {
+            nextList();
+            return true;
+        } else if (key.getKeyType() == KeyType.ReverseTab) {
+            previousList();
+            return true;
         } else if (key.getKeyType() == KeyType.Enter) {
             openActionMenu();
             return true;
@@ -156,12 +195,43 @@ public class TaskListWindow extends BasicWindow {
         }
     }
 
+    private void nextList() {
+        if (lists.size() > 1) {
+            activeIndex = (activeIndex + 1) % lists.size();
+            selected = 0;
+            refresh();
+        }
+    }
+
+    private void previousList() {
+        if (lists.size() > 1) {
+            activeIndex = (activeIndex - 1 + lists.size()) % lists.size();
+            selected = 0;
+            refresh();
+        }
+    }
+
     private void openAddTask() {
+        if (gui == null || lists.isEmpty()) {
+            return;
+        }
+        gui.addWindowAndWait(new AddTaskWindow(service, activeList().getId()));
+        refresh();
+    }
+
+    private void openNewList() {
         if (gui == null) {
             return;
         }
-        gui.addWindowAndWait(new AddTaskWindow(service));
-        refresh();
+        NewListWindow window = new NewListWindow(service);
+        gui.addWindowAndWait(window);
+        if (window.getCreatedList() != null) {
+            lists.clear();
+            lists.addAll(service.listLists());
+            activeIndex = lists.size() - 1;
+            selected = 0;
+            refresh();
+        }
     }
 
     private void openActionMenu() {
@@ -215,7 +285,10 @@ public class TaskListWindow extends BasicWindow {
     }
 
     private void purgeCompleted() {
-        List<Task> removed = service.purgeCompletedTasks();
+        if (lists.isEmpty()) {
+            return;
+        }
+        List<Task> removed = service.purgeCompletedTasks(activeList().getId());
         refresh();
         if (removed.isEmpty()) {
             setStatus(NO_COMPLETED_TO_PURGE);

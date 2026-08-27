@@ -3,16 +3,32 @@ package tasktracker.repository;
 import java.util.ArrayList;
 import java.util.List;
 import tasktracker.model.Task;
+import tasktracker.model.TaskList;
 import tasktracker.model.TaskStatus;
 
-final class JsonTasksCodec {
+final class JsonStoreCodec {
 
-    private JsonTasksCodec() {
+    private static final String DEFAULT_LIST_NAME = "Inbox";
+
+    record Store(List<TaskList> lists, List<Task> tasks) {
     }
 
-    static String encode(List<Task> tasks) {
+    private JsonStoreCodec() {
+    }
+
+    static String encode(List<TaskList> lists, List<Task> tasks) {
         StringBuilder sb = new StringBuilder();
-        sb.append('[');
+        sb.append("{\"lists\":[");
+        for (int i = 0; i < lists.size(); i++) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            TaskList list = lists.get(i);
+            sb.append("{\"id\":").append(list.getId());
+            sb.append(",\"name\":").append(quote(list.getName()));
+            sb.append('}');
+        }
+        sb.append("],\"tasks\":[");
         for (int i = 0; i < tasks.size(); i++) {
             if (i > 0) {
                 sb.append(',');
@@ -21,37 +37,62 @@ final class JsonTasksCodec {
             sb.append("{\"id\":").append(task.getId());
             sb.append(",\"title\":").append(quote(task.getTitle()));
             sb.append(",\"status\":\"").append(task.getStatus().name()).append('"');
+            sb.append(",\"listId\":").append(task.getListId());
             sb.append('}');
         }
-        sb.append(']');
+        sb.append("]}");
         return sb.toString();
     }
 
-    static List<Task> decode(String input) {
+    static Store decode(String input) {
         Parser parser = new Parser(input);
-        List<Task> tasks = new ArrayList<>();
-        parser.expect('[');
         parser.skipWhitespace();
-        if (parser.peek() == ']') {
+        if (parser.peek() == '[') {
+            return decodeLegacy(parser);
+        }
+        return decodeObject(parser);
+    }
+
+    private static Store decodeObject(Parser parser) {
+        List<TaskList> lists = new ArrayList<>();
+        List<Task> tasks = new ArrayList<>();
+        parser.expect('{');
+        parser.skipWhitespace();
+        if (parser.peek() == '}') {
             parser.next();
             parser.skipWhitespace();
             parser.requireEnd();
-            return tasks;
+            return new Store(lists, tasks);
         }
         while (true) {
-            tasks.add(parser.parseTask());
+            parser.skipWhitespace();
+            String key = parser.parseString();
+            parser.expect(':');
+            parser.skipWhitespace();
+            switch (key) {
+                case "lists" -> lists.addAll(parser.parseLists());
+                case "tasks" -> tasks.addAll(parser.parseTasks(null));
+                default -> throw new JsonParseException("Campo desconocido: " + key);
+            }
             parser.skipWhitespace();
             char c = parser.next();
-            if (c == ']') {
+            if (c == '}') {
                 break;
             }
             if (c != ',') {
-                throw new JsonParseException("Se esperaba ',' o ']'");
+                throw new JsonParseException("Se esperaba ',' o '}'");
             }
         }
         parser.skipWhitespace();
         parser.requireEnd();
-        return tasks;
+        return new Store(lists, tasks);
+    }
+
+    private static Store decodeLegacy(Parser parser) {
+        List<Task> tasks = parser.parseTasks(1L);
+        TaskList inbox = new TaskList(DEFAULT_LIST_NAME);
+        inbox.setId(1);
+        return new Store(List.of(inbox), tasks);
     }
 
     private static String quote(String value) {
@@ -119,16 +160,65 @@ final class JsonTasksCodec {
 
         void requireEnd() {
             if (pos < input.length()) {
-                throw new JsonParseException("Contenido inesperado tras el array");
+                throw new JsonParseException("Contenido inesperado tras el documento");
             }
         }
 
-        Task parseTask() {
+        List<Task> parseTasks(Long defaultListId) {
+            List<Task> tasks = new ArrayList<>();
+            expect('[');
+            skipWhitespace();
+            if (peek() == ']') {
+                next();
+                skipWhitespace();
+                return tasks;
+            }
+            while (true) {
+                tasks.add(parseTask(defaultListId));
+                skipWhitespace();
+                char c = next();
+                if (c == ']') {
+                    break;
+                }
+                if (c != ',') {
+                    throw new JsonParseException("Se esperaba ',' o ']'");
+                }
+            }
+            skipWhitespace();
+            return tasks;
+        }
+
+        List<TaskList> parseLists() {
+            List<TaskList> lists = new ArrayList<>();
+            expect('[');
+            skipWhitespace();
+            if (peek() == ']') {
+                next();
+                skipWhitespace();
+                return lists;
+            }
+            while (true) {
+                lists.add(parseList());
+                skipWhitespace();
+                char c = next();
+                if (c == ']') {
+                    break;
+                }
+                if (c != ',') {
+                    throw new JsonParseException("Se esperaba ',' o ']'");
+                }
+            }
+            skipWhitespace();
+            return lists;
+        }
+
+        Task parseTask(Long defaultListId) {
             expect('{');
             skipWhitespace();
             Long id = null;
             String title = null;
             TaskStatus status = null;
+            Long listId = null;
             if (peek() == '}') {
                 next();
             } else {
@@ -141,6 +231,7 @@ final class JsonTasksCodec {
                         case "id" -> id = parseLong();
                         case "title" -> title = parseString();
                         case "status" -> status = parseStatus();
+                        case "listId" -> listId = parseLong();
                         default -> throw new JsonParseException("Campo desconocido: " + key);
                     }
                     skipWhitespace();
@@ -153,15 +244,55 @@ final class JsonTasksCodec {
                     }
                 }
             }
-            if (id == null || title == null || status == null) {
-                throw new JsonParseException("La tarea requiere los campos id, title y status");
+            if (listId == null && defaultListId != null) {
+                listId = defaultListId;
+            }
+            if (id == null || title == null || status == null || listId == null) {
+                throw new JsonParseException("La tarea requiere los campos id, title, status y listId");
             }
             Task task = new Task(title);
             task.setId(id);
+            task.setListId(listId);
             if (status == TaskStatus.COMPLETED) {
                 task.markCompleted();
             }
             return task;
+        }
+
+        TaskList parseList() {
+            expect('{');
+            skipWhitespace();
+            Long id = null;
+            String name = null;
+            if (peek() == '}') {
+                next();
+            } else {
+                while (true) {
+                    skipWhitespace();
+                    String key = parseString();
+                    expect(':');
+                    skipWhitespace();
+                    switch (key) {
+                        case "id" -> id = parseLong();
+                        case "name" -> name = parseString();
+                        default -> throw new JsonParseException("Campo desconocido: " + key);
+                    }
+                    skipWhitespace();
+                    char c = next();
+                    if (c == '}') {
+                        break;
+                    }
+                    if (c != ',') {
+                        throw new JsonParseException("Se esperaba ',' o '}'");
+                    }
+                }
+            }
+            if (id == null || name == null) {
+                throw new JsonParseException("La lista requiere los campos id y name");
+            }
+            TaskList list = new TaskList(name);
+            list.setId(id);
+            return list;
         }
 
         String parseString() {

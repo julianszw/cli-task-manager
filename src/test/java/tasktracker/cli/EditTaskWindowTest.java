@@ -14,10 +14,11 @@ import tasktracker.service.TaskService;
 class EditTaskWindowTest {
 
     private final TaskService service = new TaskService(new InMemoryTaskRepository());
+    private final long listId = service.createList("Inbox").getId();
 
     @Test
     void inputIsPreloadedWithCurrentTitle() {
-        Task task = service.addTask("Original");
+        Task task = service.addTask(listId, "Original");
         EditTaskWindow window = new EditTaskWindow(service, task);
 
         assertEquals("Original", window.inputBox().getText());
@@ -25,7 +26,7 @@ class EditTaskWindowTest {
 
     @Test
     void enterRenamesTask() {
-        Task task = service.addTask("Original");
+        Task task = service.addTask(listId, "Original");
         EditTaskWindow window = new EditTaskWindow(service, task);
 
         window.inputBox().setText("");
@@ -33,12 +34,12 @@ class EditTaskWindowTest {
         window.handleInput(new KeyStroke(KeyType.Enter));
 
         assertTrue(window.isUpdated());
-        assertEquals("Nuevo", service.listTasks().get(0).getTitle());
+        assertEquals("Nuevo", service.listTasks(listId).get(0).getTitle());
     }
 
     @Test
     void enterWithBlankTitleShowsErrorAndDoesNotRename() {
-        Task task = service.addTask("Original");
+        Task task = service.addTask(listId, "Original");
         EditTaskWindow window = new EditTaskWindow(service, task);
 
         window.inputBox().setText("   ");
@@ -46,19 +47,19 @@ class EditTaskWindowTest {
 
         assertFalse(window.isUpdated());
         assertTrue(window.getMessageText().contains("no puede estar vacío"));
-        assertEquals("Original", service.listTasks().get(0).getTitle());
+        assertEquals("Original", service.listTasks(listId).get(0).getTitle());
     }
 
     @Test
     void escapeCancelsWithoutRenaming() {
-        Task task = service.addTask("Original");
+        Task task = service.addTask(listId, "Original");
         EditTaskWindow window = new EditTaskWindow(service, task);
 
         window.inputBox().setText("Nuevo");
         window.handleInput(new KeyStroke(KeyType.Escape));
 
         assertFalse(window.isUpdated());
-        assertEquals("Original", service.listTasks().get(0).getTitle());
+        assertEquals("Original", service.listTasks(listId).get(0).getTitle());
     }
 
     private void type(EditTaskWindow window, String text) {

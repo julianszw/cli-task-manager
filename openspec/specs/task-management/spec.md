@@ -6,14 +6,22 @@ Define el comportamiento esperado para crear, consultar, completar y reabrir tar
 ## Requirements
 
 ### Requirement: Crear tarea
-El sistema DEBE permitir crear una tarea nueva a partir de un título no vacío.
+El sistema DEBE permitir crear una tarea nueva a partir de un título no vacío,
+asociada a una lista existente.
 
 #### Scenario: Crear tarea con título válido
-- **GIVEN** un título de tarea no vacío
+- **GIVEN** un título de tarea no vacío y una lista existente
 - **WHEN** se solicita crear la tarea
 - **THEN** el sistema genera un id único para la tarea
 - **AND** la tarea queda en estado `PENDING`
+- **AND** la tarea queda asociada a la lista indicada
 - **AND** la tarea queda disponible para ser listada
+
+#### Scenario: Crear tarea en una lista inexistente
+- **GIVEN** un id de lista que no corresponde a ninguna lista
+- **WHEN** se solicita crear la tarea
+- **THEN** el sistema lanza una excepción de lista no encontrada
+- **AND** no se genera ninguna tarea nueva
 
 #### Scenario: Intentar crear tarea con título vacío
 - **GIVEN** un título vacío o compuesto solo por espacios
@@ -109,18 +117,19 @@ El sistema DEBE permitir eliminar una tarea existente por su id.
 - **THEN** el sistema lanza `TaskNotFoundException`
 - **AND** ninguna tarea se elimina
 
-### Requirement: Eliminar tareas completadas
-El sistema DEBE permitir eliminar todas las tareas que estén en estado `COMPLETED`.
+### Requirement: Eliminar tareas completadas de una lista
+El sistema DEBE permitir eliminar todas las tareas que estén en estado `COMPLETED`
+dentro de una lista concreta.
 
 #### Scenario: Eliminar con tareas completadas
-- **GIVEN** una o más tareas en estado `COMPLETED`
-- **WHEN** se solicita eliminar las tareas completadas
-- **THEN** el sistema elimina las tareas completadas
+- **GIVEN** una o más tareas en estado `COMPLETED` en la lista indicada
+- **WHEN** se solicita eliminar las tareas completadas de esa lista
+- **THEN** el sistema elimina las tareas completadas de esa lista
 - **AND** devuelve las tareas eliminadas
-- **AND** las tareas en estado `PENDING` permanecen disponibles para ser listadas
+- **AND** las tareas `PENDING` y las tareas de otras listas permanecen disponibles
 
 #### Scenario: Eliminar sin tareas completadas
-- **GIVEN** que no hay tareas en estado `COMPLETED`
-- **WHEN** se solicita eliminar las tareas completadas
+- **GIVEN** que no hay tareas en estado `COMPLETED` en la lista indicada
+- **WHEN** se solicita eliminar las tareas completadas de esa lista
 - **THEN** el sistema no elimina ninguna tarea
 - **AND** devuelve una lista vacía

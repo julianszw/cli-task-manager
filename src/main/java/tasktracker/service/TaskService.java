@@ -1,8 +1,10 @@
 package tasktracker.service;
 
 import java.util.List;
+import tasktracker.exception.TaskListNotFoundException;
 import tasktracker.exception.TaskNotFoundException;
 import tasktracker.model.Task;
+import tasktracker.model.TaskList;
 import tasktracker.repository.TaskRepository;
 
 public class TaskService {
@@ -13,15 +15,32 @@ public class TaskService {
         this.repository = repository;
     }
 
-    public Task addTask(String title) {
+    public List<TaskList> listLists() {
+        return repository.findAllLists();
+    }
+
+    public TaskList createList(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("El nombre de la lista no puede estar vacío");
+        }
+        return repository.saveList(new TaskList(name));
+    }
+
+    public Task addTask(long listId, String title) {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("El título no puede estar vacío");
         }
-        return repository.save(new Task(title));
+        repository.findListById(listId)
+                .orElseThrow(() -> new TaskListNotFoundException(listId));
+        Task task = new Task(title);
+        task.setListId(listId);
+        return repository.save(task);
     }
 
-    public List<Task> listTasks() {
-        return repository.findAll();
+    public List<Task> listTasks(long listId) {
+        return repository.findAll().stream()
+                .filter(task -> task.getListId() == listId)
+                .toList();
     }
 
     public void completeTask(long id) {
@@ -53,7 +72,7 @@ public class TaskService {
                 .orElseThrow(() -> new TaskNotFoundException(id));
     }
 
-    public List<Task> purgeCompletedTasks() {
-        return repository.removeCompleted();
+    public List<Task> purgeCompletedTasks(long listId) {
+        return repository.removeCompleted(listId);
     }
 }

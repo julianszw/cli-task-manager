@@ -42,14 +42,26 @@ cada operación que modifique el estado de las tareas.
 - **THEN** el archivo JSON no se modifica
 
 ### Requirement: Formato del archivo
-El sistema DEBE almacenar las tareas como un array JSON de objetos, donde cada
-objeto representa una tarea con los campos `id`, `title` y `status`.
+El sistema DEBE almacenar las listas y las tareas como un objeto JSON con dos
+arrays: `lists` (cada elemento con los campos `id` y `name`) y `tasks` (cada
+elemento con los campos `id`, `title`, `status` y `listId`).
 
-#### Scenario: Tareas guardadas
-- **GIVEN** una o más tareas existentes
+#### Scenario: Listas y tareas guardadas
+- **GIVEN** una o más listas y tareas existentes
 - **WHEN** se persiste el estado
-- **THEN** el archivo contiene un array JSON
-- **AND** cada elemento incluye los campos `id`, `title` y `status`
+- **THEN** el archivo contiene un objeto JSON con los arrays `lists` y `tasks`
+- **AND** cada lista incluye los campos `id` y `name`
+- **AND** cada tarea incluye los campos `id`, `title`, `status` y `listId`
+
+### Requirement: Migración del formato anterior
+El sistema DEBE migrar automáticamente los archivos con el formato anterior (un
+array plano de tareas) a una lista "Inbox", sin perder tareas.
+
+#### Scenario: Archivo con formato anterior
+- **GIVEN** un archivo JSON con un array plano de tareas (sin listas)
+- **WHEN** se inicia la aplicación
+- **THEN** el sistema crea una lista "Inbox"
+- **AND** todas las tareas quedan asociadas a esa lista
 
 ### Requirement: Escritura completa del estado
 El sistema DEBE sobrescribir el archivo con el estado completo de las tareas en
@@ -62,13 +74,18 @@ cada guardado, reflejando fielmente las tareas en memoria.
 - **AND** no persisten tareas eliminadas ni estados desactualizados
 
 ### Requirement: Generación de ids sin colisión
-El sistema DEBE asignar a cada tarea nueva un id que no colisione con los ids
-ya persistidos.
+El sistema DEBE asignar a cada tarea y a cada lista nueva un id que no colisione
+con los ids ya persistidos.
 
 #### Scenario: Con tareas cargadas
 - **GIVEN** tareas cargadas desde el archivo JSON
 - **WHEN** se crea una tarea nueva
-- **THEN** el id generado es mayor que el máximo id existente
+- **THEN** el id generado es mayor que el máximo id de tarea existente
+
+#### Scenario: Con listas cargadas
+- **GIVEN** listas cargadas desde el archivo JSON
+- **WHEN** se crea una lista nueva
+- **THEN** el id generado es mayor que el máximo id de lista existente
 
 #### Scenario: Sin tareas cargadas
 - **GIVEN** que no hay tareas cargadas

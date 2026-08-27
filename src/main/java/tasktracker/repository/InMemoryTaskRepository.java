@@ -6,11 +6,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import tasktracker.model.Task;
+import tasktracker.model.TaskList;
 
 public class InMemoryTaskRepository implements TaskRepository {
 
     private final Map<Long, Task> tasks = new LinkedHashMap<>();
+    private final Map<Long, TaskList> lists = new LinkedHashMap<>();
     private final AtomicLong sequence = new AtomicLong();
+    private final AtomicLong listSequence = new AtomicLong();
 
     @Override
     public Task save(Task task) {
@@ -36,12 +39,30 @@ public class InMemoryTaskRepository implements TaskRepository {
     }
 
     @Override
-    public List<Task> removeCompleted() {
+    public List<Task> removeCompleted(long listId) {
         List<Task> removed = tasks.values().stream()
-                .filter(Task::isCompleted)
+                .filter(t -> t.isCompleted() && t.getListId() == listId)
                 .toList();
         removed.forEach(task -> tasks.remove(task.getId()));
         return removed;
+    }
+
+    @Override
+    public List<TaskList> findAllLists() {
+        return List.copyOf(lists.values());
+    }
+
+    @Override
+    public TaskList saveList(TaskList list) {
+        long id = listSequence.incrementAndGet();
+        list.setId(id);
+        lists.put(id, list);
+        return list;
+    }
+
+    @Override
+    public Optional<TaskList> findListById(long id) {
+        return Optional.ofNullable(lists.get(id));
     }
 
     @Override
