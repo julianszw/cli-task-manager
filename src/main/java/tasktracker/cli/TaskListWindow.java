@@ -54,10 +54,6 @@ public class TaskListWindow extends BasicWindow {
         setMessage(message, MessageKind.WARN);
     }
 
-    void setError(String message) {
-        setMessage(message, MessageKind.ERROR);
-    }
-
     String getStatusText() {
         return status;
     }

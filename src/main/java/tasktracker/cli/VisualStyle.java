@@ -10,7 +10,6 @@ public final class VisualStyle {
     public static final TextColor FOREGROUND = TextColor.ANSI.WHITE_BRIGHT;
     public static final TextColor DIM = TextColor.ANSI.WHITE;
     public static final TextColor ACCENT = TextColor.ANSI.CYAN;
-    public static final TextColor ACCENT_ALT = TextColor.ANSI.MAGENTA;
     public static final TextColor DONE = TextColor.ANSI.GREEN;
     public static final TextColor WARN = TextColor.ANSI.YELLOW;
     public static final TextColor ERROR = TextColor.ANSI.RED;

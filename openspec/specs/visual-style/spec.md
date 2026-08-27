@@ -15,7 +15,7 @@ El sistema DEBE mostrar siempre un tema oscuro, sin posibilidad de alternar a un
 - **AND** no existe ninguna tecla ni acción para alternar a un tema claro
 
 ### Requirement: Paleta de colores
-El sistema DEBE aplicar una paleta de colores consistente en toda la vista: texto blanco brillante sobre fondo oscuro, acentos en cian y magenta, y colores semánticos verde (completado), amarillo (advertencia) y rojo (error).
+El sistema DEBE aplicar una paleta de colores consistente en toda la vista: texto blanco brillante sobre fondo oscuro, acento en cian, y colores semánticos verde (completado), amarillo (advertencia) y rojo (error).
 
 #### Scenario: Texto y fondo
 - **GIVEN** la vista visible
@@ -95,17 +95,17 @@ El sistema DEBE mostrar en la barra de estado un resumen con la cantidad de tare
 - **THEN** se muestra la cantidad de tareas pendientes y de tareas completadas
 
 ### Requirement: Banner de mensajes
-El sistema DEBE mostrar los mensajes y errores en una línea fija de la barra de estado, sin alterar el tamaño de la vista.
+El sistema DEBE mostrar los mensajes y avisos en una línea fija de la barra de estado, sin alterar el tamaño de la vista.
 
 #### Scenario: Mensaje informativo
 - **GIVEN** un mensaje informativo (por ejemplo, "no hay tareas completadas")
 - **WHEN** el mensaje debe mostrarse
 - **THEN** el mensaje aparece en la línea de banner de la barra de estado
 
-#### Scenario: Error
-- **GIVEN** un error (por ejemplo, título vacío o archivo no legible)
-- **WHEN** el error debe mostrarse
-- **THEN** el error se muestra en la línea de banner con el glifo `⚠` y color rojo
+#### Scenario: Aviso
+- **GIVEN** un aviso (por ejemplo, un archivo de tareas no legible)
+- **WHEN** el aviso debe mostrarse
+- **THEN** el aviso aparece en la línea de banner en color amarillo
 
 ### Requirement: Fila de atajos adaptativa
 El sistema DEBE mostrar los atajos de teclado en la barra de estado con la tecla en negrita y la etiqueta atenuada, adaptándose al ancho del terminal.

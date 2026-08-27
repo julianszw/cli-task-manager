@@ -29,5 +29,13 @@ bin/
 ### Mac OS ###
 .DS_Store
 
+### Build ###
+target/
+dependency-reduced-pom.xml
+
+### IntelliJ IDEA ###
+.idea/
+*.iml
+
 ### Datos locales ###
 tasks.json

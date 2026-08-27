@@ -12,7 +12,6 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
     private static final String APP_TITLE = "CLI TASK TRACKER";
     private static final String LIST_TITLE = "T A R E A S";
     private static final String NO_TASKS = "No hay tareas cargadas";
-    private static final String ERROR_GLYPH = "⚠";
 
     private static final int STATUS_BAR_HEIGHT = 5;
 
@@ -160,13 +159,10 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
         if (message.isEmpty()) {
             return;
         }
-        switch (component.kind()) {
-            case ERROR -> {
-                g.setForegroundColor(VisualStyle.ERROR);
-                message = ERROR_GLYPH + " " + message;
-            }
-            case WARN -> g.setForegroundColor(VisualStyle.WARN);
-            default -> g.setForegroundColor(VisualStyle.DIM);
+        if (component.kind() == MessageKind.WARN) {
+            g.setForegroundColor(VisualStyle.WARN);
+        } else {
+            g.setForegroundColor(VisualStyle.DIM);
         }
         g.putString(0, row, truncateEnd(message, cols));
     }
