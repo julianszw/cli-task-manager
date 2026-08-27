@@ -117,7 +117,7 @@ El sistema DEBE mostrar siempre una ayuda visible con las teclas disponibles, en
 #### Scenario: Ayuda siempre visible
 - **GIVEN** la vista única visible
 - **WHEN** se muestra la vista
-- **THEN** se muestra la fila de atajos con las teclas disponibles: `↑`/`k` (up), `↓`/`j` (down), `a` (add), `c` (complete), `r` (reopen), `d` (delete), `p` (purge), `q`/`Esc` (exit)
+- **THEN** se muestra la fila de atajos con las teclas disponibles: `↑`/`k` (up), `↓`/`j` (down), `Enter` (acciones), `a` (add), `c` (complete), `r` (reopen), `d` (delete), `p` (purge), `q`/`Esc` (exit)
 - **AND** la ayuda permanece visible en todo momento, sin necesidad de presionar una tecla para mostrarla
 
 ### Requirement: Salir de la aplicación
@@ -128,3 +128,9 @@ Las teclas `q` y `Esc` DEBEN cerrar la aplicación.
 - **WHEN** el usuario presiona `q` o `Esc`
 - **THEN** se cierra la aplicación
 - **AND** no hay un menú al que volver
+
+#### Scenario: Esc con menú de acciones abierto
+- **GIVEN** el menú de acciones abierto (ver `task-action-menu`)
+- **WHEN** el usuario presiona `Esc`
+- **THEN** se cancela el menú de acciones en lugar de cerrar la aplicación
+- **AND** la aplicación permanece abierta en la lista de tareas

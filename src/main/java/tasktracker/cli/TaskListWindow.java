@@ -126,6 +126,9 @@ public class TaskListWindow extends BasicWindow {
                     }
                 }
             }
+        } else if (key.getKeyType() == KeyType.Enter) {
+            openActionMenu();
+            return true;
         } else if (key.getKeyType() == KeyType.ArrowUp) {
             moveUp();
             return true;
@@ -158,6 +161,32 @@ public class TaskListWindow extends BasicWindow {
             return;
         }
         gui.addWindowAndWait(new AddTaskWindow(service));
+        refresh();
+    }
+
+    private void openActionMenu() {
+        if (tasks.isEmpty() || gui == null) {
+            return;
+        }
+        TaskActionMenuWindow menu = new TaskActionMenuWindow();
+        gui.addWindowAndWait(menu);
+        TaskActionMenuWindow.Action action = menu.getSelectedAction();
+        if (action == null) {
+            return;
+        }
+        switch (action) {
+            case COMPLETE -> completeSelected();
+            case REOPEN -> reopenSelected();
+            case DELETE -> deleteSelected();
+            case EDIT -> openEditTask();
+        }
+    }
+
+    private void openEditTask() {
+        if (gui == null || selected < 0 || selected >= tasks.size()) {
+            return;
+        }
+        gui.addWindowAndWait(new EditTaskWindow(service, tasks.get(selected)));
         refresh();
     }
 

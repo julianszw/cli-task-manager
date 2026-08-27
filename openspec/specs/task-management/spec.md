@@ -73,6 +73,27 @@ El sistema DEBE permitir marcar una tarea existente en estado `COMPLETED` como p
 - **WHEN** se solicita reabrir esa tarea nuevamente
 - **THEN** el sistema deja la tarea en estado `PENDING` sin error
 
+### Requirement: Actualizar título de tarea
+El sistema DEBE permitir modificar el título de una tarea existente.
+
+#### Scenario: Actualizar título válido
+- **GIVEN** una tarea con id válido y un título nuevo no vacío
+- **WHEN** se solicita actualizar el título de esa tarea
+- **THEN** el título de la tarea cambia al nuevo valor
+- **AND** el resto de los atributos (id y estado) permanecen sin cambios
+
+#### Scenario: Actualizar con título vacío
+- **GIVEN** una tarea con id válido y un título nuevo vacío o compuesto solo por espacios
+- **WHEN** se solicita actualizar el título de esa tarea
+- **THEN** el sistema rechaza la actualización
+- **AND** el título de la tarea no cambia
+
+#### Scenario: Actualizar tarea inexistente
+- **GIVEN** un id que no corresponde a ninguna tarea
+- **WHEN** se solicita actualizar el título de esa tarea
+- **THEN** el sistema lanza `TaskNotFoundException`
+- **AND** ninguna tarea cambia de título
+
 ### Requirement: Eliminar tarea
 El sistema DEBE permitir eliminar una tarea existente por su id.
 

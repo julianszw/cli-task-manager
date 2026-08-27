@@ -128,4 +128,21 @@ class TaskListWindowTest {
         assertEquals(TaskStatus.PENDING, service.listTasks().get(0).getStatus());
         assertEquals(TaskStatus.COMPLETED, service.listTasks().get(1).getStatus());
     }
+
+    @Test
+    void enterWithNoTasksDoesNothing() {
+        TaskListWindow window = new TaskListWindow(service);
+
+        assertTrue(window.handleInput(new KeyStroke(KeyType.Enter)));
+        assertTrue(service.listTasks().isEmpty());
+    }
+
+    @Test
+    void enterWithTasksWithoutGuiDoesNothing() {
+        service.addTask("A");
+        TaskListWindow window = new TaskListWindow(service);
+
+        assertTrue(window.handleInput(new KeyStroke(KeyType.Enter)));
+        assertEquals(1, service.listTasks().size());
+    }
 }

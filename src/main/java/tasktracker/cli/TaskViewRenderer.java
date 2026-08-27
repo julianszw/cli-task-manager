@@ -31,6 +31,7 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
     private final ShortcutBar shortcutBar = new ShortcutBar(List.of(
             new ShortcutBar.Shortcut("↑/k", "subir"),
             new ShortcutBar.Shortcut("↓/j", "bajar"),
+            new ShortcutBar.Shortcut("Enter", "acciones"),
             new ShortcutBar.Shortcut("a", "crear"),
             new ShortcutBar.Shortcut("c", "completar"),
             new ShortcutBar.Shortcut("r", "reabrir"),

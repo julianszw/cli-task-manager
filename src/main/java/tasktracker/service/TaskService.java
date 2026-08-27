@@ -38,6 +38,16 @@ public class TaskService {
         repository.persist();
     }
 
+    public void renameTask(long id, String title) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("El título no puede estar vacío");
+        }
+        Task task = repository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+        task.rename(title);
+        repository.persist();
+    }
+
     public void deleteTask(long id) {
         repository.removeById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));

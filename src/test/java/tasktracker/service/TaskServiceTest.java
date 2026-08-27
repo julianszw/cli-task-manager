@@ -161,4 +161,55 @@ class TaskServiceTest {
 
         assertEquals(List.of("persisted"), persisted);
     }
+
+    @Test
+    void renameTaskUpdatesTitleAndKeepsIdAndStatus() {
+        Task task = service.addTask("Original");
+        long id = task.getId();
+        service.completeTask(task.getId());
+
+        service.renameTask(id, "Nuevo título");
+
+        assertEquals("Nuevo título", task.getTitle());
+        assertEquals(id, task.getId());
+        assertEquals(TaskStatus.COMPLETED, task.getStatus());
+    }
+
+    @Test
+    void renameTaskRejectsBlankTitle() {
+        Task task = service.addTask("Original");
+
+        assertThrows(IllegalArgumentException.class, () -> service.renameTask(task.getId(), "   "));
+        assertEquals("Original", task.getTitle());
+    }
+
+    @Test
+    void renameTaskRejectsNullTitle() {
+        Task task = service.addTask("Original");
+
+        assertThrows(IllegalArgumentException.class, () -> service.renameTask(task.getId(), null));
+        assertEquals("Original", task.getTitle());
+    }
+
+    @Test
+    void renameTaskThrowsWhenTaskDoesNotExist() {
+        assertThrows(TaskNotFoundException.class, () -> service.renameTask(99, "Título"));
+    }
+
+    @Test
+    void renameTaskTriggersPersistence() {
+        List<String> persisted = new ArrayList<>();
+        TaskRepository repository = new InMemoryTaskRepository() {
+            @Override
+            public void persist() {
+                persisted.add("persisted");
+            }
+        };
+        TaskService service = new TaskService(repository);
+        Task task = service.addTask("Tarea");
+
+        service.renameTask(task.getId(), "Renombrada");
+
+        assertEquals(List.of("persisted"), persisted);
+    }
 }

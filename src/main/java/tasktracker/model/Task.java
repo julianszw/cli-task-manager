@@ -3,7 +3,7 @@ package tasktracker.model;
 public class Task {
 
     private long id;
-    private final String title;
+    private String title;
     private TaskStatus status;
 
     public Task(String title) {
@@ -33,6 +33,10 @@ public class Task {
 
     public void markPending() {
         this.status = TaskStatus.PENDING;
+    }
+
+    public void rename(String title) {
+        this.title = title;
     }
 
     public boolean isCompleted() {
