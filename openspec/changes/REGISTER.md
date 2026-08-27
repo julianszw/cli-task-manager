@@ -31,3 +31,4 @@ _(ninguno)_
 | `015-remove-unused-files-and-code` | `8cce7bd` | eliminar archivos y código no usados |
 | `016-task-action-menu` | `f3dc5b8` | agregar menú de acciones y edición de tareas |
 | `017-app-logo` | `55fdc34` | agregar logo ascii task manager |
+| `018-task-lists` | `2980601` | agregar listas de tareas con navegación tab |
