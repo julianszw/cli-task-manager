@@ -8,7 +8,7 @@ cada commit.
 
 ## Pendientes de commit
 
-- `016-task-action-menu`
+_(ninguno)_
 
 ## Commiteados
 
@@ -29,3 +29,4 @@ cada commit.
 | `013-remove-unused-code` | `1440fe4` | eliminar capa de comandos cli no usada |
 | `014-visual-style` | `684ca4e` | implementar lenguaje visual agentty |
 | `015-remove-unused-files-and-code` | `8cce7bd` | eliminar archivos y código no usados |
+| `016-task-action-menu` | `f3dc5b8` | agregar menú de acciones y edición de tareas |
