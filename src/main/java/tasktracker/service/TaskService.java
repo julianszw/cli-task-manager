@@ -1,5 +1,6 @@
 package tasktracker.service;
 
+import java.util.Comparator;
 import java.util.List;
 import tasktracker.exception.TaskListNotFoundException;
 import tasktracker.exception.TaskNotFoundException;
@@ -40,6 +41,7 @@ public class TaskService {
     public List<Task> listTasks(long listId) {
         return repository.findAll().stream()
                 .filter(task -> task.getListId() == listId)
+                .sorted(Comparator.comparing(Task::isCompleted))
                 .toList();
     }
 
@@ -70,6 +72,18 @@ public class TaskService {
     public void deleteTask(long id) {
         repository.removeById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
+    }
+
+    public void moveTask(long taskId, long targetListId) {
+        repository.findListById(targetListId)
+                .orElseThrow(() -> new TaskListNotFoundException(targetListId));
+        Task task = repository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException(taskId));
+        if (task.getListId() == targetListId) {
+            return;
+        }
+        task.setListId(targetListId);
+        repository.persist();
     }
 
     public List<Task> purgeCompletedTasks(long listId) {

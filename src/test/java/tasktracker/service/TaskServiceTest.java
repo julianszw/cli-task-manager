@@ -307,4 +307,100 @@ class TaskServiceTest {
 
         assertEquals(List.of("persisted"), persisted);
     }
+
+    @Test
+    void moveTaskMovesTaskToTargetList() {
+        long inbox = inboxId();
+        long work = service.createList("Trabajo").getId();
+        Task task = service.addTask(inbox, "A");
+
+        service.moveTask(task.getId(), work);
+
+        assertEquals(work, task.getListId());
+        assertTrue(service.listTasks(inbox).isEmpty());
+        assertEquals(List.of(task), service.listTasks(work));
+    }
+
+    @Test
+    void moveTaskThrowsWhenTaskDoesNotExist() {
+        long work = service.createList("Trabajo").getId();
+
+        assertThrows(TaskNotFoundException.class, () -> service.moveTask(99, work));
+    }
+
+    @Test
+    void moveTaskThrowsWhenTargetListDoesNotExist() {
+        long inbox = inboxId();
+        Task task = service.addTask(inbox, "A");
+
+        assertThrows(TaskListNotFoundException.class, () -> service.moveTask(task.getId(), 99));
+        assertEquals(inbox, task.getListId());
+    }
+
+    @Test
+    void moveTaskToSameListKeepsTaskUnchanged() {
+        long inbox = inboxId();
+        Task task = service.addTask(inbox, "A");
+
+        assertDoesNotThrow(() -> service.moveTask(task.getId(), inbox));
+        assertEquals(inbox, task.getListId());
+        assertEquals(List.of(task), service.listTasks(inbox));
+    }
+
+    @Test
+    void moveTaskTriggersPersistence() {
+        List<String> persisted = new ArrayList<>();
+        TaskRepository repository = new InMemoryTaskRepository() {
+            @Override
+            public void persist() {
+                persisted.add("persisted");
+            }
+        };
+        TaskService service = new TaskService(repository);
+        TaskList inbox = service.createList("Inbox");
+        TaskList work = service.createList("Trabajo");
+        Task task = service.addTask(inbox.getId(), "Tarea");
+
+        service.moveTask(task.getId(), work.getId());
+
+        assertEquals(List.of("persisted"), persisted);
+    }
+
+    @Test
+    void listTasksOrdersPendingBeforeCompleted() {
+        long listId = inboxId();
+        Task a = service.addTask(listId, "A");
+        Task b = service.addTask(listId, "B");
+        Task c = service.addTask(listId, "C");
+        service.completeTask(b.getId());
+
+        assertEquals(List.of(a, c, b), service.listTasks(listId));
+    }
+
+    @Test
+    void listTasksKeepsRelativeOrderWithinGroups() {
+        long listId = inboxId();
+        Task a = service.addTask(listId, "A");
+        Task b = service.addTask(listId, "B");
+        Task c = service.addTask(listId, "C");
+        Task d = service.addTask(listId, "D");
+        service.completeTask(a.getId());
+        service.completeTask(c.getId());
+
+        assertEquals(List.of(b, d, a, c), service.listTasks(listId));
+    }
+
+    @Test
+    void reopenedTaskReturnsToPendingGroup() {
+        long listId = inboxId();
+        Task a = service.addTask(listId, "A");
+        Task b = service.addTask(listId, "B");
+        service.completeTask(b.getId());
+
+        assertEquals(List.of(a, b), service.listTasks(listId));
+
+        service.reopenTask(b.getId());
+
+        assertEquals(List.of(a, b), service.listTasks(listId));
+    }
 }

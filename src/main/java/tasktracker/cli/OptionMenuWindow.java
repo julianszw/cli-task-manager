@@ -10,51 +10,37 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import java.util.List;
 
-public class TaskActionMenuWindow extends BasicWindow {
+final class OptionMenuWindow extends BasicWindow {
 
-    enum Action {
-        COMPLETE("Completar"),
-        REOPEN("Reabrir"),
-        DELETE("Eliminar"),
-        EDIT("Editar"),
-        MOVE("Mover");
+    private final ActionListBox options = new ActionListBox();
+    private int selected = -1;
 
-        private final String label;
-
-        Action(String label) {
-            this.label = label;
-        }
+    OptionMenuWindow(String title, List<String> items) {
+        this(title, items, 0);
     }
 
-    private static final String TITLE = "Acciones";
-
-    private final ActionListBox actions = new ActionListBox();
-    private Action selected;
-
-    public TaskActionMenuWindow() {
-        super(TITLE);
+    OptionMenuWindow(String title, List<String> items, int defaultIndex) {
+        super(title);
         setHints(List.of(Window.Hint.CENTERED));
 
-        for (Action action : Action.values()) {
-            actions.addItem(action.label, () -> {
-                selected = action;
+        for (int i = 0; i < items.size(); i++) {
+            int index = i;
+            options.addItem(items.get(i), () -> {
+                selected = index;
                 close();
             });
         }
 
         Panel content = new Panel(new LinearLayout(Direction.VERTICAL));
-        content.addComponent(actions);
+        content.addComponent(options);
         setComponent(content);
 
-        setFocusedInteractable(actions);
-    }
-
-    Action getSelectedAction() {
-        return selected;
+        options.setSelectedIndex(defaultIndex);
+        setFocusedInteractable(options);
     }
 
     int selectedIndex() {
-        return actions.getSelectedIndex();
+        return selected;
     }
 
     @Override
@@ -84,11 +70,11 @@ public class TaskActionMenuWindow extends BasicWindow {
     }
 
     private void moveSelection(int delta) {
-        int current = actions.getSelectedIndex();
+        int current = options.getSelectedIndex();
         int next = current + delta;
-        if (next < 0 || next >= actions.getItemCount()) {
+        if (next < 0 || next >= options.getItemCount()) {
             return;
         }
-        actions.setSelectedIndex(next);
+        options.setSelectedIndex(next);
     }
 }

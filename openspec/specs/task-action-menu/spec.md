@@ -1,7 +1,7 @@
 # Task Action Menu
 
 ## Purpose
-Define el menú contextual de acciones que se abre al presionar `Enter` sobre la tarea seleccionada en la vista única (`interactive-cli`). Permite desplazarse entre las acciones aplicables a la tarea (completar, reabrir, eliminar y editar) y ejecutarlas con `Enter`. Complementa los atajos de teclado existentes, que quedan deshabilitados mientras el menú está abierto.
+Define el menú contextual de acciones que se abre al presionar `Enter` sobre la tarea seleccionada en la vista única (`interactive-cli`). Permite desplazarse entre las acciones aplicables a la tarea (completar, reabrir, eliminar, editar y mover) y ejecutarlas con `Enter`. La acción editar abre directamente el campo de título y la acción mover abre el selector de lista destino. Complementa los atajos de teclado existentes, que quedan deshabilitados mientras el menú está abierto.
 
 ## Requirements
 
@@ -12,7 +12,7 @@ La tecla `Enter` DEBE abrir un menú contextual de acciones para la tarea selecc
 - **GIVEN** la vista única visible con una tarea seleccionada
 - **WHEN** el usuario presiona `Enter`
 - **THEN** se abre un menú contextual junto a la tarea seleccionada (overlay)
-- **AND** el menú lista las acciones de la tarea: completar, reabrir, eliminar y editar
+- **AND** el menú lista las acciones de la tarea: completar, reabrir, eliminar, editar y mover
 
 #### Scenario: Enter sin tareas
 - **GIVEN** que no hay tareas en la lista
@@ -21,12 +21,12 @@ La tecla `Enter` DEBE abrir un menú contextual de acciones para la tarea selecc
 - **AND** no se produce ningún error
 
 ### Requirement: Acciones disponibles del menú
-El menú DEBE listar las acciones de la tarea seleccionada — completar, reabrir, eliminar y editar — en un orden estable y consistente.
+El menú DEBE listar las acciones de la tarea seleccionada — completar, reabrir, eliminar, editar y mover — en un orden estable y consistente.
 
 #### Scenario: Lista de acciones
 - **GIVEN** el menú de acciones abierto
 - **WHEN** se muestra el menú
-- **THEN** se listan las acciones completar, reabrir, eliminar y editar
+- **THEN** se listan las acciones completar, reabrir, eliminar, editar y mover
 - **AND** el orden de las acciones es el mismo en cada apertura
 
 #### Scenario: Completar desde el menú
@@ -116,4 +116,26 @@ La acción "editar" DEBE abrir un campo de entrada precargado con el título act
 - **GIVEN** el campo de edición abierto
 - **WHEN** el usuario cancela sin confirmar (con `Esc`)
 - **THEN** no se modifica el título de la tarea
+- **AND** la vista vuelve a la lista sin cambios
+
+### Requirement: Mover tarea a otra lista desde el menú
+La acción "mover" DEBE permitir elegir una lista destino y mover la tarea seleccionada a esa lista.
+
+#### Scenario: Mover a otra lista
+- **GIVEN** la acción "mover" seleccionada y al menos dos listas existentes
+- **WHEN** el usuario ejecuta la acción con `Enter`
+- **THEN** se muestra un selector con las listas existentes, excluyendo la lista actual de la tarea
+- **AND** al elegir una lista destino y confirmar, la tarea se mueve a esa lista según `task-management`
+- **AND** la vista se redibuja reflejando el resultado
+
+#### Scenario: Sin listas destino disponibles
+- **GIVEN** la acción "mover" seleccionada y solo existe una lista (la lista actual)
+- **WHEN** el usuario ejecuta la acción con `Enter`
+- **THEN** se muestra un mensaje indicando que no hay otra lista a la que mover la tarea
+- **AND** no se mueve la tarea
+
+#### Scenario: Cancelar el selector de lista
+- **GIVEN** el selector de listas abierto
+- **WHEN** el usuario presiona `Esc`
+- **THEN** se cierra el selector sin mover la tarea
 - **AND** la vista vuelve a la lista sin cambios

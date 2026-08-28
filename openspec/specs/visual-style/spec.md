@@ -15,7 +15,7 @@ El sistema DEBE mostrar siempre un tema oscuro, sin posibilidad de alternar a un
 - **AND** no existe ninguna tecla ni acción para alternar a un tema claro
 
 ### Requirement: Paleta de colores
-El sistema DEBE aplicar una paleta de colores consistente en toda la vista: texto blanco brillante sobre fondo oscuro, acento en cian, y colores semánticos verde (completado), amarillo (advertencia) y rojo (error).
+El sistema DEBE aplicar una paleta de colores consistente en toda la vista: texto blanco brillante sobre fondo oscuro, acento en cian, y colores semánticos verde (ícono de completado), gris (texto de tareas completadas), amarillo (advertencia) y rojo (error).
 
 #### Scenario: Texto y fondo
 - **GIVEN** la vista visible
@@ -30,7 +30,7 @@ El sistema DEBE aplicar una paleta de colores consistente en toda la vista: text
 #### Scenario: Colores semánticos
 - **GIVEN** la vista visible
 - **WHEN** se muestra una tarea completada, un aviso o un error
-- **THEN** se usa verde para lo completado, amarillo para avisos y rojo para errores
+- **THEN** se usa verde para el ícono de completado, gris para el texto de tareas completadas, amarillo para avisos y rojo para errores
 
 ### Requirement: Bordes redondeados
 El sistema DEBE dibujar los paneles y cajas con bordes redondeados usando caracteres de dibujo de caja (`╭` `─` `╮` `│` `╰` `╯`), en lugar de bordes rectos.

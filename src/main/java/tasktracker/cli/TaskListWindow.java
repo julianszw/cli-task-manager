@@ -19,6 +19,7 @@ public class TaskListWindow extends BasicWindow {
     private static final String TITLE = "Tareas";
     private static final String NO_TASKS = "No hay tareas cargadas";
     private static final String NO_COMPLETED_TO_PURGE = "No hay tareas completadas para eliminar";
+    private static final String NO_OTHER_LIST = "No hay otra lista a la que mover la tarea";
 
     private final TaskService service;
     private final WindowBasedTextGUI gui;
@@ -152,7 +153,7 @@ public class TaskListWindow extends BasicWindow {
                         return true;
                     }
                     case 'q' -> {
-                        close();
+                        requestExit();
                         return true;
                     }
                     default -> {
@@ -175,7 +176,7 @@ public class TaskListWindow extends BasicWindow {
             moveDown();
             return true;
         } else if (key.getKeyType() == KeyType.Escape) {
-            close();
+            requestExit();
             return true;
         }
         return super.handleInput(key);
@@ -249,6 +250,42 @@ public class TaskListWindow extends BasicWindow {
             case REOPEN -> reopenSelected();
             case DELETE -> deleteSelected();
             case EDIT -> openEditTask();
+            case MOVE -> openMoveTask();
+        }
+    }
+
+    private void openMoveTask() {
+        if (gui == null || selected < 0 || selected >= tasks.size()) {
+            return;
+        }
+        Task task = tasks.get(selected);
+        List<TaskList> targets = lists.stream()
+                .filter(list -> list.getId() != task.getListId())
+                .toList();
+        if (targets.isEmpty()) {
+            setStatus(NO_OTHER_LIST);
+            return;
+        }
+        OptionMenuWindow menu = new OptionMenuWindow(
+                "Mover a otra lista", targets.stream().map(TaskList::getName).toList());
+        gui.addWindowAndWait(menu);
+        int index = menu.selectedIndex();
+        if (index < 0) {
+            return;
+        }
+        service.moveTask(task.getId(), targets.get(index).getId());
+        refresh();
+    }
+
+    private void requestExit() {
+        if (gui == null) {
+            return;
+        }
+        OptionMenuWindow confirm = new OptionMenuWindow(
+                "¿Estás seguro?", List.of("Sí", "No"), 1);
+        gui.addWindowAndWait(confirm);
+        if (confirm.selectedIndex() == 0) {
+            close();
         }
     }
 

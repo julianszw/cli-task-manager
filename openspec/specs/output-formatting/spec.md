@@ -1,7 +1,7 @@
 # Output Formatting
 
 ## Purpose
-Define cómo se presentan las tareas en la vista: una lista con ícono de estado por fila, atenuado de las tareas completadas y colores para distinguir estados. Reemplaza el formato de tabla anterior (columnas `ID`, `STATUS` y `TITLE`) y el tachado, siguiendo el lenguaje visual de `visual-style`.
+Define cómo se presentan las tareas en la vista: una lista con ícono de estado por fila, orden por estado (pendientes primero, completadas al final), tachado y color gris para las tareas completadas, y colores para distinguir estados. Reemplaza el formato de tabla anterior (columnas `ID`, `STATUS` y `TITLE`), siguiendo el lenguaje visual de `visual-style`.
 
 ## Requirements
 
@@ -29,19 +29,34 @@ El sistema DEBE distinguir el estado de cada tarea mediante un ícono y un color
 - **THEN** la tarea `PENDING` se muestra con el ícono `○`
 - **AND** la tarea `COMPLETED` se muestra con el ícono `✓` en verde
 
-### Requirement: Atenuado de tareas completadas
-El sistema DEBE atenuar la fila completa de toda tarea en estado `COMPLETED`, sin tacharla.
+### Requirement: Formato de tareas completadas
+El sistema DEBE mostrar toda tarea en estado `COMPLETED` con el ícono `✓` en verde, el título tachado y en color gris.
 
 #### Scenario: Tarea completada
 - **GIVEN** una tarea en estado `COMPLETED`
 - **WHEN** se muestra en la lista
-- **THEN** toda la fila (ícono y título) se muestra atenuada
-- **AND** la fila no se muestra tachada
+- **THEN** el ícono `✓` se muestra en verde
+- **AND** el título se muestra tachado
+- **AND** el título se muestra en color gris
 
 #### Scenario: Tarea pendiente
 - **GIVEN** una tarea en estado `PENDING`
 - **WHEN** se muestra en la lista
-- **THEN** la fila se muestra sin atenuar
+- **THEN** la fila se muestra sin tachado
+- **AND** sin el color gris de completada
+
+### Requirement: Orden de tareas por estado
+El sistema DEBE mostrar las tareas agrupadas por estado: las tareas `PENDING` primero y las tareas `COMPLETED` al final.
+
+#### Scenario: Tarea completada se mueve al final
+- **GIVEN** una tarea en estado `PENDING` ubicada entre otras tareas
+- **WHEN** la tarea pasa a `COMPLETED`
+- **THEN** la tarea se muestra al final de la lista, después de todas las tareas pendientes
+
+#### Scenario: Tarea reabierta vuelve a las pendientes
+- **GIVEN** una tarea en estado `COMPLETED` ubicada al final de la lista
+- **WHEN** la tarea se reabre (pasa a `PENDING`)
+- **THEN** la tarea deja de mostrarse al final y vuelve a agruparse con las pendientes
 
 ### Requirement: Aplicación consistente del formato
 El sistema DEBE aplicar el formato de lista, íconos, atenuado y color en la vista interactiva de tareas (la vista principal que lista tareas).

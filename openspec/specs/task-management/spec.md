@@ -133,3 +133,30 @@ dentro de una lista concreta.
 - **WHEN** se solicita eliminar las tareas completadas de esa lista
 - **THEN** el sistema no elimina ninguna tarea
 - **AND** devuelve una lista vacía
+
+### Requirement: Mover tarea a otra lista
+El sistema DEBE permitir mover una tarea existente de su lista actual a otra lista existente.
+
+#### Scenario: Mover tarea a otra lista
+- **GIVEN** una tarea con id válido asociada a una lista y una lista destino existente distinta de la actual
+- **WHEN** se solicita mover la tarea a la lista destino
+- **THEN** la tarea queda asociada a la lista destino
+- **AND** deja de pertenecer a la lista original
+
+#### Scenario: Mover a una lista inexistente
+- **GIVEN** una tarea con id válido y un id de lista destino que no corresponde a ninguna lista
+- **WHEN** se solicita mover la tarea
+- **THEN** el sistema lanza una excepción de lista no encontrada
+- **AND** la tarea permanece en su lista original
+
+#### Scenario: Mover tarea inexistente
+- **GIVEN** un id de tarea que no corresponde a ninguna tarea y una lista destino existente
+- **WHEN** se solicita mover la tarea
+- **THEN** el sistema lanza `TaskNotFoundException`
+- **AND** ninguna tarea cambia de lista
+
+#### Scenario: Mover a la misma lista
+- **GIVEN** una tarea con id válido y una lista destino igual a su lista actual
+- **WHEN** se solicita mover la tarea
+- **THEN** la tarea permanece en la misma lista sin cambios
+- **AND** no se produce ningún error

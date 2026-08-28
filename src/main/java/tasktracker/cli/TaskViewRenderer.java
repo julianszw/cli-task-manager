@@ -137,6 +137,7 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
             g.setForegroundColor(VisualStyle.DONE);
             g.putString(3, y, ICON_DONE);
             g.setForegroundColor(VisualStyle.DIM);
+            g.enableModifiers(SGR.CROSSED_OUT);
         } else {
             g.setForegroundColor(VisualStyle.FOREGROUND);
             g.putString(3, y, ICON_PENDING);

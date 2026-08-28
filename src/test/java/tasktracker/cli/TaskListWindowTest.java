@@ -39,8 +39,11 @@ class TaskListWindowTest {
 
         window.handleInput(new KeyStroke('c', false, false));
 
-        assertEquals(TaskStatus.COMPLETED, service.listTasks(inboxId).get(0).getStatus());
-        assertEquals(TaskStatus.PENDING, service.listTasks(inboxId).get(1).getStatus());
+        List<Task> tasks = service.listTasks(inboxId);
+        assertEquals("B", tasks.get(0).getTitle());
+        assertEquals(TaskStatus.PENDING, tasks.get(0).getStatus());
+        assertEquals("A", tasks.get(1).getTitle());
+        assertEquals(TaskStatus.COMPLETED, tasks.get(1).getStatus());
     }
 
     @Test
@@ -118,7 +121,7 @@ class TaskListWindowTest {
     }
 
     @Test
-    void exitKeysAreHandled() {
+    void exitKeysAreHandledWithoutGui() {
         inbox();
         service.addTask(inboxId, "A");
         TaskListWindow window = new TaskListWindow(service);

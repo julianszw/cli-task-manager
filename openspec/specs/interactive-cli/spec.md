@@ -120,17 +120,39 @@ El sistema DEBE mostrar siempre una ayuda visible con las teclas disponibles, en
 - **THEN** se muestra la fila de atajos con las teclas disponibles: `↑`/`k` (subir), `↓`/`j` (bajar), `Enter` (acciones), `Tab` (lista), `a` (crear), `n` (nueva lista), `c` (completar), `r` (reabrir), `d` (eliminar), `p` (purgar), `q`/`Esc` (salir)
 - **AND** la ayuda permanece visible en todo momento, sin necesidad de presionar una tecla para mostrarla
 
-### Requirement: Salir de la aplicación
-Las teclas `q` y `Esc` DEBEN cerrar la aplicación.
+### Requirement: Salir de la aplicación con confirmación
+Las teclas `q` y `Esc` DEBEN mostrar un diálogo de confirmación ("¿estás seguro?") con opciones sí/no antes de cerrar la aplicación.
 
-#### Scenario: Salir
-- **GIVEN** la vista única visible
+#### Scenario: Solicitar salida
+- **GIVEN** la vista única visible sin ningún menú ni diálogo abierto
 - **WHEN** el usuario presiona `q` o `Esc`
+- **THEN** se muestra un diálogo de confirmación "¿estás seguro?" con las opciones sí/no
+- **AND** la aplicación no se cierra aún
+
+#### Scenario: Selección por defecto
+- **GIVEN** el diálogo de confirmación abierto
+- **WHEN** se muestra el diálogo
+- **THEN** la opción "no" está seleccionada por defecto
+
+#### Scenario: Confirmar salida
+- **GIVEN** el diálogo de confirmación abierto con la opción "sí" seleccionada
+- **WHEN** el usuario confirma con `Enter`
 - **THEN** se cierra la aplicación
-- **AND** no hay un menú al que volver
+
+#### Scenario: Cancelar salida
+- **GIVEN** el diálogo de confirmación abierto con la opción "no" seleccionada
+- **WHEN** el usuario confirma con `Enter`
+- **THEN** el diálogo se cierra
+- **AND** la aplicación permanece abierta en la lista de tareas
+
+#### Scenario: Cancelar con Esc
+- **GIVEN** el diálogo de confirmación abierto
+- **WHEN** el usuario presiona `Esc`
+- **THEN** el diálogo se cierra
+- **AND** la aplicación permanece abierta en la lista de tareas
 
 #### Scenario: Esc con menú de acciones abierto
 - **GIVEN** el menú de acciones abierto (ver `task-action-menu`)
 - **WHEN** el usuario presiona `Esc`
-- **THEN** se cancela el menú de acciones en lugar de cerrar la aplicación
+- **THEN** se cancela el menú de acciones en lugar de mostrar el diálogo de salida
 - **AND** la aplicación permanece abierta en la lista de tareas
