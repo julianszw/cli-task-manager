@@ -40,3 +40,5 @@ _(ninguno)_
 | `024-fix-google-auth-browser-open` | `2211e08` | fix apertura de navegador en linux |
 | `025-fix-google-tasks-400-bad-request` | `851dbb1` | fix error 400 al actualizar tareas y manejo de errores |
 | `026-secure-google-credentials` | `8dd9d51` | aislar y proteger credenciales de google |
+| `027-google-tasks-provider` | `e112984` | reemplazar persistencia local por task provider api |
+| `028-taskmaster-date-selection-and-list-options` | `e112984` | renombrar a taskmaster, agregar calendario y opciones de listas |
