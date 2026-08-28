@@ -44,7 +44,8 @@ cada operación que modifique el estado de las tareas.
 ### Requirement: Formato del archivo
 El sistema DEBE almacenar las listas y las tareas como un objeto JSON con dos
 arrays: `lists` (cada elemento con los campos `id` y `name`) y `tasks` (cada
-elemento con los campos `id`, `title`, `status` y `listId`).
+elemento con los campos `id`, `title`, `status` y `listId`), además del campo
+`zoom` (entero con el nivel de zoom de la interfaz).
 
 #### Scenario: Listas y tareas guardadas
 - **GIVEN** una o más listas y tareas existentes
@@ -52,6 +53,28 @@ elemento con los campos `id`, `title`, `status` y `listId`).
 - **THEN** el archivo contiene un objeto JSON con los arrays `lists` y `tasks`
 - **AND** cada lista incluye los campos `id` y `name`
 - **AND** cada tarea incluye los campos `id`, `title`, `status` y `listId`
+- **AND** el objeto raíz incluye el campo `zoom` con el nivel de zoom de la interfaz
+
+### Requirement: Campos opcionales de sincronización
+El sistema DEBE poder persistir, como campos opcionales de cada tarea y cada lista,
+el id remoto de Google (`remoteId`) y la marca de tiempo de la última modificación
+(`updatedAt`), omitiéndolos cuando no estén presentes.
+
+#### Scenario: Entidad con campos de sincronización
+- **GIVEN** una tarea o lista con `remoteId` y `updatedAt` establecidos
+- **WHEN** se persiste el estado
+- **THEN** el archivo incluye los campos `remoteId` y `updatedAt` de esa entidad
+
+#### Scenario: Entidad sin campos de sincronización
+- **GIVEN** una tarea o lista sin `remoteId` ni `updatedAt`
+- **WHEN** se persiste el estado
+- **THEN** los campos `remoteId` y `updatedAt` se omiten del archivo
+
+#### Scenario: Archivo sin campos de sincronización
+- **GIVEN** un archivo JSON válido cuyas tareas y listas no incluyen `remoteId` ni `updatedAt`
+- **WHEN** se inicia la aplicación
+- **THEN** el sistema carga las entidades sin esos campos
+- **AND** las tareas y listas quedan disponibles como siempre
 
 ### Requirement: Migración del formato anterior
 El sistema DEBE migrar automáticamente los archivos con el formato anterior (un
@@ -62,6 +85,24 @@ array plano de tareas) a una lista "Inbox", sin perder tareas.
 - **WHEN** se inicia la aplicación
 - **THEN** el sistema crea una lista "Inbox"
 - **AND** todas las tareas quedan asociadas a esa lista
+
+### Requirement: Persistencia del nivel de zoom
+El sistema DEBE guardar el nivel de zoom de la interfaz junto con el estado y restaurarlo al cargar el archivo.
+
+#### Scenario: Guardar zoom
+- **GIVEN** un cambio en el nivel de zoom de la interfaz
+- **WHEN** se persiste el estado
+- **THEN** el campo `zoom` del archivo refleja el nuevo nivel
+
+#### Scenario: Cargar zoom
+- **GIVEN** un archivo JSON con el campo `zoom`
+- **WHEN** se inicia la aplicación
+- **THEN** la interfaz restaura el nivel de zoom guardado
+
+#### Scenario: Sin campo zoom
+- **GIVEN** un archivo JSON sin el campo `zoom`
+- **WHEN** se inicia la aplicación
+- **THEN** el sistema asume el nivel de zoom por defecto (`0`)
 
 ### Requirement: Escritura completa del estado
 El sistema DEBE sobrescribir el archivo con el estado completo de las tareas en

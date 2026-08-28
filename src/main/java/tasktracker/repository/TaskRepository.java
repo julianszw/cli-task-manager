@@ -23,5 +23,9 @@ public interface TaskRepository {
 
     Optional<TaskList> findListById(long id);
 
+    int getZoom();
+
+    void setZoom(int zoom);
+
     void persist();
 }

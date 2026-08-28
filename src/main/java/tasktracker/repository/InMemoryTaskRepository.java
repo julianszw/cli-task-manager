@@ -14,6 +14,7 @@ public class InMemoryTaskRepository implements TaskRepository {
     private final Map<Long, TaskList> lists = new LinkedHashMap<>();
     private final AtomicLong sequence = new AtomicLong();
     private final AtomicLong listSequence = new AtomicLong();
+    private int zoom;
 
     @Override
     public Task save(Task task) {
@@ -63,6 +64,16 @@ public class InMemoryTaskRepository implements TaskRepository {
     @Override
     public Optional<TaskList> findListById(long id) {
         return Optional.ofNullable(lists.get(id));
+    }
+
+    @Override
+    public int getZoom() {
+        return zoom;
+    }
+
+    @Override
+    public void setZoom(int zoom) {
+        this.zoom = zoom;
     }
 
     @Override

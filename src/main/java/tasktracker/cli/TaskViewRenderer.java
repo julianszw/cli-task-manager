@@ -38,6 +38,8 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
             new ShortcutBar.Shortcut("r", "reabrir"),
             new ShortcutBar.Shortcut("d", "eliminar"),
             new ShortcutBar.Shortcut("p", "purgar"),
+            new ShortcutBar.Shortcut("g", "login Google"),
+            new ShortcutBar.Shortcut("s", "sincronizar"),
             new ShortcutBar.Shortcut("q/Esc", "salir")));
 
     @Override
@@ -61,7 +63,7 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
         int separatorRow = rows - STATUS_BAR_HEIGHT - 1;
         int statusBarTop = separatorRow + 1;
 
-        List<String> logo = AppLogo.fit(cols);
+        List<String> logo = component.zoom() >= 0 ? AppLogo.fit(cols) : List.of();
         int logoHeight = logo.isEmpty() ? 0 : logo.size() + 1;
 
         if (logoHeight > 0) {
@@ -108,8 +110,11 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
             return;
         }
         int contentRows = height - 2;
-        for (int i = 0; i < contentRows && i < tasks.size(); i++) {
-            drawTaskRow(g, tasks.get(i), i == component.selected(), cols, top, 1 + i);
+        int rowHeight = 1 + Math.max(0, component.zoom());
+        int row = 1;
+        for (int i = 0; i < tasks.size() && row < contentRows; i++) {
+            drawTaskRow(g, tasks.get(i), i == component.selected(), cols, top, row);
+            row += rowHeight;
         }
     }
 

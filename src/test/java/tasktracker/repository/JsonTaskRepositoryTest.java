@@ -204,6 +204,32 @@ class JsonTaskRepositoryTest {
         assertTrue(warnings.stream().anyMatch(w -> w.contains("guardar")));
     }
 
+    @Test
+    void setZoomPersistsAndReloads() throws IOException {
+        Path file = tempDir.resolve("tasks.json");
+        JsonTaskRepository repository = new JsonTaskRepository(file, message -> {
+        });
+
+        repository.setZoom(2);
+
+        assertEquals("2", String.valueOf(JsonStoreCodec.decode(Files.readString(file)).zoom()));
+
+        JsonTaskRepository reloaded = new JsonTaskRepository(file, message -> {
+        });
+        assertEquals(2, reloaded.getZoom());
+    }
+
+    @Test
+    void loadsZoomFromExistingFile() throws IOException {
+        Path file = tempDir.resolve("tasks.json");
+        Files.writeString(file, "{\"lists\":[],\"tasks\":[],\"zoom\":-2}");
+
+        JsonTaskRepository repository = new JsonTaskRepository(file, message -> {
+        });
+
+        assertEquals(-2, repository.getZoom());
+    }
+
     private static Task task(long listId, String title) {
         Task task = new Task(title);
         task.setListId(listId);

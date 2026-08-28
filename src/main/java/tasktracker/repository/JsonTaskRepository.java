@@ -20,6 +20,7 @@ public class JsonTaskRepository implements TaskRepository {
     private final Map<Long, TaskList> lists = new LinkedHashMap<>();
     private final AtomicLong sequence = new AtomicLong();
     private final AtomicLong listSequence = new AtomicLong();
+    private int zoom;
 
     public JsonTaskRepository(Path file, Consumer<String> warningConsumer) {
         this.file = file;
@@ -87,8 +88,19 @@ public class JsonTaskRepository implements TaskRepository {
     }
 
     @Override
+    public int getZoom() {
+        return zoom;
+    }
+
+    @Override
+    public void setZoom(int zoom) {
+        this.zoom = zoom;
+        persist();
+    }
+
+    @Override
     public void persist() {
-        String json = JsonStoreCodec.encode(findAllLists(), findAll());
+        String json = JsonStoreCodec.encode(findAllLists(), findAll(), zoom);
         try {
             Files.writeString(file, json);
         } catch (IOException e) {
@@ -102,6 +114,7 @@ public class JsonTaskRepository implements TaskRepository {
         }
         try {
             JsonStoreCodec.Store store = JsonStoreCodec.decode(Files.readString(file));
+            zoom = store.zoom();
             long maxTaskId = 0;
             for (Task task : store.tasks()) {
                 tasks.put(task.getId(), task);

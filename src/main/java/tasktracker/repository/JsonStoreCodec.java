@@ -10,13 +10,13 @@ final class JsonStoreCodec {
 
     private static final String DEFAULT_LIST_NAME = "Inbox";
 
-    record Store(List<TaskList> lists, List<Task> tasks) {
+    record Store(List<TaskList> lists, List<Task> tasks, int zoom) {
     }
 
     private JsonStoreCodec() {
     }
 
-    static String encode(List<TaskList> lists, List<Task> tasks) {
+    static String encode(List<TaskList> lists, List<Task> tasks, int zoom) {
         StringBuilder sb = new StringBuilder();
         sb.append("{\"lists\":[");
         for (int i = 0; i < lists.size(); i++) {
@@ -26,6 +26,7 @@ final class JsonStoreCodec {
             TaskList list = lists.get(i);
             sb.append("{\"id\":").append(list.getId());
             sb.append(",\"name\":").append(quote(list.getName()));
+            appendSyncFields(sb, list.getRemoteId(), list.getUpdatedAt());
             sb.append('}');
         }
         sb.append("],\"tasks\":[");
@@ -38,9 +39,10 @@ final class JsonStoreCodec {
             sb.append(",\"title\":").append(quote(task.getTitle()));
             sb.append(",\"status\":\"").append(task.getStatus().name()).append('"');
             sb.append(",\"listId\":").append(task.getListId());
+            appendSyncFields(sb, task.getRemoteId(), task.getUpdatedAt());
             sb.append('}');
         }
-        sb.append("]}");
+        sb.append("],\"zoom\":").append(zoom).append('}');
         return sb.toString();
     }
 
@@ -56,13 +58,14 @@ final class JsonStoreCodec {
     private static Store decodeObject(Parser parser) {
         List<TaskList> lists = new ArrayList<>();
         List<Task> tasks = new ArrayList<>();
+        int zoom = 0;
         parser.expect('{');
         parser.skipWhitespace();
         if (parser.peek() == '}') {
             parser.next();
             parser.skipWhitespace();
             parser.requireEnd();
-            return new Store(lists, tasks);
+            return new Store(lists, tasks, zoom);
         }
         while (true) {
             parser.skipWhitespace();
@@ -72,6 +75,7 @@ final class JsonStoreCodec {
             switch (key) {
                 case "lists" -> lists.addAll(parser.parseLists());
                 case "tasks" -> tasks.addAll(parser.parseTasks(null));
+                case "zoom" -> zoom = (int) parser.parseLong();
                 default -> throw new JsonParseException("Campo desconocido: " + key);
             }
             parser.skipWhitespace();
@@ -85,14 +89,23 @@ final class JsonStoreCodec {
         }
         parser.skipWhitespace();
         parser.requireEnd();
-        return new Store(lists, tasks);
+        return new Store(lists, tasks, zoom);
     }
 
     private static Store decodeLegacy(Parser parser) {
         List<Task> tasks = parser.parseTasks(1L);
         TaskList inbox = new TaskList(DEFAULT_LIST_NAME);
         inbox.setId(1);
-        return new Store(List.of(inbox), tasks);
+        return new Store(List.of(inbox), tasks, 0);
+    }
+
+    private static void appendSyncFields(StringBuilder sb, String remoteId, long updatedAt) {
+        if (remoteId != null) {
+            sb.append(",\"remoteId\":").append(quote(remoteId));
+        }
+        if (updatedAt != 0) {
+            sb.append(",\"updatedAt\":").append(updatedAt);
+        }
     }
 
     private static String quote(String value) {
@@ -219,6 +232,8 @@ final class JsonStoreCodec {
             String title = null;
             TaskStatus status = null;
             Long listId = null;
+            String remoteId = null;
+            long updatedAt = 0;
             if (peek() == '}') {
                 next();
             } else {
@@ -232,6 +247,8 @@ final class JsonStoreCodec {
                         case "title" -> title = parseString();
                         case "status" -> status = parseStatus();
                         case "listId" -> listId = parseLong();
+                        case "remoteId" -> remoteId = parseString();
+                        case "updatedAt" -> updatedAt = parseLong();
                         default -> throw new JsonParseException("Campo desconocido: " + key);
                     }
                     skipWhitespace();
@@ -253,6 +270,8 @@ final class JsonStoreCodec {
             Task task = new Task(title);
             task.setId(id);
             task.setListId(listId);
+            task.setRemoteId(remoteId);
+            task.setUpdatedAt(updatedAt);
             if (status == TaskStatus.COMPLETED) {
                 task.markCompleted();
             }
@@ -264,6 +283,8 @@ final class JsonStoreCodec {
             skipWhitespace();
             Long id = null;
             String name = null;
+            String remoteId = null;
+            long updatedAt = 0;
             if (peek() == '}') {
                 next();
             } else {
@@ -275,6 +296,8 @@ final class JsonStoreCodec {
                     switch (key) {
                         case "id" -> id = parseLong();
                         case "name" -> name = parseString();
+                        case "remoteId" -> remoteId = parseString();
+                        case "updatedAt" -> updatedAt = parseLong();
                         default -> throw new JsonParseException("Campo desconocido: " + key);
                     }
                     skipWhitespace();
@@ -292,6 +315,8 @@ final class JsonStoreCodec {
             }
             TaskList list = new TaskList(name);
             list.setId(id);
+            list.setRemoteId(remoteId);
+            list.setUpdatedAt(updatedAt);
             return list;
         }
 

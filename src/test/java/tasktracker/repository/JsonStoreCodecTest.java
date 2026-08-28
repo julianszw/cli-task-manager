@@ -20,10 +20,11 @@ class JsonStoreCodecTest {
         task.setId(7);
         task.setListId(1);
 
-        String json = JsonStoreCodec.encode(List.of(inbox), List.of(task));
+        String json = JsonStoreCodec.encode(List.of(inbox), List.of(task), 0);
 
         assertEquals("{\"lists\":[{\"id\":1,\"name\":\"Inbox\"}],"
-                + "\"tasks\":[{\"id\":7,\"title\":\"Comprar leche\",\"status\":\"PENDING\",\"listId\":1}]}", json);
+                + "\"tasks\":[{\"id\":7,\"title\":\"Comprar leche\",\"status\":\"PENDING\",\"listId\":1}],"
+                + "\"zoom\":0}", json);
     }
 
     @Test
@@ -34,11 +35,11 @@ class JsonStoreCodecTest {
         task.setId(1);
         task.setListId(1);
 
-        String json = JsonStoreCodec.encode(List.of(list), List.of(task));
+        String json = JsonStoreCodec.encode(List.of(list), List.of(task), 0);
 
         assertEquals("{\"lists\":[{\"id\":1,\"name\":\"Mi \\\"lista\\\"\\n\"}],"
                 + "\"tasks\":[{\"id\":1,\"title\":\"Dijo \\\"hola\\\" y\\nadiós \\\\\","
-                + "\"status\":\"PENDING\",\"listId\":1}]}", json);
+                + "\"status\":\"PENDING\",\"listId\":1}],\"zoom\":0}", json);
     }
 
     @Test
@@ -78,6 +79,27 @@ class JsonStoreCodecTest {
     }
 
     @Test
+    void encodeIncludesZoomLevel() {
+        String json = JsonStoreCodec.encode(List.of(), List.of(), 2);
+
+        assertEquals("{\"lists\":[],\"tasks\":[],\"zoom\":2}", json);
+    }
+
+    @Test
+    void decodeParsesZoomLevel() {
+        JsonStoreCodec.Store store = JsonStoreCodec.decode("{\"lists\":[],\"tasks\":[],\"zoom\":-2}");
+
+        assertEquals(-2, store.zoom());
+    }
+
+    @Test
+    void decodeDefaultsZoomToZeroWhenAbsent() {
+        JsonStoreCodec.Store store = JsonStoreCodec.decode("{\"lists\":[],\"tasks\":[]}");
+
+        assertEquals(0, store.zoom());
+    }
+
+    @Test
     void decodeLegacyFlatArrayMigratesToInbox() {
         String json = "[{\"id\":3,\"title\":\"A\",\"status\":\"PENDING\"},"
                 + "{\"id\":7,\"title\":\"B\",\"status\":\"COMPLETED\"}]";
@@ -107,7 +129,7 @@ class JsonStoreCodecTest {
         second.setListId(1);
         second.markCompleted();
 
-        String json = JsonStoreCodec.encode(List.of(inbox, work), List.of(first, second));
+        String json = JsonStoreCodec.encode(List.of(inbox, work), List.of(first, second), 0);
         JsonStoreCodec.Store decoded = JsonStoreCodec.decode(json);
 
         assertEquals(2, decoded.lists().size());
@@ -158,5 +180,39 @@ class JsonStoreCodecTest {
     void decodeRejectsTrailingContent() {
         assertThrows(JsonParseException.class,
                 () -> JsonStoreCodec.decode("{\"lists\":[],\"tasks\":[]} extra"));
+    }
+
+    @Test
+    void roundTripPreservesSyncFields() {
+        TaskList inbox = new TaskList("Inbox");
+        inbox.setId(1);
+        inbox.setRemoteId("list-remote-1");
+        inbox.setUpdatedAt(1234L);
+        Task task = new Task("Comprar leche");
+        task.setId(7);
+        task.setListId(1);
+        task.setRemoteId("task-remote-7");
+        task.setUpdatedAt(5678L);
+
+        String json = JsonStoreCodec.encode(List.of(inbox), List.of(task), 0);
+        JsonStoreCodec.Store decoded = JsonStoreCodec.decode(json);
+
+        assertEquals("list-remote-1", decoded.lists().get(0).getRemoteId());
+        assertEquals(1234L, decoded.lists().get(0).getUpdatedAt());
+        assertEquals("task-remote-7", decoded.tasks().get(0).getRemoteId());
+        assertEquals(5678L, decoded.tasks().get(0).getUpdatedAt());
+    }
+
+    @Test
+    void decodeEntitiesWithoutSyncFieldsLeaveThemEmpty() {
+        String json = "{\"lists\":[{\"id\":1,\"name\":\"Inbox\"}],"
+                + "\"tasks\":[{\"id\":1,\"title\":\"A\",\"status\":\"PENDING\",\"listId\":1}]}";
+
+        JsonStoreCodec.Store store = JsonStoreCodec.decode(json);
+
+        assertEquals(null, store.lists().get(0).getRemoteId());
+        assertEquals(0L, store.lists().get(0).getUpdatedAt());
+        assertEquals(null, store.tasks().get(0).getRemoteId());
+        assertEquals(0L, store.tasks().get(0).getUpdatedAt());
     }
 }

@@ -10,6 +10,10 @@ import tasktracker.repository.TaskRepository;
 
 public class TaskService {
 
+    public static final int MIN_ZOOM = -2;
+    public static final int MAX_ZOOM = 2;
+    public static final int DEFAULT_ZOOM = 0;
+
     private final TaskRepository repository;
 
     public TaskService(TaskRepository repository) {
@@ -24,7 +28,9 @@ public class TaskService {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("El nombre de la lista no puede estar vacío");
         }
-        return repository.saveList(new TaskList(name));
+        TaskList list = new TaskList(name);
+        list.setUpdatedAt(System.currentTimeMillis());
+        return repository.saveList(list);
     }
 
     public Task addTask(long listId, String title) {
@@ -35,6 +41,7 @@ public class TaskService {
                 .orElseThrow(() -> new TaskListNotFoundException(listId));
         Task task = new Task(title);
         task.setListId(listId);
+        task.setUpdatedAt(System.currentTimeMillis());
         return repository.save(task);
     }
 
@@ -49,6 +56,7 @@ public class TaskService {
         Task task = repository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
         task.markCompleted();
+        task.setUpdatedAt(System.currentTimeMillis());
         repository.persist();
     }
 
@@ -56,6 +64,7 @@ public class TaskService {
         Task task = repository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
         task.markPending();
+        task.setUpdatedAt(System.currentTimeMillis());
         repository.persist();
     }
 
@@ -66,6 +75,7 @@ public class TaskService {
         Task task = repository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
         task.rename(title);
+        task.setUpdatedAt(System.currentTimeMillis());
         repository.persist();
     }
 
@@ -83,10 +93,20 @@ public class TaskService {
             return;
         }
         task.setListId(targetListId);
+        task.setUpdatedAt(System.currentTimeMillis());
         repository.persist();
     }
 
     public List<Task> purgeCompletedTasks(long listId) {
         return repository.removeCompleted(listId);
+    }
+
+    public int getZoomLevel() {
+        return repository.getZoom();
+    }
+
+    public void setZoomLevel(int level) {
+        int clamped = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, level));
+        repository.setZoom(clamped);
     }
 }

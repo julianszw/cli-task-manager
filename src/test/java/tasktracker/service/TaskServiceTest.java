@@ -403,4 +403,30 @@ class TaskServiceTest {
 
         assertEquals(List.of(a, b), service.listTasks(listId));
     }
+
+    @Test
+    void getZoomLevelDefaultsToZero() {
+        assertEquals(0, service.getZoomLevel());
+    }
+
+    @Test
+    void setZoomLevelStoresValueWithinRange() {
+        service.setZoomLevel(2);
+
+        assertEquals(2, service.getZoomLevel());
+    }
+
+    @Test
+    void setZoomLevelClampsAboveMax() {
+        service.setZoomLevel(99);
+
+        assertEquals(TaskService.MAX_ZOOM, service.getZoomLevel());
+    }
+
+    @Test
+    void setZoomLevelClampsBelowMin() {
+        service.setZoomLevel(-99);
+
+        assertEquals(TaskService.MIN_ZOOM, service.getZoomLevel());
+    }
 }
