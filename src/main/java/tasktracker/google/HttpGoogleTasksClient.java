@@ -6,6 +6,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.model.Task;
 import com.google.api.services.tasks.model.TaskList;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import java.io.IOException;
 import java.util.List;
 import tasktracker.sync.GoogleTasksClient;
@@ -45,7 +46,7 @@ public final class HttpGoogleTasksClient implements GoogleTasksClient {
                     .map(list -> new RemoteTaskList(list.getId(), list.getTitle(), toMillis(list.getUpdated())))
                     .toList();
         } catch (IOException e) {
-            throw new SyncException("No se pudieron listar las listas: " + e.getMessage(), e);
+            throw handleException("No se pudieron listar las listas", e);
         }
     }
 
@@ -61,7 +62,7 @@ public final class HttpGoogleTasksClient implements GoogleTasksClient {
                     .map(task -> toRemoteTask(task, remoteListId))
                     .toList();
         } catch (IOException e) {
-            throw new SyncException("No se pudieron listar las tareas: " + e.getMessage(), e);
+            throw handleException("No se pudieron listar las tareas", e);
         }
     }
 
@@ -71,7 +72,7 @@ public final class HttpGoogleTasksClient implements GoogleTasksClient {
             TaskList created = service().tasklists().insert(new TaskList().setTitle(title)).execute();
             return new RemoteTaskList(created.getId(), created.getTitle(), toMillis(created.getUpdated()));
         } catch (IOException e) {
-            throw new SyncException("No se pudo crear la lista: " + e.getMessage(), e);
+            throw handleException("No se pudo crear la lista", e);
         }
     }
 
@@ -81,7 +82,7 @@ public final class HttpGoogleTasksClient implements GoogleTasksClient {
             Task created = service().tasks().insert(remoteListId, new Task().setTitle(title)).execute();
             return toRemoteTask(created, remoteListId);
         } catch (IOException e) {
-            throw new SyncException("No se pudo crear la tarea: " + e.getMessage(), e);
+            throw handleException("No se pudo crear la tarea", e);
         }
     }
 
@@ -89,10 +90,10 @@ public final class HttpGoogleTasksClient implements GoogleTasksClient {
     public RemoteTask updateTask(String remoteListId, String taskId, String title, boolean completed) {
         try {
             Task updated = service().tasks().update(remoteListId, taskId,
-                    new Task().setTitle(title).setStatus(completed ? "completed" : "needsAction")).execute();
+                    new Task().setId(taskId).setTitle(title).setStatus(completed ? "completed" : "needsAction")).execute();
             return toRemoteTask(updated, remoteListId);
         } catch (IOException e) {
-            throw new SyncException("No se pudo actualizar la tarea: " + e.getMessage(), e);
+            throw handleException("No se pudo actualizar la tarea", e);
         }
     }
 
@@ -101,7 +102,7 @@ public final class HttpGoogleTasksClient implements GoogleTasksClient {
         try {
             service().tasks().delete(remoteListId, taskId).execute();
         } catch (IOException e) {
-            throw new SyncException("No se pudo eliminar la tarea: " + e.getMessage(), e);
+            throw handleException("No se pudo eliminar la tarea", e);
         }
     }
 
@@ -132,5 +133,12 @@ public final class HttpGoogleTasksClient implements GoogleTasksClient {
         } catch (RuntimeException e) {
             return 0L;
         }
+    }
+
+    private SyncException handleException(String message, IOException e) {
+        if (e instanceof GoogleJsonResponseException ge && ge.getDetails() != null) {
+            return new SyncException(message + ": " + ge.getDetails().getMessage(), e);
+        }
+        return new SyncException(message + ": " + e.getMessage(), e);
     }
 }
