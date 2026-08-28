@@ -8,16 +8,12 @@ import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
-import com.googlecode.lanterna.screen.Screen;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import tasktracker.model.Task;
 import tasktracker.model.TaskList;
+import tasktracker.provider.ProviderException;
 import tasktracker.service.TaskService;
-import tasktracker.sync.SyncException;
-import tasktracker.sync.SyncResult;
-import tasktracker.sync.TaskSyncService;
 
 public class TaskListWindow extends BasicWindow {
 
@@ -28,8 +24,6 @@ public class TaskListWindow extends BasicWindow {
 
     private final TaskService service;
     private final WindowBasedTextGUI gui;
-    private final TaskSyncService syncService;
-    private final Screen screen;
     private final TaskViewComponent view = new TaskViewComponent();
     private final List<TaskList> lists = new ArrayList<>();
     private final List<Task> tasks = new ArrayList<>();
@@ -39,19 +33,13 @@ public class TaskListWindow extends BasicWindow {
     private MessageKind kind = MessageKind.INFO;
 
     public TaskListWindow(TaskService service) {
-        this(service, null, null, null);
+        this(service, null);
     }
 
     public TaskListWindow(TaskService service, WindowBasedTextGUI gui) {
-        this(service, gui, null, null);
-    }
-
-    public TaskListWindow(TaskService service, WindowBasedTextGUI gui, TaskSyncService syncService, Screen screen) {
         super(TITLE);
         this.service = service;
         this.gui = gui;
-        this.syncService = syncService;
-        this.screen = screen;
         lists.addAll(service.listLists());
 
         setHints(List.of(Window.Hint.FULL_SCREEN));
@@ -80,7 +68,7 @@ public class TaskListWindow extends BasicWindow {
         return activeIndex;
     }
 
-    long activeListId() {
+    String activeListId() {
         return activeList().getId();
     }
 
@@ -129,7 +117,7 @@ public class TaskListWindow extends BasicWindow {
         if (lists.isEmpty()) {
             return "";
         }
-        return activeList().getName() + " · " + (activeIndex + 1) + "/" + lists.size();
+        return activeList().getTitle() + " · " + (activeIndex + 1) + "/" + lists.size();
     }
 
     @Override
@@ -189,14 +177,6 @@ public class TaskListWindow extends BasicWindow {
                     }
                     case 'p' -> {
                         purgeCompleted();
-                        return true;
-                    }
-                    case 's' -> {
-                        syncWithGoogle();
-                        return true;
-                    }
-                    case 'g' -> {
-                        loginGoogle();
                         return true;
                     }
                     case 'q' -> {
@@ -312,6 +292,7 @@ public class TaskListWindow extends BasicWindow {
             case REOPEN -> reopenSelected();
             case DELETE -> deleteSelected();
             case EDIT -> openEditTask();
+            case FECHA -> openTaskDate();
             case MOVE -> openMoveTask();
         }
     }
@@ -322,20 +303,24 @@ public class TaskListWindow extends BasicWindow {
         }
         Task task = tasks.get(selected);
         List<TaskList> targets = lists.stream()
-                .filter(list -> list.getId() != task.getListId())
+                .filter(list -> !list.getId().equals(task.getListId()))
                 .toList();
         if (targets.isEmpty()) {
             setStatus(NO_OTHER_LIST);
             return;
         }
         OptionMenuWindow menu = new OptionMenuWindow(
-                "Mover a otra lista", targets.stream().map(TaskList::getName).toList());
+                "Mover a otra lista", targets.stream().map(TaskList::getTitle).toList());
         gui.addWindowAndWait(menu);
         int index = menu.selectedIndex();
         if (index < 0) {
             return;
         }
-        service.moveTask(task.getId(), targets.get(index).getId());
+        try {
+            service.moveTask(task.getId(), targets.get(index).getId());
+        } catch (ProviderException e) {
+            setWarning(e.getMessage());
+        }
         refresh();
     }
 
@@ -359,11 +344,23 @@ public class TaskListWindow extends BasicWindow {
         refresh();
     }
 
+    private void openTaskDate() {
+        if (gui == null || selected < 0 || selected >= tasks.size()) {
+            return;
+        }
+        gui.addWindowAndWait(new TaskDateWindow(service, tasks.get(selected)));
+        refresh();
+    }
+
     private void completeSelected() {
         if (selected < 0 || selected >= tasks.size()) {
             return;
         }
-        service.completeTask(tasks.get(selected).getId());
+        try {
+            service.completeTask(tasks.get(selected).getId());
+        } catch (ProviderException e) {
+            setWarning(e.getMessage());
+        }
         refresh();
     }
 
@@ -371,7 +368,11 @@ public class TaskListWindow extends BasicWindow {
         if (selected < 0 || selected >= tasks.size()) {
             return;
         }
-        service.reopenTask(tasks.get(selected).getId());
+        try {
+            service.reopenTask(tasks.get(selected).getId());
+        } catch (ProviderException e) {
+            setWarning(e.getMessage());
+        }
         refresh();
     }
 
@@ -379,7 +380,11 @@ public class TaskListWindow extends BasicWindow {
         if (selected < 0 || selected >= tasks.size()) {
             return;
         }
-        service.deleteTask(tasks.get(selected).getId());
+        try {
+            service.deleteTask(tasks.get(selected).getId());
+        } catch (ProviderException e) {
+            setWarning(e.getMessage());
+        }
         refresh();
     }
 
@@ -387,74 +392,17 @@ public class TaskListWindow extends BasicWindow {
         if (lists.isEmpty()) {
             return;
         }
-        List<Task> removed = service.purgeCompletedTasks(activeList().getId());
-        refresh();
-        if (removed.isEmpty()) {
-            setStatus(NO_COMPLETED_TO_PURGE);
-        } else {
-            setStatus("Tareas completadas eliminadas: " + removed.size());
-        }
-    }
-
-    private void syncWithGoogle() {
-        if (syncService == null) {
-            return;
-        }
         try {
-            if (!syncService.isAuthenticated()) {
-                authenticateWithScreenSuspended();
-            }
-            SyncResult result = syncService.sync();
+            List<Task> removed = service.purgeCompletedTasks(activeList().getId());
             refresh();
-            setStatus(syncMessage(result));
-        } catch (SyncException e) {
-            setWarning(e.getMessage());
-        }
-    }
-
-    private void loginGoogle() {
-        if (syncService == null) {
-            return;
-        }
-        try {
-            if (syncService.isAuthenticated()) {
-                setStatus("Ya hay una sesión de Google iniciada");
-                return;
+            if (removed.isEmpty()) {
+                setStatus(NO_COMPLETED_TO_PURGE);
+            } else {
+                setStatus("Tareas completadas eliminadas: " + removed.size());
             }
-            authenticateWithScreenSuspended();
-            setStatus("Sesión de Google iniciada");
-        } catch (SyncException e) {
+        } catch (ProviderException e) {
             setWarning(e.getMessage());
+            refresh();
         }
-    }
-
-    private void authenticateWithScreenSuspended() {
-        if (screen == null) {
-            syncService.ensureAuthenticated();
-            return;
-        }
-        try {
-            screen.stopScreen();
-        } catch (IOException e) {
-            throw new SyncException("No se pudo suspender la terminal: " + e.getMessage(), e);
-        }
-        try {
-            syncService.ensureAuthenticated();
-        } finally {
-            try {
-                screen.startScreen();
-            } catch (IOException e) {
-                throw new SyncException("No se pudo restaurar la terminal: " + e.getMessage(), e);
-            }
-        }
-    }
-
-    private static String syncMessage(SyncResult result) {
-        if (result.isEmpty()) {
-            return "Google Tasks: sin cambios";
-        }
-        int up = result.createdRemote() + result.updatedRemote() + result.deletedRemote();
-        int down = result.createdLocal() + result.updatedLocal() + result.deletedLocal();
-        return "Google Tasks sincronizado: " + up + " subidos, " + down + " bajados";
     }
 }

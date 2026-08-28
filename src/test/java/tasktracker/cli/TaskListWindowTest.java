@@ -7,17 +7,17 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tasktracker.FakeTaskProvider;
 import tasktracker.model.Task;
 import tasktracker.model.TaskStatus;
-import tasktracker.repository.InMemoryTaskRepository;
 import tasktracker.service.TaskService;
 
 class TaskListWindowTest {
 
-    private final TaskService service = new TaskService(new InMemoryTaskRepository());
-    private long inboxId;
+    private final TaskService service = new TaskService(new FakeTaskProvider());
+    private String inboxId;
 
-    private long inbox() {
+    private String inbox() {
         inboxId = service.createList("Inbox").getId();
         return inboxId;
     }
@@ -89,7 +89,7 @@ class TaskListWindowTest {
     @Test
     void purgeRemovesCompletedTasksOfActiveList() {
         inbox();
-        long work = service.createList("Trabajo").getId();
+        String work = service.createList("Trabajo").getId();
 
         service.addTask(inboxId, "Pendiente");
         Task completed = service.addTask(inboxId, "Completada");
@@ -186,7 +186,7 @@ class TaskListWindowTest {
     @Test
     void tabCyclesToNextList() {
         service.createList("Inbox");
-        long work = service.createList("Trabajo").getId();
+        String work = service.createList("Trabajo").getId();
         TaskListWindow window = new TaskListWindow(service);
 
         window.handleInput(new KeyStroke(KeyType.Tab));
@@ -230,7 +230,7 @@ class TaskListWindowTest {
 
     @Test
     void tasksAreScopedToActiveList() {
-        long inbox = service.createList("Inbox").getId();
+        String inbox = service.createList("Inbox").getId();
         service.addTask(inbox, "A");
         service.createList("Trabajo");
         TaskListWindow window = new TaskListWindow(service);
@@ -247,6 +247,54 @@ class TaskListWindowTest {
 
         assertTrue(window.listIndicator().contains("Inbox"));
         assertTrue(window.listIndicator().contains("1/1"));
+    }
+
+    @Test
+    void indicatorShowsProviderName() {
+        inbox();
+        TaskListWindow window = new TaskListWindow(service);
+
+        assertTrue(window.listIndicator().contains("(Fake)"));
+    }
+
+    @Test
+    void hideEmptyListsSkipsEmptyListsInNavigation() {
+        service.createList("Inbox");
+        service.createList("Trabajo");
+        String compras = service.createList("Compras").getId();
+        service.addTask(compras, "A");
+        TaskListWindow window = new TaskListWindow(service);
+
+        window.handleInput(new KeyStroke('h', false, false));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+
+        assertEquals(compras, window.activeListId());
+    }
+
+    @Test
+    void hideEmptyListsToggleOffRestoresNormalNavigation() {
+        service.createList("Inbox");
+        service.createList("Trabajo");
+        TaskListWindow window = new TaskListWindow(service);
+
+        window.handleInput(new KeyStroke('h', false, false));
+        window.handleInput(new KeyStroke('h', false, false));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+
+        assertEquals(1, window.activeListIndex());
+    }
+
+    @Test
+    void hideEmptyListsDoesNotAffectNonEmptyNavigation() {
+        service.createList("Inbox");
+        String work = service.createList("Trabajo").getId();
+        service.addTask(work, "A");
+        TaskListWindow window = new TaskListWindow(service);
+
+        window.handleInput(new KeyStroke('h', false, false));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+
+        assertEquals(work, window.activeListId());
     }
 
     @Test

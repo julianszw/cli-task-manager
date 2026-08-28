@@ -72,11 +72,12 @@ class TaskActionMenuWindowTest {
     void actionsAreListedInStableOrder() {
         TaskActionMenuWindow.Action[] actions = TaskActionMenuWindow.Action.values();
 
-        assertEquals(5, actions.length);
+        assertEquals(6, actions.length);
         assertEquals(TaskActionMenuWindow.Action.COMPLETE, actions[0]);
         assertEquals(TaskActionMenuWindow.Action.REOPEN, actions[1]);
         assertEquals(TaskActionMenuWindow.Action.DELETE, actions[2]);
         assertEquals(TaskActionMenuWindow.Action.EDIT, actions[3]);
-        assertEquals(TaskActionMenuWindow.Action.MOVE, actions[4]);
+        assertEquals(TaskActionMenuWindow.Action.FECHA, actions[4]);
+        assertEquals(TaskActionMenuWindow.Action.MOVE, actions[5]);
     }
 }

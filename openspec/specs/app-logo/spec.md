@@ -1,17 +1,17 @@
 # App Logo
 
 ## Purpose
-Define el logo de la aplicación mostrado en la parte superior de la vista: el texto "Task Manager" dibujado en grande con caracteres de bloque (estilo FIGlet), en el color de acento definido en `visual-style`, que permanece visible como cabecera por encima de la lista de tareas.
+Define el logo de la aplicación mostrado en la parte superior de la vista: el texto "TaskMaster" dibujado en grande con caracteres de bloque (estilo FIGlet), en el color de acento definido en `visual-style`, que permanece visible como cabecera por encima de la lista de tareas. Define además el nombre de la aplicación mostrado como título de la ventana de la terminal.
 
 ## Requirements
 
-### Requirement: Logo ASCII "Task Manager"
-El sistema DEBE mostrar en la parte superior de la vista un logo hecho con caracteres que represente el texto "Task Manager" en letras grandes.
+### Requirement: Logo ASCII "TaskMaster"
+El sistema DEBE mostrar en la parte superior de la vista un logo hecho con caracteres que represente el texto "TaskMaster" en letras grandes.
 
 #### Scenario: Logo visible al iniciar
 - **GIVEN** la aplicación iniciada
 - **WHEN** se muestra la vista
-- **THEN** se muestra el logo "Task Manager" en letras grandes en la parte superior
+- **THEN** se muestra el logo "TaskMaster" en letras grandes en la parte superior
 - **AND** el logo se dibuja con caracteres, sin recursos gráficos externos
 
 ### Requirement: Cabecera superior fija
@@ -40,3 +40,12 @@ El logo DEBE adaptarse al ancho del terminal sin romper el resto de la vista.
 - **WHEN** se muestra la vista
 - **THEN** el logo se trunca o se omite sin desbordar la vista
 - **AND** el resto de la vista (lista y barra de estado) sigue mostrándose correctamente
+
+### Requirement: Título de la ventana de la terminal
+El sistema DEBE mostrar el nombre de la aplicación, "TaskMaster", como título de la
+ventana de la terminal, en lugar del título por defecto del frame de Swing.
+
+#### Scenario: Título visible
+- **GIVEN** la aplicación iniciada
+- **WHEN** se muestra la ventana de la terminal
+- **THEN** el título de la ventana muestra "TaskMaster"

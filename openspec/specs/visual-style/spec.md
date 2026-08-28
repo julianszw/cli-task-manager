@@ -73,12 +73,12 @@ El sistema DEBE mostrar franjas horizontales tenues en el color de acento en los
 - **AND** ambas franjas se muestran en el color de acento, atenuadas
 
 ### Requirement: Chip de título
-El sistema DEBE mostrar el título de la aplicación en la barra de estado con un borde izquierdo de acento (`▎`) y el texto en negrita, truncado al centro si excede el ancho disponible.
+El sistema DEBE mostrar el título de la aplicación, "TaskMaster", en la barra de estado con un borde izquierdo de acento (`▎`) y el texto en negrita, truncado al centro si excede el ancho disponible.
 
 #### Scenario: Título visible
 - **GIVEN** la barra de estado visible
 - **WHEN** se muestra la barra
-- **THEN** el título se muestra precedido por el borde `▎` en el color de acento
+- **THEN** el título "TaskMaster" se muestra precedido por el borde `▎` en el color de acento
 - **AND** el texto del título se muestra en negrita
 
 #### Scenario: Título truncado

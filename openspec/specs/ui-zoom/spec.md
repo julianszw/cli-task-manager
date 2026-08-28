@@ -1,7 +1,7 @@
 # UI Zoom
 
 ## Purpose
-Define la posibilidad de hacer zoom visual global sobre la vista única de tareas (`interactive-cli`): escalar la interfaz en niveles discretos mediante atajos de teclado, restablecer al nivel por defecto y persistir la elección entre sesiones (junto con el estado en el archivo JSON según `json-persistence`).
+Define la posibilidad de hacer zoom visual global sobre la vista única de tareas (`interactive-cli`): escalar la interfaz en niveles discretos mediante atajos de teclado y restablecer al nivel por defecto. El nivel de zoom es de solo sesión: no persiste entre ejecuciones (la aplicación ya no mantiene un archivo JSON local).
 
 ## Requirements
 
@@ -9,7 +9,7 @@ Define la posibilidad de hacer zoom visual global sobre la vista única de tarea
 El sistema DEBE ofrecer cinco niveles de zoom discretos — `-2`, `-1`, `0`, `+1` y `+2` — con `0` como nivel por defecto.
 
 #### Scenario: Nivel por defecto
-- **GIVEN** la aplicación iniciada sin un nivel de zoom persistido
+- **GIVEN** la aplicación iniciada
 - **WHEN** se muestra la vista
 - **THEN** la vista se muestra en el nivel `0`
 
@@ -74,15 +74,17 @@ El sistema DEBE aplicar el nivel de zoom de manera uniforme a toda la interfaz d
 - **WHEN** se muestra la vista
 - **THEN** el nivel de zoom se aplica de forma consistente en toda la interfaz visible
 
-### Requirement: Persistencia del nivel de zoom
-El sistema DEBE persistir el nivel de zoom elegido y restaurarlo al iniciar la aplicación.
+### Requirement: Zoom de solo sesión
+El sistema NO DEBE persistir el nivel de zoom entre ejecuciones: el nivel de zoom es
+una preferencia de la sesión actual y vuelve al valor por defecto al reiniciar la
+aplicación.
 
-#### Scenario: Recordar el nivel entre sesiones
+#### Scenario: Reinicio con zoom cambiado
 - **GIVEN** la vista visible con un nivel de zoom distinto de `0` (por ejemplo, `+2`)
 - **WHEN** el usuario cierra la aplicación y la vuelve a iniciar
-- **THEN** la vista se muestra en el nivel persistido (`+2`)
+- **THEN** la vista se muestra en el nivel por defecto `0`
 
-#### Scenario: Primer inicio sin nivel persistido
-- **GIVEN** que no hay un nivel de zoom persistido
-- **WHEN** se inicia la aplicación
+#### Scenario: Primer inicio
+- **GIVEN** que la aplicación se inicia
+- **WHEN** se muestra la vista
 - **THEN** la vista se muestra en el nivel por defecto `0`

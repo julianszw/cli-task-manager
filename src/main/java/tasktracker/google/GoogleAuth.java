@@ -16,7 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import tasktracker.sync.SyncException;
+import tasktracker.provider.ProviderException;
 
 public final class GoogleAuth {
 
@@ -41,7 +41,7 @@ public final class GoogleAuth {
         try {
             return buildFlow().loadCredential("user");
         } catch (IOException | GeneralSecurityException e) {
-            throw new SyncException("No se pudo cargar la sesión de Google: " + e.getMessage(), e);
+            throw new ProviderException("No se pudo cargar la sesión de Google: " + e.getMessage(), e);
         }
     }
 
@@ -64,7 +64,7 @@ public final class GoogleAuth {
             };
             return new AuthorizationCodeInstalledApp(flow, receiver, browser).authorize("user");
         } catch (Exception e) {
-            throw new SyncException("No se pudo autenticar con Google: " + e.getMessage(), e);
+            throw new ProviderException("No se pudo autenticar con Google: " + e.getMessage(), e);
         }
     }
 
@@ -92,7 +92,7 @@ public final class GoogleAuth {
         if (Files.exists(file)) {
             return GoogleClientSecrets.load(GsonFactory.getDefaultInstance(), new FileReader(file.toFile()));
         }
-        throw new SyncException("No se encontraron credenciales de Google "
+        throw new ProviderException("No se encontraron credenciales de Google "
                 + "(define GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET o crea credentials.json)");
     }
 }

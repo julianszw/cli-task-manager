@@ -38,8 +38,6 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
             new ShortcutBar.Shortcut("r", "reabrir"),
             new ShortcutBar.Shortcut("d", "eliminar"),
             new ShortcutBar.Shortcut("p", "purgar"),
-            new ShortcutBar.Shortcut("g", "login Google"),
-            new ShortcutBar.Shortcut("s", "sincronizar"),
             new ShortcutBar.Shortcut("q/Esc", "salir")));
 
     @Override
@@ -105,8 +103,8 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
         List<Task> tasks = component.tasks();
         if (tasks.isEmpty()) {
             g.setForegroundColor(VisualStyle.DIM);
-            int x = Math.max(1, (cols - NO_TASKS.length()) / 2);
-            g.putString(x, top + 1, NO_TASKS);
+            int msgX = Math.max(1, (cols - NO_TASKS.length()) / 2);
+            g.putString(msgX, top + 1, NO_TASKS);
             return;
         }
         int contentRows = height - 2;
@@ -150,7 +148,18 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
         if (selected) {
             g.enableModifiers(SGR.BOLD);
         }
-        g.putString(5, y, truncateEnd(task.getTitle(), Math.max(0, cols - 5 - 2)));
+        int titleWidth = Math.max(0, cols - 5 - 2);
+        String title = truncateEnd(task.getTitle(), titleWidth);
+        g.putString(5, y, title);
+        g.clearModifiers();
+        String due = task.getDueDate();
+        if (due != null) {
+            int x = 5 + title.length();
+            if (x + 1 < cols - 1) {
+                g.setForegroundColor(VisualStyle.DIM);
+                g.putString(x, y, truncateEnd("  " + due, Math.max(0, cols - x - 1)));
+            }
+        }
         g.clearModifiers();
     }
 

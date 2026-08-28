@@ -20,16 +20,17 @@ El sistema DEBE agrupar las tareas en listas, de modo que cada tarea pertenezca 
 - **THEN** solo se muestran las tareas de esa lista
 
 ### Requirement: Lista inicial por defecto
-El sistema DEBE crear automáticamente una lista inicial la primera vez que no exista ninguna y abrir directamente sobre ella.
+El sistema DEBE crear automáticamente una lista inicial en el proveedor (Google
+Tasks) la primera vez que no exista ninguna y abrir directamente sobre ella.
 
 #### Scenario: Primera ejecución sin listas
-- **GIVEN** que no existen listas
+- **GIVEN** que no existen listas en el proveedor
 - **WHEN** se inicia la aplicación
-- **THEN** el sistema crea una lista inicial (por ejemplo, "Inbox")
+- **THEN** el sistema crea una lista inicial (por ejemplo, "Inbox") en el proveedor
 - **AND** la aplicación abre mostrando esa lista como activa
 
 #### Scenario: Con listas existentes
-- **GIVEN** una o más listas existentes
+- **GIVEN** una o más listas existentes en el proveedor
 - **WHEN** se inicia la aplicación
 - **THEN** no se crea una lista nueva
 - **AND** la aplicación abre sobre la primera lista
@@ -96,7 +97,7 @@ El sistema DEBE crear una nueva lista a partir de un nombre no vacío y dejarla 
 #### Scenario: Crear lista con nombre válido
 - **GIVEN** un nombre de lista no vacío
 - **WHEN** se confirma el nombre
-- **THEN** se crea una nueva lista con ese nombre
+- **THEN** se crea una nueva lista en el proveedor con ese nombre
 - **AND** la nueva lista queda disponible para navegar con `Tab`/`Shift+Tab`
 - **AND** la nueva lista se convierte en la lista activa
 

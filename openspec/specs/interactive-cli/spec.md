@@ -20,6 +20,22 @@ La aplicación DEBE abrir directamente en la vista de lista de tareas, sin un me
 - **THEN** se muestra un mensaje indicando que no hay tareas
 - **AND** el usuario puede crear una tarea o salir de la aplicación
 
+### Requirement: Requerir autenticación previa
+La aplicación DEBE requerir autenticación contra Google Tasks antes de mostrar y
+operar sobre las tareas; sin autenticación, DEBE solicitar el acceso.
+
+#### Scenario: Usuario no autenticado
+- **GIVEN** un usuario que no está autenticado
+- **WHEN** se inicia la aplicación
+- **THEN** el sistema solicita autenticación (según `task-provider`)
+- **AND** no se muestra la lista de tareas hasta completar la autenticación
+
+#### Scenario: Usuario autenticado
+- **GIVEN** un usuario autenticado
+- **WHEN** se inicia la aplicación
+- **THEN** el sistema carga las listas y tareas desde Google Tasks
+- **AND** se muestra la vista de tareas de la lista activa
+
 ### Requirement: Navegación por teclado
 El sistema DEBE permitir moverse por la lista de tareas con las teclas `↑`/`k` (arriba) y `↓`/`j` (abajo), manteniendo visible la tarea seleccionada.
 
@@ -111,13 +127,19 @@ La tecla `a` DEBE abrir un campo de entrada para crear una tarea.
 - **THEN** no se crea ninguna tarea
 - **AND** se muestra un mensaje de error
 
+#### Scenario: Crear tarea con fecha de vencimiento
+- **GIVEN** la vista única visible con una lista activa
+- **WHEN** el usuario crea una tarea indicando además una fecha de vencimiento
+- **THEN** la tarea se crea con esa fecha (según `task-management`)
+- **AND** la vista muestra la tarea con su fecha de vencimiento
+
 ### Requirement: Ayuda permanente de teclas
 El sistema DEBE mostrar siempre una ayuda visible con las teclas disponibles, en la fila de atajos de la barra de estado (según `visual-style`).
 
 #### Scenario: Ayuda siempre visible
 - **GIVEN** la vista única visible
 - **WHEN** se muestra la vista
-- **THEN** se muestra la fila de atajos con las teclas disponibles: `↑`/`k` (subir), `↓`/`j` (bajar), `Enter` (acciones), `Tab` (lista), `a` (crear), `n` (nueva lista), `c` (completar), `r` (reabrir), `d` (eliminar), `p` (purgar), `q`/`Esc` (salir)
+- **THEN** se muestra la fila de atajos con las teclas disponibles: `↑`/`k` (subir), `↓`/`j` (bajar), `Enter` (acciones), `Tab` (lista), `a` (crear), `n` (nueva lista), `h` (ocultar listas), `c` (completar), `r` (reabrir), `d` (eliminar), `p` (purgar), `q`/`Esc` (salir)
 - **AND** la ayuda permanece visible en todo momento, sin necesidad de presionar una tecla para mostrarla
 
 ### Requirement: Salir de la aplicación con confirmación

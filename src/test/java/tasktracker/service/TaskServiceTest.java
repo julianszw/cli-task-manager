@@ -3,20 +3,20 @@ package tasktracker.service;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tasktracker.FakeTaskProvider;
 import tasktracker.exception.TaskListNotFoundException;
 import tasktracker.exception.TaskNotFoundException;
 import tasktracker.model.Task;
 import tasktracker.model.TaskList;
 import tasktracker.model.TaskStatus;
-import tasktracker.repository.InMemoryTaskRepository;
-import tasktracker.repository.TaskRepository;
+import tasktracker.provider.TaskProvider;
 
 class TaskServiceTest {
 
@@ -24,10 +24,10 @@ class TaskServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new TaskService(new InMemoryTaskRepository());
+        service = new TaskService(new FakeTaskProvider());
     }
 
-    private long inboxId() {
+    private String inboxId() {
         return service.createList("Inbox").getId();
     }
 
@@ -37,8 +37,8 @@ class TaskServiceTest {
         TaskList second = service.createList("Trabajo");
 
         assertNotEquals(first.getId(), second.getId());
-        assertEquals("Inbox", first.getName());
-        assertEquals("Trabajo", second.getName());
+        assertEquals("Inbox", first.getTitle());
+        assertEquals("Trabajo", second.getTitle());
     }
 
     @Test
@@ -63,7 +63,7 @@ class TaskServiceTest {
 
     @Test
     void addTaskCreatesPendingTaskWithUniqueId() {
-        long listId = inboxId();
+        String listId = inboxId();
 
         Task first = service.addTask(listId, "Comprar leche");
         Task second = service.addTask(listId, "Pagar facturas");
@@ -75,8 +75,8 @@ class TaskServiceTest {
 
     @Test
     void addTaskAssociatesTaskToList() {
-        long inbox = inboxId();
-        long work = service.createList("Trabajo").getId();
+        String inbox = inboxId();
+        String work = service.createList("Trabajo").getId();
 
         Task task = service.addTask(inbox, "A");
 
@@ -87,30 +87,30 @@ class TaskServiceTest {
 
     @Test
     void addTaskThrowsWhenListDoesNotExist() {
-        assertThrows(TaskListNotFoundException.class, () -> service.addTask(99, "A"));
+        assertThrows(TaskListNotFoundException.class, () -> service.addTask("99", "A"));
     }
 
     @Test
     void addTaskRejectsEmptyTitle() {
-        long listId = inboxId();
+        String listId = inboxId();
         assertThrows(IllegalArgumentException.class, () -> service.addTask(listId, ""));
     }
 
     @Test
     void addTaskRejectsBlankTitle() {
-        long listId = inboxId();
+        String listId = inboxId();
         assertThrows(IllegalArgumentException.class, () -> service.addTask(listId, "   "));
     }
 
     @Test
     void addTaskRejectsNullTitle() {
-        long listId = inboxId();
+        String listId = inboxId();
         assertThrows(IllegalArgumentException.class, () -> service.addTask(listId, null));
     }
 
     @Test
     void addTaskRejectsEmptyTitleAndDoesNotCreateTask() {
-        long listId = inboxId();
+        String listId = inboxId();
         service.addTask(listId, "Única");
 
         assertThrows(IllegalArgumentException.class, () -> service.addTask(listId, " "));
@@ -118,15 +118,41 @@ class TaskServiceTest {
     }
 
     @Test
+    void addTaskWithDueDateStoresDate() {
+        String listId = inboxId();
+
+        Task task = service.addTask(listId, "Entregar", "2026-08-28");
+
+        assertEquals("2026-08-28T00:00:00.000Z", task.getDue());
+        assertEquals("2026-08-28", task.getDueDate());
+    }
+
+    @Test
+    void addTaskWithoutDueDateHasNullDue() {
+        String listId = inboxId();
+
+        Task task = service.addTask(listId, "Sin fecha");
+
+        assertNull(task.getDue());
+    }
+
+    @Test
+    void addTaskRejectsInvalidDueDate() {
+        String listId = inboxId();
+
+        assertThrows(IllegalArgumentException.class, () -> service.addTask(listId, "A", "28/08/2026"));
+    }
+
+    @Test
     void listTasksReturnsEmptyWhenNoTasks() {
-        long listId = inboxId();
+        String listId = inboxId();
         assertTrue(service.listTasks(listId).isEmpty());
     }
 
     @Test
     void listTasksReturnsOnlyTasksOfGivenList() {
-        long inbox = inboxId();
-        long work = service.createList("Trabajo").getId();
+        String inbox = inboxId();
+        String work = service.createList("Trabajo").getId();
         service.addTask(inbox, "A");
         service.addTask(inbox, "B");
         service.addTask(work, "C");
@@ -150,7 +176,7 @@ class TaskServiceTest {
 
     @Test
     void completeTaskThrowsWhenTaskDoesNotExist() {
-        assertThrows(TaskNotFoundException.class, () -> service.completeTask(99));
+        assertThrows(TaskNotFoundException.class, () -> service.completeTask("99"));
     }
 
     @Test
@@ -174,7 +200,7 @@ class TaskServiceTest {
 
     @Test
     void reopenTaskThrowsWhenTaskDoesNotExist() {
-        assertThrows(TaskNotFoundException.class, () -> service.reopenTask(99));
+        assertThrows(TaskNotFoundException.class, () -> service.reopenTask("99"));
     }
 
     @Test
@@ -187,7 +213,7 @@ class TaskServiceTest {
 
     @Test
     void deleteTaskRemovesExistingTask() {
-        long listId = inboxId();
+        String listId = inboxId();
         Task task = service.addTask(listId, "Comprar leche");
 
         service.deleteTask(task.getId());
@@ -197,12 +223,12 @@ class TaskServiceTest {
 
     @Test
     void deleteTaskThrowsWhenTaskDoesNotExist() {
-        assertThrows(TaskNotFoundException.class, () -> service.deleteTask(99));
+        assertThrows(TaskNotFoundException.class, () -> service.deleteTask("99"));
     }
 
     @Test
     void purgeCompletedTasksRemovesCompletedAndKeepsPending() {
-        long listId = inboxId();
+        String listId = inboxId();
         Task pending = service.addTask(listId, "Pendiente");
         Task completed = service.addTask(listId, "Completada");
         service.completeTask(completed.getId());
@@ -215,8 +241,8 @@ class TaskServiceTest {
 
     @Test
     void purgeCompletedTasksOnlyAffectsGivenList() {
-        long inbox = inboxId();
-        long work = service.createList("Trabajo").getId();
+        String inbox = inboxId();
+        String work = service.createList("Trabajo").getId();
         Task inboxDone = service.addTask(inbox, "A");
         Task workDone = service.addTask(work, "B");
         service.completeTask(inboxDone.getId());
@@ -230,7 +256,7 @@ class TaskServiceTest {
 
     @Test
     void purgeCompletedTasksReturnsEmptyWhenNoCompletedTasks() {
-        long listId = inboxId();
+        String listId = inboxId();
         service.addTask(listId, "Pendiente");
 
         assertTrue(service.purgeCompletedTasks(listId).isEmpty());
@@ -238,28 +264,10 @@ class TaskServiceTest {
     }
 
     @Test
-    void completeTaskTriggersPersistence() {
-        List<String> persisted = new ArrayList<>();
-        TaskRepository repository = new InMemoryTaskRepository() {
-            @Override
-            public void persist() {
-                persisted.add("persisted");
-            }
-        };
-        TaskService service = new TaskService(repository);
-        TaskList list = service.createList("Inbox");
-        Task task = service.addTask(list.getId(), "Tarea");
-
-        service.completeTask(task.getId());
-
-        assertEquals(List.of("persisted"), persisted);
-    }
-
-    @Test
     void renameTaskUpdatesTitleAndKeepsIdAndStatus() {
-        long listId = inboxId();
+        String listId = inboxId();
         Task task = service.addTask(listId, "Original");
-        long id = task.getId();
+        String id = task.getId();
         service.completeTask(task.getId());
 
         service.renameTask(id, "Nuevo título");
@@ -287,31 +295,37 @@ class TaskServiceTest {
 
     @Test
     void renameTaskThrowsWhenTaskDoesNotExist() {
-        assertThrows(TaskNotFoundException.class, () -> service.renameTask(99, "Título"));
+        assertThrows(TaskNotFoundException.class, () -> service.renameTask("99", "Título"));
     }
 
     @Test
-    void renameTaskTriggersPersistence() {
-        List<String> persisted = new ArrayList<>();
-        TaskRepository repository = new InMemoryTaskRepository() {
-            @Override
-            public void persist() {
-                persisted.add("persisted");
-            }
-        };
-        TaskService service = new TaskService(repository);
-        TaskList list = service.createList("Inbox");
-        Task task = service.addTask(list.getId(), "Tarea");
+    void setTaskDueStoresAndClearsDate() {
+        Task task = service.addTask(inboxId(), "Original");
 
-        service.renameTask(task.getId(), "Renombrada");
+        service.setTaskDue(task.getId(), "2026-08-28");
+        assertEquals("2026-08-28T00:00:00.000Z", task.getDue());
 
-        assertEquals(List.of("persisted"), persisted);
+        service.setTaskDue(task.getId(), "");
+        assertNull(task.getDue());
+    }
+
+    @Test
+    void setTaskDueRejectsInvalidDate() {
+        Task task = service.addTask(inboxId(), "Original");
+
+        assertThrows(IllegalArgumentException.class, () -> service.setTaskDue(task.getId(), "nope"));
+        assertNull(task.getDue());
+    }
+
+    @Test
+    void setTaskDueThrowsWhenTaskDoesNotExist() {
+        assertThrows(TaskNotFoundException.class, () -> service.setTaskDue("99", "2026-08-28"));
     }
 
     @Test
     void moveTaskMovesTaskToTargetList() {
-        long inbox = inboxId();
-        long work = service.createList("Trabajo").getId();
+        String inbox = inboxId();
+        String work = service.createList("Trabajo").getId();
         Task task = service.addTask(inbox, "A");
 
         service.moveTask(task.getId(), work);
@@ -323,23 +337,23 @@ class TaskServiceTest {
 
     @Test
     void moveTaskThrowsWhenTaskDoesNotExist() {
-        long work = service.createList("Trabajo").getId();
+        String work = service.createList("Trabajo").getId();
 
-        assertThrows(TaskNotFoundException.class, () -> service.moveTask(99, work));
+        assertThrows(TaskNotFoundException.class, () -> service.moveTask("99", work));
     }
 
     @Test
     void moveTaskThrowsWhenTargetListDoesNotExist() {
-        long inbox = inboxId();
+        String inbox = inboxId();
         Task task = service.addTask(inbox, "A");
 
-        assertThrows(TaskListNotFoundException.class, () -> service.moveTask(task.getId(), 99));
+        assertThrows(TaskListNotFoundException.class, () -> service.moveTask(task.getId(), "99"));
         assertEquals(inbox, task.getListId());
     }
 
     @Test
     void moveTaskToSameListKeepsTaskUnchanged() {
-        long inbox = inboxId();
+        String inbox = inboxId();
         Task task = service.addTask(inbox, "A");
 
         assertDoesNotThrow(() -> service.moveTask(task.getId(), inbox));
@@ -348,27 +362,8 @@ class TaskServiceTest {
     }
 
     @Test
-    void moveTaskTriggersPersistence() {
-        List<String> persisted = new ArrayList<>();
-        TaskRepository repository = new InMemoryTaskRepository() {
-            @Override
-            public void persist() {
-                persisted.add("persisted");
-            }
-        };
-        TaskService service = new TaskService(repository);
-        TaskList inbox = service.createList("Inbox");
-        TaskList work = service.createList("Trabajo");
-        Task task = service.addTask(inbox.getId(), "Tarea");
-
-        service.moveTask(task.getId(), work.getId());
-
-        assertEquals(List.of("persisted"), persisted);
-    }
-
-    @Test
     void listTasksOrdersPendingBeforeCompleted() {
-        long listId = inboxId();
+        String listId = inboxId();
         Task a = service.addTask(listId, "A");
         Task b = service.addTask(listId, "B");
         Task c = service.addTask(listId, "C");
@@ -379,7 +374,7 @@ class TaskServiceTest {
 
     @Test
     void listTasksKeepsRelativeOrderWithinGroups() {
-        long listId = inboxId();
+        String listId = inboxId();
         Task a = service.addTask(listId, "A");
         Task b = service.addTask(listId, "B");
         Task c = service.addTask(listId, "C");
@@ -392,7 +387,7 @@ class TaskServiceTest {
 
     @Test
     void reopenedTaskReturnsToPendingGroup() {
-        long listId = inboxId();
+        String listId = inboxId();
         Task a = service.addTask(listId, "A");
         Task b = service.addTask(listId, "B");
         service.completeTask(b.getId());
@@ -402,6 +397,20 @@ class TaskServiceTest {
         service.reopenTask(b.getId());
 
         assertEquals(List.of(a, b), service.listTasks(listId));
+    }
+
+    @Test
+    void loadPopulatesListsAndTasksFromProvider() {
+        TaskProvider provider = new FakeTaskProvider();
+        TaskList list = provider.createTaskList("Inbox");
+        provider.createTask(list.getId(), "A", null);
+        provider.createTask(list.getId(), "B", null);
+        TaskService loaded = new TaskService(provider);
+
+        loaded.load();
+
+        assertEquals(1, loaded.listLists().size());
+        assertEquals(2, loaded.listTasks(list.getId()).size());
     }
 
     @Test

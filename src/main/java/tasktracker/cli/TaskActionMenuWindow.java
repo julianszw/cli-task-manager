@@ -17,6 +17,7 @@ public class TaskActionMenuWindow extends BasicWindow {
         REOPEN("Reabrir"),
         DELETE("Eliminar"),
         EDIT("Editar"),
+        FECHA("Fecha"),
         MOVE("Mover");
 
         private final String label;

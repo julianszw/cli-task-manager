@@ -15,41 +15,41 @@ import tasktracker.model.Task;
 import tasktracker.provider.ProviderException;
 import tasktracker.service.TaskService;
 
-public class AddTaskWindow extends BasicWindow {
+public class TaskDateWindow extends BasicWindow {
 
-    private static final String TITLE = "Nueva tarea";
-    private static final String EMPTY_TITLE = "⚠ El título no puede estar vacío";
+    private static final String TITLE = "Fecha de vencimiento";
 
     private final TaskService service;
-    private final String listId;
+    private final Task task;
     private final TextBox input = new TextBox(new TerminalSize(60, 1));
-    private final TextBox dueInput = new TextBox(new TerminalSize(60, 1));
     private final Label message = new Label("");
-    private Task created;
+    private boolean updated;
 
-    public AddTaskWindow(TaskService service, String listId) {
+    public TaskDateWindow(TaskService service, Task task) {
         super(TITLE);
         this.service = service;
-        this.listId = listId;
+        this.task = task;
 
         setHints(List.of(Window.Hint.CENTERED));
 
         message.setForegroundColor(VisualStyle.ERROR);
 
+        if (task.getDueDate() != null) {
+            input.setText(task.getDueDate());
+        }
+
         Panel content = new Panel(new LinearLayout(Direction.VERTICAL));
-        content.addComponent(new Label("Título de la tarea:"));
+        content.addComponent(new Label("Fecha (yyyy-MM-dd, vacío para quitar):"));
         content.addComponent(input.withBorder(new RoundedBorder()));
-        content.addComponent(new Label("Fecha (yyyy-MM-dd, opcional):"));
-        content.addComponent(dueInput.withBorder(new RoundedBorder()));
-        content.addComponent(new Label("Enter para confirmar · Tab para ir a fecha · Esc para cancelar"));
+        content.addComponent(new Label("Enter para confirmar · Esc para cancelar"));
         content.addComponent(message);
         setComponent(content);
 
         setFocusedInteractable(input);
     }
 
-    public Task getCreatedTask() {
-        return created;
+    boolean isUpdated() {
+        return updated;
     }
 
     String getMessageText() {
@@ -60,28 +60,12 @@ public class AddTaskWindow extends BasicWindow {
         return input;
     }
 
-    TextBox dueBox() {
-        return dueInput;
-    }
-
     @Override
     public boolean handleInput(KeyStroke key) {
-        if (key.getKeyType() == KeyType.Tab) {
-            setFocusedInteractable(dueInput);
-            return true;
-        }
-        if (key.getKeyType() == KeyType.ReverseTab) {
-            setFocusedInteractable(input);
-            return true;
-        }
         if (key.getKeyType() == KeyType.Enter) {
-            String title = input.getText().trim();
-            if (title.isEmpty()) {
-                message.setText(EMPTY_TITLE);
-                return true;
-            }
             try {
-                created = service.addTask(listId, title, dueInput.getText());
+                service.setTaskDue(task.getId(), input.getText());
+                updated = true;
                 close();
             } catch (IllegalArgumentException | ProviderException e) {
                 message.setText(e.getMessage());

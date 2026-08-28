@@ -12,10 +12,17 @@ asociada a una lista existente.
 #### Scenario: Crear tarea con título válido
 - **GIVEN** un título de tarea no vacío y una lista existente
 - **WHEN** se solicita crear la tarea
-- **THEN** el sistema genera un id único para la tarea
+- **THEN** el sistema crea la tarea en el proveedor (Google Tasks)
+- **AND** la tarea queda con el id asignado por el proveedor
 - **AND** la tarea queda en estado `PENDING`
 - **AND** la tarea queda asociada a la lista indicada
 - **AND** la tarea queda disponible para ser listada
+
+#### Scenario: Crear tarea con fecha de vencimiento
+- **GIVEN** un título de tarea no vacío, una lista existente y una fecha de vencimiento
+- **WHEN** se solicita crear la tarea con esa fecha
+- **THEN** la tarea se crea en el proveedor
+- **AND** la tarea queda con la fecha de vencimiento indicada
 
 #### Scenario: Crear tarea en una lista inexistente
 - **GIVEN** un id de lista que no corresponde a ninguna lista
@@ -35,7 +42,7 @@ El sistema DEBE permitir obtener todas las tareas existentes.
 #### Scenario: Listar con tareas cargadas
 - **GIVEN** una o más tareas creadas previamente
 - **WHEN** se solicita el listado
-- **THEN** el sistema devuelve todas las tareas con su id, título y estado
+- **THEN** el sistema devuelve todas las tareas con su id, título, estado y, si existe, su fecha de vencimiento
 
 #### Scenario: Listar sin tareas cargadas
 - **GIVEN** que no hay tareas creadas
@@ -88,7 +95,7 @@ El sistema DEBE permitir modificar el título de una tarea existente.
 - **GIVEN** una tarea con id válido y un título nuevo no vacío
 - **WHEN** se solicita actualizar el título de esa tarea
 - **THEN** el título de la tarea cambia al nuevo valor
-- **AND** el resto de los atributos (id y estado) permanecen sin cambios
+- **AND** el resto de los atributos (id, estado y fecha) permanecen sin cambios
 
 #### Scenario: Actualizar con título vacío
 - **GIVEN** una tarea con id válido y un título nuevo vacío o compuesto solo por espacios
@@ -101,6 +108,26 @@ El sistema DEBE permitir modificar el título de una tarea existente.
 - **WHEN** se solicita actualizar el título de esa tarea
 - **THEN** el sistema lanza `TaskNotFoundException`
 - **AND** ninguna tarea cambia de título
+
+### Requirement: Fecha de vencimiento
+El sistema DEBE permitir establecer, modificar y quitar la fecha de vencimiento de
+una tarea existente.
+
+#### Scenario: Establecer o modificar fecha
+- **GIVEN** una tarea con id válido y una fecha de vencimiento
+- **WHEN** se solicita establecer o modificar la fecha de esa tarea
+- **THEN** la fecha de vencimiento de la tarea se actualiza en el proveedor
+
+#### Scenario: Quitar fecha
+- **GIVEN** una tarea con id válido que tiene fecha de vencimiento
+- **WHEN** se solicita quitar la fecha
+- **THEN** la tarea queda sin fecha de vencimiento
+
+#### Scenario: Actualizar fecha en tarea inexistente
+- **GIVEN** un id que no corresponde a ninguna tarea
+- **WHEN** se solicita modificar la fecha de esa tarea
+- **THEN** el sistema lanza `TaskNotFoundException`
+- **AND** ninguna tarea cambia de fecha
 
 ### Requirement: Eliminar tarea
 El sistema DEBE permitir eliminar una tarea existente por su id.

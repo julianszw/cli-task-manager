@@ -12,6 +12,7 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import java.util.List;
 import tasktracker.model.Task;
+import tasktracker.provider.ProviderException;
 import tasktracker.service.TaskService;
 
 public class EditTaskWindow extends BasicWindow {
@@ -22,6 +23,7 @@ public class EditTaskWindow extends BasicWindow {
     private final TaskService service;
     private final Task task;
     private final TextBox input = new TextBox(new TerminalSize(60, 1));
+    private final TextBox dueInput = new TextBox(new TerminalSize(60, 1));
     private final Label message = new Label("");
     private boolean updated;
 
@@ -35,11 +37,16 @@ public class EditTaskWindow extends BasicWindow {
         message.setForegroundColor(VisualStyle.ERROR);
 
         input.setText(task.getTitle());
+        if (task.getDueDate() != null) {
+            dueInput.setText(task.getDueDate());
+        }
 
         Panel content = new Panel(new LinearLayout(Direction.VERTICAL));
         content.addComponent(new Label("Título de la tarea:"));
         content.addComponent(input.withBorder(new RoundedBorder()));
-        content.addComponent(new Label("Enter para confirmar · Esc para cancelar"));
+        content.addComponent(new Label("Fecha (yyyy-MM-dd, vacío para quitar):"));
+        content.addComponent(dueInput.withBorder(new RoundedBorder()));
+        content.addComponent(new Label("Enter para confirmar · Tab para ir a fecha · Esc para cancelar"));
         content.addComponent(message);
         setComponent(content);
 
@@ -58,17 +65,34 @@ public class EditTaskWindow extends BasicWindow {
         return input;
     }
 
+    TextBox dueBox() {
+        return dueInput;
+    }
+
     @Override
     public boolean handleInput(KeyStroke key) {
+        if (key.getKeyType() == KeyType.Tab) {
+            setFocusedInteractable(dueInput);
+            return true;
+        }
+        if (key.getKeyType() == KeyType.ReverseTab) {
+            setFocusedInteractable(input);
+            return true;
+        }
         if (key.getKeyType() == KeyType.Enter) {
             String title = input.getText().trim();
             if (title.isEmpty()) {
                 message.setText(EMPTY_TITLE);
                 return true;
             }
-            service.renameTask(task.getId(), title);
-            updated = true;
-            close();
+            try {
+                service.renameTask(task.getId(), title);
+                service.setTaskDue(task.getId(), dueInput.getText());
+                updated = true;
+                close();
+            } catch (IllegalArgumentException | ProviderException e) {
+                message.setText(e.getMessage());
+            }
             return true;
         }
         if (key.getKeyType() == KeyType.Escape) {

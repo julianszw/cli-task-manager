@@ -70,3 +70,24 @@ El sistema DEBE aplicar el formato de lista, íconos, atenuado y color en la vis
 - **GIVEN** un comando cuya salida reporta tareas eliminadas (por ejemplo `purge`)
 - **WHEN** se ejecuta
 - **THEN** se muestra un resumen con las tareas eliminadas (`ID` y `TITLE`)
+
+### Requirement: Fecha de vencimiento en la lista
+El sistema DEBE mostrar la fecha de vencimiento de cada tarea junto a su título,
+cuando la tarea tiene una fecha de vencimiento, en un color más liviano y sin
+negrita que el título.
+
+#### Scenario: Tarea con fecha de vencimiento
+- **GIVEN** una tarea con fecha de vencimiento
+- **WHEN** se muestra en la lista
+- **THEN** se muestra su fecha de vencimiento junto al título
+
+#### Scenario: Estilo de la fecha
+- **GIVEN** una tarea con fecha de vencimiento
+- **WHEN** se muestra en la lista
+- **THEN** la fecha se muestra en un color atenuado, más liviano que el título
+- **AND** la fecha no se muestra en negrita
+
+#### Scenario: Tarea sin fecha de vencimiento
+- **GIVEN** una tarea sin fecha de vencimiento
+- **WHEN** se muestra en la lista
+- **THEN** no se muestra ninguna fecha junto al título

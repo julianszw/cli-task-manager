@@ -7,12 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import org.junit.jupiter.api.Test;
-import tasktracker.repository.InMemoryTaskRepository;
+import tasktracker.FakeTaskProvider;
 import tasktracker.service.TaskService;
 
 class NewListWindowTest {
 
-    private final TaskService service = new TaskService(new InMemoryTaskRepository());
+    private final TaskService service = new TaskService(new FakeTaskProvider());
 
     @Test
     void enterWithNameCreatesList() {
@@ -21,7 +21,7 @@ class NewListWindowTest {
         type(window, "Trabajo");
         window.handleInput(new KeyStroke(KeyType.Enter));
 
-        assertEquals("Trabajo", window.getCreatedList().getName());
+        assertEquals("Trabajo", window.getCreatedList().getTitle());
         assertEquals(1, service.listLists().size());
     }
 

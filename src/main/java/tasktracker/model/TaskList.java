@@ -2,40 +2,22 @@ package tasktracker.model;
 
 public class TaskList {
 
-    private long id;
-    private final String name;
-    private String remoteId;
-    private long updatedAt;
+    private String id;
+    private final String title;
 
-    public TaskList(String name) {
-        this.name = name;
+    public TaskList(String title) {
+        this.title = title;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
-    }
-
-    public String getRemoteId() {
-        return remoteId;
-    }
-
-    public void setRemoteId(String remoteId) {
-        this.remoteId = remoteId;
-    }
-
-    public long getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(long updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

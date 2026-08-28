@@ -3,8 +3,8 @@
 ## Purpose
 CLI Task Tracker: aplicación de terminal en Java para crear, listar y completar
 tareas, agrupadas en listas. Proyecto de práctica orientado a reforzar arquitectura
-en capas y manejo de estado con persistencia en un archivo JSON local (definido en
-`repository`).
+en capas, operando exclusivamente contra la Google Tasks API como única fuente de
+datos (definido en `provider`).
 
 ## Tech Stack
 - Java 21 (sin frameworks externos)
@@ -13,8 +13,8 @@ en capas y manejo de estado con persistencia en un archivo JSON local (definido 
 - Lanterna (`com.googlecode.lanterna:lanterna`) para la TUI: ventanas, paneles,
   componentes (lista con render custom, caja de texto) y manejo de teclado.
 - Google Tasks API (`google-api-services-tasks`, `google-api-client`,
-  `google-oauth-client-jetty`) para la sincronización bidireccional con las tareas
-  de Google, con OAuth de aplicación de escritorio.
+  `google-oauth-client-jetty`) como única fuente de datos, con OAuth de aplicación
+  de escritorio.
 - Lenguaje visual definido en `visual-style`: tema oscuro único, bordes redondeados,
   lista con íconos de estado y barra de estado inferior fija.
 - Logo ASCII "Task Manager" en la cabecera (`app-logo`), generado con caracteres de
@@ -24,14 +24,14 @@ en capas y manejo de estado con persistencia en un archivo JSON local (definido 
 Estructura en capas, sin dependencias circulares:
 
 - `model` — entidades del dominio (`Task`, `TaskList`, `TaskStatus`). Sin lógica de negocio, solo estado y comportamiento propio de la entidad.
-- `repository` — acceso y persistencia de datos (en memoria o archivo JSON). Abstrae dónde y cómo se guardan las tareas.
-- `service` — lógica de negocio y orquestación. Valida reglas, coordina `repository`, expone operaciones a `cli`.
-- `sync` — motor de sincronización bidireccional con Google Tasks: vincula entidades por `remoteId`, sube y baja cambios y resuelve conflictos (última modificación gana).
-- `google` — adaptador de infraestructura: autenticación OAuth (`GoogleAuth`) y cliente HTTP de Google Tasks (`HttpGoogleTasksClient`, implementa la interfaz de `sync`).
-- `cli` — interacción con el usuario por terminal. Comandos, parsing de input, formato de output. Sin lógica de negocio ni acceso a datos directo.
+- `provider` — abstracción del backend de tareas (`TaskProvider`): define las operaciones sobre listas y tareas, de modo que la fuente de datos sea intercambiable (Google Tasks ahora, otros proveedores después).
+- `service` — lógica de negocio y orquestación. Valida reglas, coordina `provider`, expone operaciones a `cli`.
+- `google` — adaptador de infraestructura: autenticación OAuth (`GoogleAuth`) y cliente de Google Tasks (`GoogleTasksProvider`, implementa la abstracción de `provider`).
+- `cli` — interacción con el usuario por terminal. Ventanas, atajos y formato de output. Sin lógica de negocio ni acceso a datos directo.
 - `exception` — excepciones propias del dominio (ej: `TaskNotFoundException`).
 
-Regla de dependencia: `cli` → `service` → `repository` → `model`, con `cli` → `sync` → `repository`/`model` y `sync` dependiendo de la interfaz de cliente definida en `sync` (implementada por `google`). Nunca al revés.
+Regla de dependencia: `cli` → `service` → `provider` → `model`, con `google`
+implementando la interfaz de `provider`. Nunca al revés.
 
 ## Conventions
 - La interacción es una vista única de tareas (TUI) con atajos de teclado; no hay
@@ -40,10 +40,11 @@ Regla de dependencia: `cli` → `service` → `repository` → `model`, con `cli
   activa, se navega con `Tab`/`Shift+Tab` y se crean listas con `n`.
 - La presentación sigue `visual-style` (tema oscuro único, sin alternancia de tema).
 - Excepciones de dominio son unchecked y se muestran como mensajes legibles al usuario.
-- Tests unitarios por capa (`repository`, `service`, `cli`): la capa `cli` se testea
+- Tests unitarios por capa (`service`, `cli`): la capa `cli` se testea
   con foco en la vista/entrada, no en lógica de negocio.
 
 ## Out of scope (por ahora)
-- Persistencia en base de datos (usa un archivo JSON local).
+- Persistencia local y modo offline (Google Tasks es la única fuente de datos).
+- Otros proveedores además de Google Tasks (por ejemplo, Microsoft TO DO).
 - Interfaz gráfica o web.
 - Multi-usuario.

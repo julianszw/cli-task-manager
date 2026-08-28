@@ -2,19 +2,18 @@ package tasktracker.model;
 
 public class Task {
 
-    private long id;
+    private String id;
     private String title;
     private TaskStatus status;
-    private long listId;
-    private String remoteId;
-    private long updatedAt;
+    private String listId;
+    private String due;
 
     public Task(String title) {
         this.title = title;
         this.status = TaskStatus.PENDING;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
@@ -26,32 +25,32 @@ public class Task {
         return status;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public long getListId() {
+    public String getListId() {
         return listId;
     }
 
-    public void setListId(long listId) {
+    public void setListId(String listId) {
         this.listId = listId;
     }
 
-    public String getRemoteId() {
-        return remoteId;
+    public String getDue() {
+        return due;
     }
 
-    public void setRemoteId(String remoteId) {
-        this.remoteId = remoteId;
+    public void setDue(String due) {
+        this.due = due;
     }
 
-    public long getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(long updatedAt) {
-        this.updatedAt = updatedAt;
+    public String getDueDate() {
+        if (due == null) {
+            return null;
+        }
+        int separator = due.indexOf('T');
+        return separator >= 0 ? due.substring(0, separator) : due;
     }
 
     public void markCompleted() {

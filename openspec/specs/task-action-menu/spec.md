@@ -1,7 +1,7 @@
 # Task Action Menu
 
 ## Purpose
-Define el menú contextual de acciones que se abre al presionar `Enter` sobre la tarea seleccionada en la vista única (`interactive-cli`). Permite desplazarse entre las acciones aplicables a la tarea (completar, reabrir, eliminar, editar y mover) y ejecutarlas con `Enter`. La acción editar abre directamente el campo de título y la acción mover abre el selector de lista destino. Complementa los atajos de teclado existentes, que quedan deshabilitados mientras el menú está abierto.
+Define el menú contextual de acciones que se abre al presionar `Enter` sobre la tarea seleccionada en la vista única (`interactive-cli`). Permite desplazarse entre las acciones aplicables a la tarea (completar, reabrir, eliminar, editar, fecha y mover) y ejecutarlas con `Enter`. La acción editar abre directamente el campo de título, la acción fecha permite establecer o quitar la fecha de vencimiento y la acción mover abre el selector de lista destino. Complementa los atajos de teclado existentes, que quedan deshabilitados mientras el menú está abierto.
 
 ## Requirements
 
@@ -12,7 +12,7 @@ La tecla `Enter` DEBE abrir un menú contextual de acciones para la tarea selecc
 - **GIVEN** la vista única visible con una tarea seleccionada
 - **WHEN** el usuario presiona `Enter`
 - **THEN** se abre un menú contextual junto a la tarea seleccionada (overlay)
-- **AND** el menú lista las acciones de la tarea: completar, reabrir, eliminar, editar y mover
+- **AND** el menú lista las acciones de la tarea: completar, reabrir, eliminar, editar, fecha y mover
 
 #### Scenario: Enter sin tareas
 - **GIVEN** que no hay tareas en la lista
@@ -21,12 +21,12 @@ La tecla `Enter` DEBE abrir un menú contextual de acciones para la tarea selecc
 - **AND** no se produce ningún error
 
 ### Requirement: Acciones disponibles del menú
-El menú DEBE listar las acciones de la tarea seleccionada — completar, reabrir, eliminar, editar y mover — en un orden estable y consistente.
+El menú DEBE listar las acciones de la tarea seleccionada — completar, reabrir, eliminar, editar, fecha y mover — en un orden estable y consistente.
 
 #### Scenario: Lista de acciones
 - **GIVEN** el menú de acciones abierto
 - **WHEN** se muestra el menú
-- **THEN** se listan las acciones completar, reabrir, eliminar, editar y mover
+- **THEN** se listan las acciones completar, reabrir, eliminar, editar, fecha y mover
 - **AND** el orden de las acciones es el mismo en cada apertura
 
 #### Scenario: Completar desde el menú
@@ -121,6 +121,27 @@ La acción "editar" DEBE abrir un campo de entrada precargado con el título act
 - **GIVEN** el campo de edición abierto
 - **WHEN** el usuario cancela sin confirmar (con `Esc`)
 - **THEN** no se modifica el título de la tarea
+- **AND** la vista vuelve a la lista sin cambios
+
+### Requirement: Editar fecha de vencimiento desde el menú
+La acción "fecha" DEBE permitir establecer o quitar la fecha de vencimiento de la tarea seleccionada, abriendo el calendario interactivo (según `date-selection`).
+
+#### Scenario: Establecer o modificar fecha
+- **GIVEN** el menú abierto con la acción "fecha" seleccionada
+- **WHEN** el usuario ejecuta la acción con `Enter`
+- **THEN** se abre un calendario interactivo para elegir la fecha
+- **AND** al elegir un día, la fecha de la tarea se actualiza según `task-management`
+- **AND** la vista se redibuja mostrando la nueva fecha
+
+#### Scenario: Quitar fecha
+- **GIVEN** el menú abierto con la acción "fecha" seleccionada y la tarea con fecha de vencimiento
+- **WHEN** el usuario elige quitar la fecha (tecla `d`)
+- **THEN** la tarea queda sin fecha de vencimiento según `task-management`
+
+#### Scenario: Cancelar edición de fecha
+- **GIVEN** el calendario abierto
+- **WHEN** el usuario cancela sin confirmar (con `Esc`)
+- **THEN** no se modifica la fecha de la tarea
 - **AND** la vista vuelve a la lista sin cambios
 
 ### Requirement: Mover tarea a otra lista desde el menú

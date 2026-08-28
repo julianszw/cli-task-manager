@@ -6,15 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
+import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
+import tasktracker.FakeTaskProvider;
 import tasktracker.model.Task;
-import tasktracker.repository.InMemoryTaskRepository;
 import tasktracker.service.TaskService;
 
 class EditTaskWindowTest {
 
-    private final TaskService service = new TaskService(new InMemoryTaskRepository());
-    private final long listId = service.createList("Inbox").getId();
+    private final TaskService service = new TaskService(new FakeTaskProvider());
+    private final String listId = service.createList("Inbox").getId();
 
     @Test
     void inputIsPreloadedWithCurrentTitle() {
@@ -22,6 +23,22 @@ class EditTaskWindowTest {
         EditTaskWindow window = new EditTaskWindow(service, task);
 
         assertEquals("Original", window.inputBox().getText());
+    }
+
+    @Test
+    void dueInputIsPreloadedWithCurrentDue() {
+        Task task = service.addTask(listId, "Original", "2026-08-28");
+        EditTaskWindow window = new EditTaskWindow(service, task);
+
+        assertEquals("2026-08-28", window.dueBox().getText());
+    }
+
+    @Test
+    void dueInputIsPreloadedWithTodayWhenNoDue() {
+        Task task = service.addTask(listId, "Original");
+        EditTaskWindow window = new EditTaskWindow(service, task);
+
+        assertEquals(LocalDate.now().toString(), window.dueBox().getText());
     }
 
     @Test
@@ -35,6 +52,38 @@ class EditTaskWindowTest {
 
         assertTrue(window.isUpdated());
         assertEquals("Nuevo", service.listTasks(listId).get(0).getTitle());
+    }
+
+    @Test
+    void enterWithDueUpdatesDueDate() {
+        Task task = service.addTask(listId, "Original");
+        EditTaskWindow window = new EditTaskWindow(service, task);
+
+        window.inputBox().setText("");
+        type(window, "Original");
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.dueBox().setText("");
+        type(window, "2026-08-28");
+        window.handleInput(new KeyStroke(KeyType.Enter));
+
+        assertTrue(window.isUpdated());
+        assertEquals("2026-08-28", service.listTasks(listId).get(0).getDueDate());
+    }
+
+    @Test
+    void enterWithInvalidDueShowsErrorAndDoesNotUpdate() {
+        Task task = service.addTask(listId, "Original");
+        EditTaskWindow window = new EditTaskWindow(service, task);
+
+        window.inputBox().setText("");
+        type(window, "Original");
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.dueBox().setText("");
+        type(window, "nope");
+        window.handleInput(new KeyStroke(KeyType.Enter));
+
+        assertFalse(window.isUpdated());
+        assertTrue(window.getMessageText().contains("yyyy-MM-dd"));
     }
 
     @Test
