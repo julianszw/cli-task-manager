@@ -6,6 +6,8 @@ public class Task {
     private String title;
     private TaskStatus status;
     private long listId;
+    private String remoteId;
+    private long updatedAt;
 
     public Task(String title) {
         this.title = title;
@@ -34,6 +36,22 @@ public class Task {
 
     public void setListId(long listId) {
         this.listId = listId;
+    }
+
+    public String getRemoteId() {
+        return remoteId;
+    }
+
+    public void setRemoteId(String remoteId) {
+        this.remoteId = remoteId;
+    }
+
+    public long getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(long updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public void markCompleted() {

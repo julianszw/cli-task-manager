@@ -1,0 +1,85 @@
+package tasktracker.google;
+
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.tasks.TasksScopes;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.GeneralSecurityException;
+import java.util.List;
+import tasktracker.sync.SyncException;
+
+public final class GoogleAuth {
+
+    private static final String DATA_STORE_DIR = "google-tokens";
+    private static final String APPLICATION_NAME = "cli-task-tracker";
+
+    private final Path workingDir;
+
+    public GoogleAuth(Path workingDir) {
+        this.workingDir = workingDir;
+    }
+
+    public boolean hasStoredCredentials() {
+        try {
+            return buildFlow().loadCredential("user") != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public Credential loadCredential() {
+        try {
+            return buildFlow().loadCredential("user");
+        } catch (IOException | GeneralSecurityException e) {
+            throw new SyncException("No se pudo cargar la sesión de Google: " + e.getMessage(), e);
+        }
+    }
+
+    public Credential authorize() {
+        try {
+            GoogleAuthorizationCodeFlow flow = buildFlow();
+            LocalServerReceiver receiver = new LocalServerReceiver.Builder().build();
+            return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        } catch (Exception e) {
+            throw new SyncException("No se pudo autenticar con Google: " + e.getMessage(), e);
+        }
+    }
+
+    private GoogleAuthorizationCodeFlow buildFlow() throws IOException, GeneralSecurityException {
+        GoogleClientSecrets secrets = loadClientSecrets();
+        NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
+        FileDataStoreFactory store = new FileDataStoreFactory(workingDir.resolve(DATA_STORE_DIR).toFile());
+        return new GoogleAuthorizationCodeFlow.Builder(
+                transport, GsonFactory.getDefaultInstance(), secrets, List.of(TasksScopes.TASKS))
+                .setDataStoreFactory(store)
+                .setAccessType("offline")
+                .build();
+    }
+
+    private GoogleClientSecrets loadClientSecrets() throws IOException {
+        String clientId = System.getenv("GOOGLE_CLIENT_ID");
+        String clientSecret = System.getenv("GOOGLE_CLIENT_SECRET");
+        if (clientId != null && clientSecret != null) {
+            return new GoogleClientSecrets()
+                    .setInstalled(new GoogleClientSecrets.Details()
+                            .setClientId(clientId)
+                            .setClientSecret(clientSecret));
+        }
+        Path file = workingDir.resolve("credentials.json");
+        if (Files.exists(file)) {
+            return GoogleClientSecrets.load(GsonFactory.getDefaultInstance(), new FileReader(file.toFile()));
+        }
+        throw new SyncException("No se encontraron credenciales de Google "
+                + "(define GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET o crea credentials.json)");
+    }
+}

@@ -39,3 +39,8 @@ dependency-reduced-pom.xml
 
 ### Datos locales ###
 tasks.json
+sync-state.json
+
+### Google Tasks ###
+credentials.json
+google-tokens/

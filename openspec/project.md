@@ -12,6 +12,9 @@ en capas y manejo de estado con persistencia en un archivo JSON local (definido 
 - JUnit para tests (`src/test/java/tasktracker`)
 - Lanterna (`com.googlecode.lanterna:lanterna`) para la TUI: ventanas, paneles,
   componentes (lista con render custom, caja de texto) y manejo de teclado.
+- Google Tasks API (`google-api-services-tasks`, `google-api-client`,
+  `google-oauth-client-jetty`) para la sincronización bidireccional con las tareas
+  de Google, con OAuth de aplicación de escritorio.
 - Lenguaje visual definido en `visual-style`: tema oscuro único, bordes redondeados,
   lista con íconos de estado y barra de estado inferior fija.
 - Logo ASCII "Task Manager" en la cabecera (`app-logo`), generado con caracteres de
@@ -23,10 +26,12 @@ Estructura en capas, sin dependencias circulares:
 - `model` — entidades del dominio (`Task`, `TaskList`, `TaskStatus`). Sin lógica de negocio, solo estado y comportamiento propio de la entidad.
 - `repository` — acceso y persistencia de datos (en memoria o archivo JSON). Abstrae dónde y cómo se guardan las tareas.
 - `service` — lógica de negocio y orquestación. Valida reglas, coordina `repository`, expone operaciones a `cli`.
+- `sync` — motor de sincronización bidireccional con Google Tasks: vincula entidades por `remoteId`, sube y baja cambios y resuelve conflictos (última modificación gana).
+- `google` — adaptador de infraestructura: autenticación OAuth (`GoogleAuth`) y cliente HTTP de Google Tasks (`HttpGoogleTasksClient`, implementa la interfaz de `sync`).
 - `cli` — interacción con el usuario por terminal. Comandos, parsing de input, formato de output. Sin lógica de negocio ni acceso a datos directo.
 - `exception` — excepciones propias del dominio (ej: `TaskNotFoundException`).
 
-Regla de dependencia: `cli` → `service` → `repository` → `model`. Nunca al revés.
+Regla de dependencia: `cli` → `service` → `repository` → `model`, con `cli` → `sync` → `repository`/`model` y `sync` dependiendo de la interfaz de cliente definida en `sync` (implementada por `google`). Nunca al revés.
 
 ## Conventions
 - La interacción es una vista única de tareas (TUI) con atajos de teclado; no hay

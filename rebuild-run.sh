@@ -2,8 +2,8 @@
 set -e
 cd "$(dirname "$0")"
 
-echo "==> Compilando..."
-mvn package -q -DskipTests
+echo "==> Compilando (sin tests ni empaquetado)..."
+mvn -q -DskipTests compile dependency:build-classpath -Dmdep.outputFile=target/classpath.txt
 
 echo "==> Levantando CLI Task Tracker..."
-java -jar target/cli-task-tracker-1.0.0.jar
+java -cp "target/classes:$(cat target/classpath.txt)" tasktracker.App
