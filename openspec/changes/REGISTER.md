@@ -1,7 +1,7 @@
 # Registro de commits por change
 
 Fuente de verdad que mapea cada `openspec/changes/<nnn>-<id>/` al commit (o
-commits) que lo implementó. El agente `commit` actualiza este archivo después de
+commits) que lo implementó. El agente `git-manager` actualiza este archivo después de
 cada commit.
 
 > Formato de mensaje de commit: `openspec <nnn>-<id>: <resumen>`.
@@ -37,4 +37,6 @@ _(ninguno)_
 | `020-google-tasks-sync` | `8e35da8` | agregar sincronización bidireccional con google tasks |
 | `021-circular-action-menu-navigation` | `f0ea4ef` | navegación circular con aritmética modular |
 | `023-fix-google-auth-screen-suspend` | `79aec73` | suspender screen de lanterna durante flujo oauth |
-
+| `024-fix-google-auth-browser-open` | `2211e08` | fix apertura de navegador en linux |
+| `025-fix-google-tasks-400-bad-request` | `851dbb1` | fix error 400 al actualizar tareas y manejo de errores |
+| `026-secure-google-credentials` | `8dd9d51` | aislar y proteger credenciales de google |
