@@ -44,3 +44,4 @@ sync-state.json
 ### Google Tasks ###
 credentials.json
 google-tokens/
+.env

@@ -49,7 +49,20 @@ public final class GoogleAuth {
         try {
             GoogleAuthorizationCodeFlow flow = buildFlow();
             LocalServerReceiver receiver = new LocalServerReceiver.Builder().build();
-            return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+            AuthorizationCodeInstalledApp.Browser browser = url -> {
+                System.out.println();
+                System.out.println("Abrí esta URL en tu navegador para autenticarte:");
+                System.out.println(url);
+                System.out.println();
+                try {
+                    new ProcessBuilder("xdg-open", url)
+                            .redirectErrorStream(true)
+                            .start();
+                } catch (Exception ignored) {
+                    // xdg-open no disponible; el usuario usará la URL impresa
+                }
+            };
+            return new AuthorizationCodeInstalledApp(flow, receiver, browser).authorize("user");
         } catch (Exception e) {
             throw new SyncException("No se pudo autenticar con Google: " + e.getMessage(), e);
         }
@@ -72,8 +85,8 @@ public final class GoogleAuth {
         if (clientId != null && clientSecret != null) {
             return new GoogleClientSecrets()
                     .setInstalled(new GoogleClientSecrets.Details()
-                            .setClientId(clientId)
-                            .setClientSecret(clientSecret));
+                            .setClientId(clientId.trim())
+                            .setClientSecret(clientSecret.trim()));
         }
         Path file = workingDir.resolve("credentials.json");
         if (Files.exists(file)) {

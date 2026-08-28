@@ -2,6 +2,10 @@
 set -e
 cd "$(dirname "$0")"
 
+if [ -f ".env" ]; then
+  source .env
+fi
+
 JAR="target/cli-task-tracker-1.0.0.jar"
 if [ ! -f "$JAR" ]; then
   echo "==> Compilando..."
