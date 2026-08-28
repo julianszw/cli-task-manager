@@ -84,11 +84,11 @@ public class TaskActionMenuWindow extends BasicWindow {
     }
 
     private void moveSelection(int delta) {
-        int current = actions.getSelectedIndex();
-        int next = current + delta;
-        if (next < 0 || next >= actions.getItemCount()) {
+        int count = actions.getItemCount();
+        if (count == 0) {
             return;
         }
+        int next = ((actions.getSelectedIndex() + delta) % count + count) % count;
         actions.setSelectedIndex(next);
     }
 }

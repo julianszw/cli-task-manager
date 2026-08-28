@@ -38,16 +38,14 @@ class TaskActionMenuWindowTest {
     }
 
     @Test
-    void navigationIsBounded() {
+    void navigationWrapsAround() {
         TaskActionMenuWindow window = new TaskActionMenuWindow();
 
         window.handleInput(new KeyStroke('k', false, false));
-        assertEquals(0, window.selectedIndex());
-
-        for (int i = 0; i < 10; i++) {
-            window.handleInput(new KeyStroke('j', false, false));
-        }
         assertEquals(TaskActionMenuWindow.Action.values().length - 1, window.selectedIndex());
+
+        window.handleInput(new KeyStroke('j', false, false));
+        assertEquals(0, window.selectedIndex());
     }
 
     @Test

@@ -47,8 +47,8 @@ El menú DEBE listar las acciones de la tarea seleccionada — completar, reabri
 - **THEN** la tarea se elimina según `task-management`
 - **AND** la vista se redibuja sin mostrar la tarea eliminada
 
-### Requirement: Navegación entre acciones
-El sistema DEBE permitir desplazarse entre las acciones del menú con las teclas `↑`/`k` (arriba) y `↓`/`j` (abajo), resaltando la acción seleccionada.
+### Requirement: Navegación circular entre acciones
+El sistema DEBE permitir desplazarse entre las acciones del menú con las teclas `↑`/`k` (arriba) y `↓`/`j` (abajo), de forma circular, resaltando la acción seleccionada.
 
 #### Scenario: Mover selección de acción
 - **GIVEN** el menú de acciones abierto
@@ -56,10 +56,15 @@ El sistema DEBE permitir desplazarse entre las acciones del menú con las teclas
 - **THEN** la selección se mueve a la siguiente acción
 - **AND** la acción seleccionada se resalta visualmente
 
-#### Scenario: Límites del menú
-- **GIVEN** la selección en la primera o última acción
-- **WHEN** el usuario intenta moverse más allá del límite
-- **THEN** la selección se mantiene sin salir del menú
+#### Scenario: Ciclo al llegar al final
+- **GIVEN** la selección en la última acción
+- **WHEN** el usuario presiona `↓` o `j`
+- **THEN** la selección vuelve a la primera acción
+
+#### Scenario: Ciclo al llegar al principio
+- **GIVEN** la selección en la primera acción
+- **WHEN** el usuario presiona `↑` o `k`
+- **THEN** la selección vuelve a la última acción
 
 ### Requirement: Ejecutar acción con Enter
 La tecla `Enter` DEBE ejecutar la acción seleccionada del menú sobre la tarea y cerrar el menú.
