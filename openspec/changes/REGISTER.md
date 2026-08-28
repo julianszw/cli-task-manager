@@ -32,3 +32,4 @@ _(ninguno)_
 | `016-task-action-menu` | `f3dc5b8` | agregar menú de acciones y edición de tareas |
 | `017-app-logo` | `55fdc34` | agregar logo ascii task manager |
 | `018-task-lists` | `2980601` | agregar listas de tareas con navegación tab |
+| `019-move-task-completion-format-exit-confirmation` | `5def5b6` | agregar mover tarea entre listas, tachado de completadas y confirmación de salida |
