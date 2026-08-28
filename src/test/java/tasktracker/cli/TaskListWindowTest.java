@@ -248,4 +248,60 @@ class TaskListWindowTest {
         assertTrue(window.listIndicator().contains("Inbox"));
         assertTrue(window.listIndicator().contains("1/1"));
     }
+
+    @Test
+    void ctrlEqualsIncreasesZoom() {
+        inbox();
+        TaskListWindow window = new TaskListWindow(service);
+
+        window.handleInput(new KeyStroke('=', true, false));
+
+        assertEquals(1, window.zoomLevel());
+    }
+
+    @Test
+    void ctrlMinusDecreasesZoom() {
+        inbox();
+        TaskListWindow window = new TaskListWindow(service);
+
+        window.handleInput(new KeyStroke('-', true, false));
+
+        assertEquals(-1, window.zoomLevel());
+    }
+
+    @Test
+    void ctrlZeroResetsZoom() {
+        inbox();
+        TaskListWindow window = new TaskListWindow(service);
+
+        window.handleInput(new KeyStroke('=', true, false));
+        window.handleInput(new KeyStroke('=', true, false));
+        window.handleInput(new KeyStroke('0', true, false));
+
+        assertEquals(0, window.zoomLevel());
+    }
+
+    @Test
+    void zoomIsClampedAtMax() {
+        inbox();
+        TaskListWindow window = new TaskListWindow(service);
+
+        for (int i = 0; i < 10; i++) {
+            window.handleInput(new KeyStroke('=', true, false));
+        }
+
+        assertEquals(TaskService.MAX_ZOOM, window.zoomLevel());
+    }
+
+    @Test
+    void zoomIsClampedAtMin() {
+        inbox();
+        TaskListWindow window = new TaskListWindow(service);
+
+        for (int i = 0; i < 10; i++) {
+            window.handleInput(new KeyStroke('-', true, false));
+        }
+
+        assertEquals(TaskService.MIN_ZOOM, window.zoomLevel());
+    }
 }
