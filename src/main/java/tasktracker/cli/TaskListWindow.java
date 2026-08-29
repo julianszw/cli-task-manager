@@ -277,7 +277,7 @@ public class TaskListWindow extends BasicWindow {
         if (gui == null || lists.isEmpty()) {
             return;
         }
-        gui.addWindowAndWait(new AddTaskWindow(service, activeList().getId()));
+        gui.addWindowAndWait(new AddTaskWindow(service, activeList().getId(), this::pickDate));
         refresh();
     }
 
@@ -359,7 +359,7 @@ public class TaskListWindow extends BasicWindow {
         if (gui == null || selected < 0 || selected >= tasks.size()) {
             return;
         }
-        gui.addWindowAndWait(new EditTaskWindow(service, tasks.get(selected)));
+        gui.addWindowAndWait(new EditTaskWindow(service, tasks.get(selected), this::pickDate));
         refresh();
     }
 

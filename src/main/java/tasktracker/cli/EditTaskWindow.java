@@ -10,6 +10,7 @@ import com.googlecode.lanterna.gui2.TextBox;
 import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
+import java.time.LocalDate;
 import java.util.List;
 import tasktracker.model.Task;
 import tasktracker.provider.ProviderException;
@@ -22,15 +23,21 @@ public class EditTaskWindow extends BasicWindow {
 
     private final TaskService service;
     private final Task task;
+    private final DatePicker datePicker;
     private final TextBox input = new TextBox(new TerminalSize(60, 1));
     private final TextBox dueInput = new TextBox(new TerminalSize(60, 1));
     private final Label message = new Label("");
     private boolean updated;
 
     public EditTaskWindow(TaskService service, Task task) {
+        this(service, task, null);
+    }
+
+    public EditTaskWindow(TaskService service, Task task, DatePicker datePicker) {
         super(TITLE);
         this.service = service;
         this.task = task;
+        this.datePicker = datePicker;
 
         setHints(List.of(Window.Hint.CENTERED));
 
@@ -48,7 +55,7 @@ public class EditTaskWindow extends BasicWindow {
         content.addComponent(input.withBorder(new RoundedBorder()));
         content.addComponent(new Label("Fecha (yyyy-MM-dd, vacío para quitar):"));
         content.addComponent(dueInput.withBorder(new RoundedBorder()));
-        content.addComponent(new Label("Enter para confirmar · Tab para ir a fecha · Esc para cancelar"));
+        content.addComponent(new Label("Enter para confirmar · Tab para elegir fecha · Esc para cancelar"));
         content.addComponent(message);
         setComponent(content);
 
@@ -74,7 +81,7 @@ public class EditTaskWindow extends BasicWindow {
     @Override
     public boolean handleInput(KeyStroke key) {
         if (key.getKeyType() == KeyType.Tab) {
-            setFocusedInteractable(dueInput);
+            openCalendar();
             return true;
         }
         if (key.getKeyType() == KeyType.ReverseTab) {
@@ -102,5 +109,20 @@ public class EditTaskWindow extends BasicWindow {
             return true;
         }
         return super.handleInput(key);
+    }
+
+    private void openCalendar() {
+        if (datePicker == null) {
+            setFocusedInteractable(dueInput);
+            return;
+        }
+        LocalDate initial = Dates.parse(dueInput.getText());
+        if (initial == null) {
+            initial = LocalDate.now();
+        }
+        String picked = datePicker.pick(initial);
+        if (picked != null) {
+            dueInput.setText(picked);
+        }
     }
 }

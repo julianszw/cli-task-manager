@@ -116,6 +116,45 @@ class AddTaskWindowTest {
         assertTrue(service.listTasks(listId).isEmpty());
     }
 
+    @Test
+    void tabWithDatePickerUpdatesDueFromCalendar() {
+        AddTaskWindow window = new AddTaskWindow(service, listId, initial -> "2026-09-01");
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+
+        assertEquals("2026-09-01", window.dueBox().getText());
+    }
+
+    @Test
+    void tabWithDatePickerClearingDueEmptiesField() {
+        AddTaskWindow window = new AddTaskWindow(service, listId, initial -> "");
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+
+        assertEquals("", window.dueBox().getText());
+    }
+
+    @Test
+    void tabWithDatePickerCancelKeepsDueUnchanged() {
+        AddTaskWindow window = new AddTaskWindow(service, listId, initial -> null);
+
+        String before = window.dueBox().getText();
+        window.handleInput(new KeyStroke(KeyType.Tab));
+
+        assertEquals(before, window.dueBox().getText());
+    }
+
+    @Test
+    void tabWithoutDatePickerStillFocusesDueField() {
+        AddTaskWindow window = new AddTaskWindow(service, listId);
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.dueBox().setText("");
+        type(window, "2026-08-28");
+
+        assertEquals("2026-08-28", window.dueBox().getText());
+    }
+
     private void type(AddTaskWindow window, String text) {
         for (char c : text.toCharArray()) {
             window.handleInput(new KeyStroke(c, false, false));

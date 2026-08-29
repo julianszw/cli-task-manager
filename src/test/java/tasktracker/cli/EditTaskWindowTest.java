@@ -111,6 +111,37 @@ class EditTaskWindowTest {
         assertEquals("Original", service.listTasks(listId).get(0).getTitle());
     }
 
+    @Test
+    void tabWithDatePickerUpdatesDueFromCalendar() {
+        Task task = service.addTask(listId, "Original");
+        EditTaskWindow window = new EditTaskWindow(service, task, initial -> "2026-09-01");
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+
+        assertEquals("2026-09-01", window.dueBox().getText());
+    }
+
+    @Test
+    void tabWithDatePickerClearingDueEmptiesField() {
+        Task task = service.addTask(listId, "Original");
+        EditTaskWindow window = new EditTaskWindow(service, task, initial -> "");
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+
+        assertEquals("", window.dueBox().getText());
+    }
+
+    @Test
+    void tabWithDatePickerCancelKeepsDueUnchanged() {
+        Task task = service.addTask(listId, "Original");
+        EditTaskWindow window = new EditTaskWindow(service, task, initial -> null);
+
+        String before = window.dueBox().getText();
+        window.handleInput(new KeyStroke(KeyType.Tab));
+
+        assertEquals(before, window.dueBox().getText());
+    }
+
     private void type(EditTaskWindow window, String text) {
         for (char c : text.toCharArray()) {
             window.handleInput(new KeyStroke(c, false, false));
