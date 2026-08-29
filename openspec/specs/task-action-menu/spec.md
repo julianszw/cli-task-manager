@@ -165,3 +165,22 @@ La acción "mover" DEBE permitir elegir una lista destino y mover la tarea selec
 - **WHEN** el usuario presiona `Esc`
 - **THEN** se cierra el selector sin mover la tarea
 - **AND** la vista vuelve a la lista sin cambios
+
+### Requirement: Navegación cíclica en el selector de listas
+El selector de listas de la acción "mover" DEBE permitir desplazarse entre las listas destino con las teclas `↑`/`k` (arriba) y `↓`/`j` (abajo), de forma cíclica, resaltando la lista seleccionada.
+
+#### Scenario: Mover selección en el selector
+- **GIVEN** el selector de listas abierto con dos o más listas
+- **WHEN** el usuario presiona `↓` o `j`
+- **THEN** la selección se mueve a la siguiente lista
+- **AND** la lista seleccionada se resalta visualmente
+
+#### Scenario: Ciclo al llegar al final
+- **GIVEN** la selección en la última lista del selector
+- **WHEN** el usuario presiona `↓` o `j`
+- **THEN** la selección vuelve a la primera lista
+
+#### Scenario: Ciclo al llegar al principio
+- **GIVEN** la selección en la primera lista del selector
+- **WHEN** el usuario presiona `↑` o `k`
+- **THEN** la selección vuelve a la última lista

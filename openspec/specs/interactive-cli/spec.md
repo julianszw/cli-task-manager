@@ -178,3 +178,17 @@ Las teclas `q` y `Esc` DEBEN mostrar un diálogo de confirmación ("¿estás seg
 - **WHEN** el usuario presiona `Esc`
 - **THEN** se cancela el menú de acciones en lugar de mostrar el diálogo de salida
 - **AND** la aplicación permanece abierta en la lista de tareas
+
+### Requirement: Navegación cíclica en el diálogo de confirmación
+El diálogo de confirmación de salida DEBE permitir alternar entre las opciones "sí" y "no" con las teclas `↑`/`k` (arriba) y `↓`/`j` (abajo), de forma cíclica.
+
+#### Scenario: Alternar entre opciones
+- **GIVEN** el diálogo de confirmación abierto con "no" seleccionado por defecto
+- **WHEN** el usuario presiona `↑` o `k` (o `↓` o `j`)
+- **THEN** la selección cambia a la opción "sí"
+
+#### Scenario: Ciclo en los extremos
+- **GIVEN** la opción "sí" seleccionada
+- **WHEN** el usuario presiona `↑` o `k`
+- **THEN** la selección vuelve a la opción "no"
+- **AND** al presionar `↓` o `j` desde "no", la selección vuelve a "sí"

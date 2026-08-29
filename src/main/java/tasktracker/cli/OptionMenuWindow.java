@@ -49,6 +49,14 @@ final class OptionMenuWindow extends BasicWindow {
             close();
             return true;
         }
+        if (key.getKeyType() == KeyType.ArrowUp) {
+            moveSelection(-1);
+            return true;
+        }
+        if (key.getKeyType() == KeyType.ArrowDown) {
+            moveSelection(1);
+            return true;
+        }
         if (key.getKeyType() == KeyType.Character) {
             Character c = key.getCharacter();
             if (c != null) {
@@ -70,11 +78,11 @@ final class OptionMenuWindow extends BasicWindow {
     }
 
     private void moveSelection(int delta) {
-        int current = options.getSelectedIndex();
-        int next = current + delta;
-        if (next < 0 || next >= options.getItemCount()) {
+        int count = options.getItemCount();
+        if (count == 0) {
             return;
         }
+        int next = ((options.getSelectedIndex() + delta) % count + count) % count;
         options.setSelectedIndex(next);
     }
 }

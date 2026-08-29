@@ -49,6 +49,17 @@ class TaskActionMenuWindowTest {
     }
 
     @Test
+    void arrowKeysWrapAround() {
+        TaskActionMenuWindow window = new TaskActionMenuWindow();
+
+        window.handleInput(new KeyStroke(KeyType.ArrowUp));
+        assertEquals(TaskActionMenuWindow.Action.values().length - 1, window.selectedIndex());
+
+        window.handleInput(new KeyStroke(KeyType.ArrowDown));
+        assertEquals(0, window.selectedIndex());
+    }
+
+    @Test
     void enterExecutesSelectedActionAfterNavigation() {
         TaskActionMenuWindow window = new TaskActionMenuWindow();
 

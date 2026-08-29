@@ -64,6 +64,14 @@ public class TaskActionMenuWindow extends BasicWindow {
             close();
             return true;
         }
+        if (key.getKeyType() == KeyType.ArrowUp) {
+            moveSelection(-1);
+            return true;
+        }
+        if (key.getKeyType() == KeyType.ArrowDown) {
+            moveSelection(1);
+            return true;
+        }
         if (key.getKeyType() == KeyType.Character) {
             Character c = key.getCharacter();
             if (c != null) {

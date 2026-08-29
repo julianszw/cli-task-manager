@@ -62,6 +62,19 @@ posicionarse sobre el campo de fecha, para elegir la fecha.
 - **THEN** el calendario se cierra sin modificar la fecha
 - **AND** el campo conserva su valor previo
 
+### Requirement: Navegación cíclica del calendario
+La navegación del calendario DEBE ser cíclica: al pasar el último día de un mes la selección avanza al primer día del mes siguiente, y al pasar del último mes la selección vuelve al primer mes del año.
+
+#### Scenario: Ciclo entre días
+- **GIVEN** el calendario abierto con un día seleccionado
+- **WHEN** el usuario navega más allá del último día del mes
+- **THEN** la selección avanza al primer día del mes siguiente
+
+#### Scenario: Ciclo entre meses
+- **GIVEN** el calendario abierto en el último mes del año
+- **WHEN** el usuario navega al mes siguiente
+- **THEN** el calendario muestra el primer mes del año siguiente
+
 ### Requirement: Quitar fecha dejando el campo vacío
 El sistema DEBE permitir dejar la fecha de vencimiento vacía (quitar la fecha)
 desde el campo de fecha, aun cuando esté precargado con la fecha de hoy.

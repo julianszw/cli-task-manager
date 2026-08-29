@@ -51,13 +51,32 @@ class OptionMenuWindowTest {
     }
 
     @Test
-    void navigationIsBounded() {
+    void navigationWrapsFromFirstToLast() {
         OptionMenuWindow window = new OptionMenuWindow("Título", ITEMS);
 
         window.handleInput(new KeyStroke('k', false, false));
-        for (int i = 0; i < 10; i++) {
-            window.handleInput(new KeyStroke('j', false, false));
-        }
+        window.handleInput(new KeyStroke(KeyType.Enter));
+
+        assertEquals(ITEMS.size() - 1, window.selectedIndex());
+    }
+
+    @Test
+    void navigationWrapsFromLastToFirst() {
+        OptionMenuWindow window = new OptionMenuWindow("Título", ITEMS);
+
+        window.handleInput(new KeyStroke('j', false, false));
+        window.handleInput(new KeyStroke('j', false, false));
+        window.handleInput(new KeyStroke('j', false, false));
+        window.handleInput(new KeyStroke(KeyType.Enter));
+
+        assertEquals(0, window.selectedIndex());
+    }
+
+    @Test
+    void arrowKeysMoveSelectionCyclically() {
+        OptionMenuWindow window = new OptionMenuWindow("Título", ITEMS);
+
+        window.handleInput(new KeyStroke(KeyType.ArrowUp));
         window.handleInput(new KeyStroke(KeyType.Enter));
 
         assertEquals(ITEMS.size() - 1, window.selectedIndex());

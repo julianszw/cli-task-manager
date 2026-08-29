@@ -101,4 +101,34 @@ class CalendarWindowTest {
         assertTrue(window.isCleared());
         assertNull(window.getSelectedDate());
     }
+
+    @Test
+    void arrowRightWrapsToNextMonthFromLastDay() {
+        CalendarWindow window = new CalendarWindow(LocalDate.of(2026, 8, 31));
+
+        window.handleInput(new KeyStroke(KeyType.ArrowRight));
+        window.handleInput(new KeyStroke(KeyType.Enter));
+
+        assertEquals(LocalDate.of(2026, 9, 1), window.getSelectedDate());
+    }
+
+    @Test
+    void tabFromDecemberWrapsToJanuaryNextYear() {
+        CalendarWindow window = new CalendarWindow(LocalDate.of(2026, 12, 28));
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.handleInput(new KeyStroke(KeyType.Enter));
+
+        assertEquals(LocalDate.of(2027, 1, 28), window.getSelectedDate());
+    }
+
+    @Test
+    void reverseTabFromJanuaryWrapsToDecember() {
+        CalendarWindow window = new CalendarWindow(LocalDate.of(2026, 1, 28));
+
+        window.handleInput(new KeyStroke(KeyType.ReverseTab));
+        window.handleInput(new KeyStroke(KeyType.Enter));
+
+        assertEquals(LocalDate.of(2025, 12, 28), window.getSelectedDate());
+    }
 }
