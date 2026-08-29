@@ -43,3 +43,5 @@ _(ninguno)_
 | `027-google-tasks-provider` | `e112984` | reemplazar persistencia local por task provider api |
 | `028-taskmaster-date-selection-and-list-options` | `e112984`, `2e78182` | renombrar a taskmaster, agregar calendario y opciones de listas |
 | `029-restore-date-field-calendar` | `29bd543` | abrir calendario al posicionarse en el campo de fecha |
+| `030-add-task-list-field` | `c9b9190` | agregar campo de lista en nueva tarea |
+| `031-cyclic-menu-navigation` | `85a3df7` | navegación cíclica en menúes y calendario |
