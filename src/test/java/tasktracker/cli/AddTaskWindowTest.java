@@ -155,6 +155,110 @@ class AddTaskWindowTest {
         assertEquals("2026-08-28", window.dueBox().getText());
     }
 
+    @Test
+    void listFieldShowsActiveListByDefault() {
+        service.createList("Trabajo");
+        AddTaskWindow window = new AddTaskWindow(service, listId);
+
+        assertEquals("Inbox", window.listLabelText());
+    }
+
+    @Test
+    void focusStartsOnTitle() {
+        AddTaskWindow window = new AddTaskWindow(service, listId);
+
+        assertEquals(AddTaskWindow.Field.TITLE, window.focus());
+    }
+
+    @Test
+    void tabMovesFocusFromTitleToDueToToList() {
+        AddTaskWindow window = new AddTaskWindow(service, listId);
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        assertEquals(AddTaskWindow.Field.DUE, window.focus());
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        assertEquals(AddTaskWindow.Field.LIST, window.focus());
+    }
+
+    @Test
+    void tabCyclesListSelection() {
+        String work = service.createList("Trabajo").getId();
+        AddTaskWindow window = new AddTaskWindow(service, listId);
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+
+        assertEquals(work, window.selectedListId());
+        assertEquals("Trabajo", window.listLabelText());
+    }
+
+    @Test
+    void tabCyclesListWrapsAround() {
+        service.createList("Trabajo");
+        AddTaskWindow window = new AddTaskWindow(service, listId);
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+
+        assertEquals(listId, window.selectedListId());
+        assertEquals("Inbox", window.listLabelText());
+    }
+
+    @Test
+    void shiftTabFromListGoesToDueWithoutChangingList() {
+        service.createList("Trabajo");
+        AddTaskWindow window = new AddTaskWindow(service, listId);
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        String before = window.selectedListId();
+
+        window.handleInput(new KeyStroke(KeyType.ReverseTab));
+
+        assertEquals(AddTaskWindow.Field.DUE, window.focus());
+        assertEquals(before, window.selectedListId());
+    }
+
+    @Test
+    void shiftTabFromTitleWrapsToList() {
+        AddTaskWindow window = new AddTaskWindow(service, listId);
+
+        window.handleInput(new KeyStroke(KeyType.ReverseTab));
+
+        assertEquals(AddTaskWindow.Field.LIST, window.focus());
+    }
+
+    @Test
+    void confirmCreatesTaskInSelectedList() {
+        String work = service.createList("Trabajo").getId();
+        AddTaskWindow window = new AddTaskWindow(service, listId);
+
+        type(window, "tarea");
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.handleInput(new KeyStroke(KeyType.Enter));
+
+        assertEquals(work, window.getCreatedTask().getListId());
+        assertEquals(1, service.listTasks(work).size());
+        assertTrue(service.listTasks(listId).isEmpty());
+    }
+
+    @Test
+    void typingIsIgnoredWhileOnListField() {
+        AddTaskWindow window = new AddTaskWindow(service, listId);
+
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        window.handleInput(new KeyStroke(KeyType.Tab));
+        type(window, "x");
+
+        assertEquals("", window.inputBox().getText());
+    }
+
     private void type(AddTaskWindow window, String text) {
         for (char c : text.toCharArray()) {
             window.handleInput(new KeyStroke(c, false, false));
