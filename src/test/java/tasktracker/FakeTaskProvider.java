@@ -86,6 +86,11 @@ public class FakeTaskProvider implements TaskProvider {
     }
 
     @Override
+    public String providerName() {
+        return "Fake";
+    }
+
+    @Override
     public void clearTasks(String listId) {
         tasks.values().removeIf(task -> listId.equals(task.getListId()));
     }

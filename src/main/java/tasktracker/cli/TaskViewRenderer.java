@@ -9,7 +9,7 @@ import tasktracker.model.Task;
 
 final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
 
-    private static final String APP_TITLE = "CLI TASK TRACKER";
+    private static final String APP_TITLE = "TaskMaster";
     private static final String NO_TASKS = "No hay tareas cargadas";
 
     private static final int STATUS_BAR_HEIGHT = 5;
@@ -37,6 +37,7 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
             new ShortcutBar.Shortcut("c", "completar"),
             new ShortcutBar.Shortcut("r", "reabrir"),
             new ShortcutBar.Shortcut("d", "eliminar"),
+            new ShortcutBar.Shortcut("h", "ocultar listas"),
             new ShortcutBar.Shortcut("p", "purgar"),
             new ShortcutBar.Shortcut("q/Esc", "salir")));
 
@@ -94,10 +95,28 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
 
         String indicator = component.listIndicator();
         if (!indicator.isEmpty() && cols >= indicator.length() + 4) {
-            g.setForegroundColor(VisualStyle.ACCENT);
-            g.enableModifiers(SGR.BOLD);
-            g.putString(2, top, " " + indicator + " ");
-            g.clearModifiers();
+            int parenStart = indicator.indexOf('(');
+            int parenEnd = indicator.indexOf(')');
+
+            if (parenStart >= 0 && parenEnd > parenStart) {
+                g.setForegroundColor(VisualStyle.ACCENT);
+                g.enableModifiers(SGR.BOLD);
+                g.putString(2, top, " " + indicator.substring(0, parenStart));
+                
+                g.setForegroundColor(VisualStyle.DIM);
+                g.clearModifiers();
+                g.putString(2 + parenStart, top, indicator.substring(parenStart, parenEnd + 1));
+                
+                g.setForegroundColor(VisualStyle.ACCENT);
+                g.enableModifiers(SGR.BOLD);
+                g.putString(2 + parenEnd + 1, top, indicator.substring(parenEnd + 1) + " ");
+                g.clearModifiers();
+            } else {
+                g.setForegroundColor(VisualStyle.ACCENT);
+                g.enableModifiers(SGR.BOLD);
+                g.putString(2, top, " " + indicator + " ");
+                g.clearModifiers();
+            }
         }
 
         List<Task> tasks = component.tasks();

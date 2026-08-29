@@ -28,7 +28,7 @@ public class App {
             service.createList("Inbox");
         }
 
-        Terminal terminal = new DefaultTerminalFactory().createTerminal();
+        Terminal terminal = new DefaultTerminalFactory().setTerminalEmulatorTitle("TaskMaster").createTerminal();
         Screen screen = new TerminalScreen(terminal);
         screen.startScreen();
         try {

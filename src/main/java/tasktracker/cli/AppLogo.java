@@ -4,7 +4,7 @@ import java.util.List;
 
 final class AppLogo {
 
-    private static final String TEXT = "TASK MANAGER";
+    private static final String TEXT = "TASKMASTER";
     private static final int MIN_WIDTH = 12;
 
     private static final List<String> LINES = buildLines();

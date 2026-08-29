@@ -146,6 +146,11 @@ public final class GoogleTasksProvider implements TaskProvider {
     }
 
     @Override
+    public String providerName() {
+        return "Google Tasks";
+    }
+
+    @Override
     public void clearTasks(String listId) {
         try {
             service().tasks().clear(listId).execute();

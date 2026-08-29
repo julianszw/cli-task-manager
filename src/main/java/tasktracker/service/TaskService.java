@@ -134,6 +134,10 @@ public class TaskService {
         this.zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, level));
     }
 
+    public String providerName() {
+        return provider.providerName();
+    }
+
     private Task requireTask(String id) {
         Task task = tasks.get(id);
         if (task == null) {
@@ -158,6 +162,6 @@ public class TaskService {
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("La fecha debe tener formato yyyy-MM-dd");
         }
-        return value;
+        return value + "T00:00:00.000Z";
     }
 }

@@ -29,4 +29,8 @@ public interface TaskProvider {
     Task moveTask(String taskListId, String taskId, String destinationListId);
 
     void clearTasks(String listId);
+
+    default String providerName() {
+        return "Local";
+    }
 }

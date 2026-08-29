@@ -35,6 +35,7 @@ public class AddTaskWindow extends BasicWindow {
         setHints(List.of(Window.Hint.CENTERED));
 
         message.setForegroundColor(VisualStyle.ERROR);
+        dueInput.setText(Dates.today());
 
         Panel content = new Panel(new LinearLayout(Direction.VERTICAL));
         content.addComponent(new Label("Título de la tarea:"));

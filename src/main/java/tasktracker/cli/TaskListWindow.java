@@ -8,6 +8,7 @@ import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import tasktracker.model.Task;
@@ -31,6 +32,7 @@ public class TaskListWindow extends BasicWindow {
     private int selected;
     private String status = "";
     private MessageKind kind = MessageKind.INFO;
+    private boolean hideEmptyLists = false;
 
     public TaskListWindow(TaskService service) {
         this(service, null);
@@ -117,7 +119,7 @@ public class TaskListWindow extends BasicWindow {
         if (lists.isEmpty()) {
             return "";
         }
-        return activeList().getTitle() + " · " + (activeIndex + 1) + "/" + lists.size();
+        return activeList().getTitle() + " (" + service.providerName() + ") · " + (activeIndex + 1) + "/" + lists.size();
     }
 
     @Override
@@ -147,6 +149,11 @@ public class TaskListWindow extends BasicWindow {
             Character c = key.getCharacter();
             if (c != null) {
                 switch (c) {
+                    case 'h' -> {
+                        hideEmptyLists = !hideEmptyLists;
+                        refresh();
+                        return true;
+                    }
                     case 'k' -> {
                         moveUp();
                         return true;
@@ -240,7 +247,13 @@ public class TaskListWindow extends BasicWindow {
 
     private void nextList() {
         if (lists.size() > 1) {
-            activeIndex = (activeIndex + 1) % lists.size();
+            int startIndex = activeIndex;
+            do {
+                activeIndex = (activeIndex + 1) % lists.size();
+                if (!hideEmptyLists || !service.listTasks(activeList().getId()).isEmpty()) {
+                    break;
+                }
+            } while (activeIndex != startIndex);
             selected = 0;
             refresh();
         }
@@ -248,7 +261,13 @@ public class TaskListWindow extends BasicWindow {
 
     private void previousList() {
         if (lists.size() > 1) {
-            activeIndex = (activeIndex - 1 + lists.size()) % lists.size();
+            int startIndex = activeIndex;
+            do {
+                activeIndex = (activeIndex - 1 + lists.size()) % lists.size();
+                if (!hideEmptyLists || !service.listTasks(activeList().getId()).isEmpty()) {
+                    break;
+                }
+            } while (activeIndex != startIndex);
             selected = 0;
             refresh();
         }
@@ -348,8 +367,27 @@ public class TaskListWindow extends BasicWindow {
         if (gui == null || selected < 0 || selected >= tasks.size()) {
             return;
         }
-        gui.addWindowAndWait(new TaskDateWindow(service, tasks.get(selected)));
+        Task task = tasks.get(selected);
+        LocalDate initial = task.getDueDate() != null ? Dates.parse(task.getDueDate()) : LocalDate.now();
+        if (initial == null) initial = LocalDate.now();
+        String picked = pickDate(initial);
+        if (picked != null) {
+            try {
+                service.setTaskDue(task.getId(), picked);
+            } catch (ProviderException e) {
+                setWarning(e.getMessage());
+            }
+        }
         refresh();
+    }
+
+    private String pickDate(LocalDate initial) {
+        CalendarWindow window = new CalendarWindow(initial);
+        gui.addWindowAndWait(window);
+        if (window.isCleared()) {
+            return "";
+        }
+        return window.getSelectedDate() == null ? null : window.getSelectedDate().toString();
     }
 
     private void completeSelected() {

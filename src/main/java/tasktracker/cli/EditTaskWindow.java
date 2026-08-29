@@ -39,6 +39,8 @@ public class EditTaskWindow extends BasicWindow {
         input.setText(task.getTitle());
         if (task.getDueDate() != null) {
             dueInput.setText(task.getDueDate());
+        } else {
+            dueInput.setText(Dates.today());
         }
 
         Panel content = new Panel(new LinearLayout(Direction.VERTICAL));
