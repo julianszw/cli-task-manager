@@ -4,10 +4,7 @@ mode: primary
 permission:
   edit:
     "**": deny
-    "**/reviews/**": allow
-  write:
-    "**": deny
-    "**/reviews/**": allow
+    "reviews/**": allow
   bash: deny
   question: allow
 ---
