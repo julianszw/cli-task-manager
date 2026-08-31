@@ -47,7 +47,7 @@ class AddTaskWindowTest {
         type(window, "2026-08-28");
         window.handleInput(new KeyStroke(KeyType.Enter));
 
-        assertEquals("2026-08-28", window.getCreatedTask().getDueDate());
+        assertEquals(LocalDate.of(2026, 8, 28), window.getCreatedTask().getDue());
         assertEquals(1, service.listTasks(listId).size());
     }
 
@@ -80,7 +80,7 @@ class AddTaskWindowTest {
         type(window, "tarea");
         window.handleInput(new KeyStroke(KeyType.Enter));
 
-        assertEquals(LocalDate.now().toString(), window.getCreatedTask().getDueDate());
+        assertEquals(LocalDate.now(), window.getCreatedTask().getDue());
     }
 
     @Test

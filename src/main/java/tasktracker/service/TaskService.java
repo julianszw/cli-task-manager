@@ -60,7 +60,7 @@ public class TaskService {
             throw new IllegalArgumentException("El título no puede estar vacío");
         }
         requireList(listId);
-        Task created = provider.createTask(listId, title, normalizeDue(due));
+        Task created = provider.createTask(listId, title, parseDue(due));
         tasks.put(created.getId(), created);
         return created;
     }
@@ -95,7 +95,7 @@ public class TaskService {
 
     public void setTaskDue(String id, String due) {
         Task task = requireTask(id);
-        task.setDue(normalizeDue(due));
+        task.setDue(parseDue(due));
         provider.updateTask(task);
     }
 
@@ -152,16 +152,14 @@ public class TaskService {
         }
     }
 
-    private static String normalizeDue(String due) {
+    private static LocalDate parseDue(String due) {
         if (due == null || due.isBlank()) {
             return null;
         }
-        String value = due.trim();
         try {
-            LocalDate.parse(value);
+            return LocalDate.parse(due.trim());
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("La fecha debe tener formato yyyy-MM-dd");
         }
-        return value + "T00:00:00.000Z";
     }
 }

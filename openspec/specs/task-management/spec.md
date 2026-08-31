@@ -111,7 +111,8 @@ El sistema DEBE permitir modificar el título de una tarea existente.
 
 ### Requirement: Fecha de vencimiento
 El sistema DEBE permitir establecer, modificar y quitar la fecha de vencimiento de
-una tarea existente.
+una tarea existente, modelándola como una fecha del dominio (sin componente de hora
+ni dependencia del formato de Google Tasks).
 
 #### Scenario: Establecer o modificar fecha
 - **GIVEN** una tarea con id válido y una fecha de vencimiento

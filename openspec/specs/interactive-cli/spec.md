@@ -36,6 +36,23 @@ operar sobre las tareas; sin autenticación, DEBE solicitar el acceso.
 - **THEN** el sistema carga las listas y tareas desde Google Tasks
 - **AND** se muestra la vista de tareas de la lista activa
 
+### Requirement: Fallo al iniciar
+Ante un fallo de autenticación o de red al iniciar, el sistema DEBE mostrar un
+mensaje legible y terminar con un código de salida de error, sin exponer un stack
+trace al usuario.
+
+#### Scenario: Fallo de autenticación o de red al iniciar
+- **GIVEN** un fallo de autenticación o de red al arrancar la aplicación
+- **WHEN** se inicia la aplicación
+- **THEN** el sistema muestra un mensaje de error legible al usuario
+- **AND** termina con un código de salida distinto de cero
+- **AND** no imprime un stack trace crudo
+
+#### Scenario: Arranque exitoso
+- **GIVEN** la aplicación puede autenticarse y conectarse
+- **WHEN** se inicia la aplicación
+- **THEN** la aplicación continúa normalmente mostrando la vista de tareas
+
 ### Requirement: Navegación por teclado
 El sistema DEBE permitir moverse por la lista de tareas con las teclas `↑`/`k` (arriba) y `↓`/`j` (abajo), manteniendo visible la tarea seleccionada.
 

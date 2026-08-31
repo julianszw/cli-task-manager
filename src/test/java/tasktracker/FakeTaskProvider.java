@@ -1,5 +1,6 @@
 package tasktracker;
 
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,29 +22,11 @@ public class FakeTaskProvider implements TaskProvider {
     }
 
     @Override
-    public TaskList getTaskList(String id) {
-        return lists.get(id);
-    }
-
-    @Override
     public TaskList createTaskList(String title) {
         TaskList list = new TaskList(title);
         list.setId(String.valueOf(listSequence.incrementAndGet()));
         lists.put(list.getId(), list);
         return list;
-    }
-
-    @Override
-    public TaskList updateTaskList(String id, String title) {
-        TaskList updated = new TaskList(title);
-        updated.setId(id);
-        lists.put(id, updated);
-        return updated;
-    }
-
-    @Override
-    public void deleteTaskList(String id) {
-        lists.remove(id);
     }
 
     @Override
@@ -54,12 +37,7 @@ public class FakeTaskProvider implements TaskProvider {
     }
 
     @Override
-    public Task getTask(String listId, String taskId) {
-        return tasks.get(taskId);
-    }
-
-    @Override
-    public Task createTask(String listId, String title, String due) {
+    public Task createTask(String listId, String title, LocalDate due) {
         Task task = new Task(title);
         task.setId(String.valueOf(taskSequence.incrementAndGet()));
         task.setListId(listId);
@@ -88,10 +66,5 @@ public class FakeTaskProvider implements TaskProvider {
     @Override
     public String providerName() {
         return "Fake";
-    }
-
-    @Override
-    public void clearTasks(String listId) {
-        tasks.values().removeIf(task -> listId.equals(task.getListId()));
     }
 }

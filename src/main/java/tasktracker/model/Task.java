@@ -1,12 +1,14 @@
 package tasktracker.model;
 
+import java.time.LocalDate;
+
 public class Task {
 
     private String id;
     private String title;
     private TaskStatus status;
     private String listId;
-    private String due;
+    private LocalDate due;
 
     public Task(String title) {
         this.title = title;
@@ -37,20 +39,12 @@ public class Task {
         this.listId = listId;
     }
 
-    public String getDue() {
+    public LocalDate getDue() {
         return due;
     }
 
-    public void setDue(String due) {
+    public void setDue(LocalDate due) {
         this.due = due;
-    }
-
-    public String getDueDate() {
-        if (due == null) {
-            return null;
-        }
-        int separator = due.indexOf('T');
-        return separator >= 0 ? due.substring(0, separator) : due;
     }
 
     public void markCompleted() {

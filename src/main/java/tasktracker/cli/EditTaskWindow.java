@@ -44,8 +44,8 @@ public class EditTaskWindow extends BasicWindow {
         message.setForegroundColor(VisualStyle.ERROR);
 
         input.setText(task.getTitle());
-        if (task.getDueDate() != null) {
-            dueInput.setText(task.getDueDate());
+        if (task.getDue() != null) {
+            dueInput.setText(task.getDue().toString());
         } else {
             dueInput.setText(Dates.today());
         }

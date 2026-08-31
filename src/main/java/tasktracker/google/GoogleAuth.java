@@ -21,9 +21,9 @@ import tasktracker.provider.ProviderException;
 public final class GoogleAuth {
 
     private static final String DATA_STORE_DIR = "google-tokens";
-    private static final String APPLICATION_NAME = "cli-task-tracker";
 
     private final Path workingDir;
+    private volatile GoogleAuthorizationCodeFlow flow;
 
     public GoogleAuth(Path workingDir) {
         this.workingDir = workingDir;
@@ -31,15 +31,15 @@ public final class GoogleAuth {
 
     public boolean hasStoredCredentials() {
         try {
-            return buildFlow().loadCredential("user") != null;
-        } catch (Exception e) {
-            return false;
+            return flow().loadCredential("user") != null;
+        } catch (IOException | GeneralSecurityException e) {
+            throw new ProviderException("No se pudo verificar la sesión guardada: " + e.getMessage(), e);
         }
     }
 
     public Credential loadCredential() {
         try {
-            return buildFlow().loadCredential("user");
+            return flow().loadCredential("user");
         } catch (IOException | GeneralSecurityException e) {
             throw new ProviderException("No se pudo cargar la sesión de Google: " + e.getMessage(), e);
         }
@@ -47,7 +47,7 @@ public final class GoogleAuth {
 
     public Credential authorize() {
         try {
-            GoogleAuthorizationCodeFlow flow = buildFlow();
+            GoogleAuthorizationCodeFlow flow = flow();
             LocalServerReceiver receiver = new LocalServerReceiver.Builder().build();
             AuthorizationCodeInstalledApp.Browser browser = url -> {
                 System.out.println();
@@ -66,6 +66,19 @@ public final class GoogleAuth {
         } catch (Exception e) {
             throw new ProviderException("No se pudo autenticar con Google: " + e.getMessage(), e);
         }
+    }
+
+    private GoogleAuthorizationCodeFlow flow() throws IOException, GeneralSecurityException {
+        GoogleAuthorizationCodeFlow f = flow;
+        if (f == null) {
+            synchronized (this) {
+                if (flow == null) {
+                    flow = buildFlow();
+                }
+                f = flow;
+            }
+        }
+        return f;
     }
 
     private GoogleAuthorizationCodeFlow buildFlow() throws IOException, GeneralSecurityException {

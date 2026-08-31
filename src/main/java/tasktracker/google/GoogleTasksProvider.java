@@ -5,6 +5,11 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.tasks.Tasks;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import tasktracker.model.Task;
 import tasktracker.model.TaskList;
@@ -14,135 +19,109 @@ import tasktracker.provider.TaskProvider;
 public final class GoogleTasksProvider implements TaskProvider {
 
     private static final String APPLICATION_NAME = "cli-task-tracker";
+    private static final String DUE_TIME_SUFFIX = "T00:00:00.000Z";
+    private static final int MAX_RESULTS = 100;
 
-    private final GoogleAuth auth;
+    private final Tasks tasks;
 
     public GoogleTasksProvider(GoogleAuth auth) {
-        this.auth = auth;
+        try {
+            this.tasks = new Tasks.Builder(
+                    GoogleNetHttpTransport.newTrustedTransport(),
+                    GsonFactory.getDefaultInstance(),
+                    auth.loadCredential())
+                    .setApplicationName(APPLICATION_NAME)
+                    .build();
+        } catch (IOException | GeneralSecurityException e) {
+            throw new ProviderException("No se pudo construir el cliente de Google Tasks: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public List<TaskList> listTaskLists() {
-        try {
-            List<com.google.api.services.tasks.model.TaskList> items =
-                    service().tasklists().list().setMaxResults(100).execute().getItems();
-            if (items == null) {
-                return List.of();
-            }
-            return items.stream().map(GoogleTasksProvider::toTaskList).toList();
-        } catch (IOException e) {
-            throw handleException("No se pudieron listar las listas", e);
-        }
-    }
-
-    @Override
-    public TaskList getTaskList(String id) {
-        try {
-            return toTaskList(service().tasklists().get(id).execute());
-        } catch (IOException e) {
-            throw handleException("No se pudo obtener la lista", e);
-        }
+        return call("No se pudieron listar las listas", () -> {
+            List<com.google.api.services.tasks.model.TaskList> all = new ArrayList<>();
+            String pageToken = null;
+            do {
+                var request = tasks.tasklists().list().setMaxResults(MAX_RESULTS);
+                if (pageToken != null) {
+                    request.setPageToken(pageToken);
+                }
+                var response = request.execute();
+                if (response.getItems() != null) {
+                    all.addAll(response.getItems());
+                }
+                pageToken = response.getNextPageToken();
+            } while (pageToken != null);
+            return all.stream().map(GoogleTasksProvider::toTaskList).toList();
+        });
     }
 
     @Override
     public TaskList createTaskList(String title) {
-        try {
-            com.google.api.services.tasks.model.TaskList created = service().tasklists()
+        return call("No se pudo crear la lista", () -> {
+            com.google.api.services.tasks.model.TaskList created = tasks.tasklists()
                     .insert(new com.google.api.services.tasks.model.TaskList().setTitle(title))
                     .execute();
             return toTaskList(created);
-        } catch (IOException e) {
-            throw handleException("No se pudo crear la lista", e);
-        }
-    }
-
-    @Override
-    public TaskList updateTaskList(String id, String title) {
-        try {
-            com.google.api.services.tasks.model.TaskList updated = service().tasklists()
-                    .update(id, new com.google.api.services.tasks.model.TaskList().setId(id).setTitle(title))
-                    .execute();
-            return toTaskList(updated);
-        } catch (IOException e) {
-            throw handleException("No se pudo actualizar la lista", e);
-        }
-    }
-
-    @Override
-    public void deleteTaskList(String id) {
-        try {
-            service().tasklists().delete(id).execute();
-        } catch (IOException e) {
-            throw handleException("No se pudo eliminar la lista", e);
-        }
+        });
     }
 
     @Override
     public List<Task> listTasks(String listId) {
-        try {
-            List<com.google.api.services.tasks.model.Task> items =
-                    service().tasks().list(listId).setMaxResults(100).execute().getItems();
-            if (items == null) {
-                return List.of();
-            }
-            return items.stream().map(task -> toTask(task, listId)).toList();
-        } catch (IOException e) {
-            throw handleException("No se pudieron listar las tareas", e);
-        }
+        return call("No se pudieron listar las tareas", () -> {
+            List<com.google.api.services.tasks.model.Task> all = new ArrayList<>();
+            String pageToken = null;
+            do {
+                var request = tasks.tasks().list(listId).setMaxResults(MAX_RESULTS);
+                if (pageToken != null) {
+                    request.setPageToken(pageToken);
+                }
+                var response = request.execute();
+                if (response.getItems() != null) {
+                    all.addAll(response.getItems());
+                }
+                pageToken = response.getNextPageToken();
+            } while (pageToken != null);
+            return all.stream().map(task -> toTask(task, listId)).toList();
+        });
     }
 
     @Override
-    public Task getTask(String listId, String taskId) {
-        try {
-            return toTask(service().tasks().get(listId, taskId).execute(), listId);
-        } catch (IOException e) {
-            throw handleException("No se pudo obtener la tarea", e);
-        }
-    }
-
-    @Override
-    public Task createTask(String listId, String title, String due) {
-        try {
+    public Task createTask(String listId, String title, LocalDate due) {
+        return call("No se pudo crear la tarea", () -> {
             com.google.api.services.tasks.model.Task googleTask =
                     new com.google.api.services.tasks.model.Task().setTitle(title);
             if (due != null) {
-                googleTask.setDue(due);
+                googleTask.setDue(toGoogleDue(due));
             }
-            return toTask(service().tasks().insert(listId, googleTask).execute(), listId);
-        } catch (IOException e) {
-            throw handleException("No se pudo crear la tarea", e);
-        }
+            return toTask(tasks.tasks().insert(listId, googleTask).execute(), listId);
+        });
     }
 
     @Override
     public Task updateTask(Task task) {
-        try {
-            return toTask(service().tasks().update(task.getListId(), task.getId(), toGoogleTask(task)).execute(),
-                    task.getListId());
-        } catch (IOException e) {
-            throw handleException("No se pudo actualizar la tarea", e);
-        }
+        return call("No se pudo actualizar la tarea",
+                () -> toTask(tasks.tasks().update(task.getListId(), task.getId(), toGoogleTask(task)).execute(),
+                        task.getListId()));
     }
 
     @Override
     public void deleteTask(String listId, String taskId) {
-        try {
-            service().tasks().delete(listId, taskId).execute();
-        } catch (IOException e) {
-            throw handleException("No se pudo eliminar la tarea", e);
-        }
+        call("No se pudo eliminar la tarea", () -> {
+            tasks.tasks().delete(listId, taskId).execute();
+            return null;
+        });
     }
 
     @Override
     public Task moveTask(String taskListId, String taskId, String destinationListId) {
-        try {
-            com.google.api.services.tasks.model.Task moved = service().tasks().move(taskListId, taskId)
+        return call("No se pudo mover la tarea", () -> {
+            com.google.api.services.tasks.model.Task moved = tasks.tasks().move(taskListId, taskId)
                     .setDestinationTasklist(destinationListId)
                     .execute();
             return toTask(moved, destinationListId);
-        } catch (IOException e) {
-            throw handleException("No se pudo mover la tarea", e);
-        }
+        });
     }
 
     @Override
@@ -150,33 +129,24 @@ public final class GoogleTasksProvider implements TaskProvider {
         return "Google Tasks";
     }
 
-    @Override
-    public void clearTasks(String listId) {
+    private <T> T call(String message, ThrowingSupplier<T> operation) {
         try {
-            service().tasks().clear(listId).execute();
+            return operation.get();
         } catch (IOException e) {
-            throw handleException("No se pudieron eliminar las tareas", e);
+            throw handleException(message, e);
         }
     }
 
-    private Tasks service() {
-        try {
-            return new Tasks.Builder(
-                    GoogleNetHttpTransport.newTrustedTransport(),
-                    GsonFactory.getDefaultInstance(),
-                    auth.loadCredential())
-                    .setApplicationName(APPLICATION_NAME)
-                    .build();
-        } catch (Exception e) {
-            throw new ProviderException("No se pudo construir el cliente de Google Tasks: " + e.getMessage(), e);
-        }
+    @FunctionalInterface
+    private interface ThrowingSupplier<T> {
+        T get() throws IOException;
     }
 
     private static Task toTask(com.google.api.services.tasks.model.Task googleTask, String listId) {
         Task task = new Task(googleTask.getTitle());
         task.setId(googleTask.getId());
         task.setListId(listId);
-        task.setDue(googleTask.getDue());
+        task.setDue(parseDue(googleTask.getDue()));
         if ("completed".equals(googleTask.getStatus())) {
             task.markCompleted();
         }
@@ -189,7 +159,7 @@ public final class GoogleTasksProvider implements TaskProvider {
                 .setTitle(task.getTitle())
                 .setStatus(task.isCompleted() ? "completed" : "needsAction");
         if (task.getDue() != null) {
-            googleTask.setDue(task.getDue());
+            googleTask.setDue(toGoogleDue(task.getDue()));
         }
         return googleTask;
     }
@@ -198,6 +168,21 @@ public final class GoogleTasksProvider implements TaskProvider {
         TaskList taskList = new TaskList(list.getTitle());
         taskList.setId(list.getId());
         return taskList;
+    }
+
+    private static String toGoogleDue(LocalDate due) {
+        return due + DUE_TIME_SUFFIX;
+    }
+
+    private static LocalDate parseDue(String due) {
+        if (due == null) {
+            return null;
+        }
+        try {
+            return OffsetDateTime.parse(due).toLocalDate();
+        } catch (DateTimeParseException e) {
+            return LocalDate.parse(due.substring(0, Math.min(10, due.length())));
+        }
     }
 
     private ProviderException handleException(String message, IOException e) {

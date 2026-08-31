@@ -82,7 +82,6 @@ final class OptionMenuWindow extends BasicWindow {
         if (count == 0) {
             return;
         }
-        int next = ((options.getSelectedIndex() + delta) % count + count) % count;
-        options.setSelectedIndex(next);
+        options.setSelectedIndex(MenuNavigation.cycle(options.getSelectedIndex(), delta, count));
     }
 }

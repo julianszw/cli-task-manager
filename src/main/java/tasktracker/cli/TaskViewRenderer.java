@@ -4,6 +4,7 @@ import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.ComponentRenderer;
 import com.googlecode.lanterna.gui2.TextGUIGraphics;
+import java.time.LocalDate;
 import java.util.List;
 import tasktracker.model.Task;
 
@@ -171,7 +172,7 @@ final class TaskViewRenderer implements ComponentRenderer<TaskViewComponent> {
         String title = truncateEnd(task.getTitle(), titleWidth);
         g.putString(5, y, title);
         g.clearModifiers();
-        String due = task.getDueDate();
+        String due = task.getDue() != null ? task.getDue().toString() : null;
         if (due != null) {
             int x = 5 + title.length();
             if (x + 1 < cols - 1) {

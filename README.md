@@ -21,9 +21,10 @@ Genera un jar autocontenido (incluye dependencias) en `target/cli-task-tracker-1
 java -jar target/cli-task-tracker-1.0.0.jar
 ```
 
-La app abre directamente la vista única de tareas con un tema oscuro, un logo
-"Task Manager" en la cabecera, listas de tareas navegables (cada tarea pertenece a
-una lista), íconos de estado (`○` pendiente, `✓` verde completado), fecha de
+La app abre directamente la vista de tareas con un tema oscuro y un logo
+"TaskMaster" en la cabecera. Sobre esa vista se abren ventanas modales para crear,
+editar, elegir fecha (calendario) y seleccionar listas. Cada tarea pertenece a una
+lista navegable, con íconos de estado (`○` pendiente, `✓` verde completado), fecha de
 vencimiento junto al título y una barra de estado inferior con título, contador y
 atajos. Las tareas completadas se muestran con el texto tachado en gris y se agrupan
 al final de la lista. El menú de acciones (`Enter`) tiene navegación circular y la
@@ -40,6 +41,7 @@ sesión actual.
 | `Tab` / `Shift+Tab` | Cambiar a la lista siguiente / anterior |
 | `a` | Crear una tarea nueva en la lista activa |
 | `n` | Crear una lista nueva |
+| `h` | Ocultar/mostrar listas vacías |
 | `c` | Completar la tarea seleccionada |
 | `r` | Reabrir la tarea seleccionada |
 | `d` | Eliminar la tarea seleccionada |
@@ -47,6 +49,8 @@ sesión actual.
 | `Ctrl+=` / `Ctrl+-` | Aumentar / disminuir el zoom de la interfaz |
 | `Ctrl+0` | Restablecer el zoom al nivel por defecto |
 | `q` / `Esc` | Salir (con confirmación) |
+
+En el calendario de fecha, `d` quita la fecha de vencimiento y `Enter` la confirma.
 
 ## Google Tasks como fuente de datos
 

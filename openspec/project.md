@@ -7,7 +7,7 @@ en capas, operando exclusivamente contra la Google Tasks API como única fuente 
 datos (definido en `provider`).
 
 ## Tech Stack
-- Java 21 (sin frameworks externos)
+- Java 21 (sin framework de inyección de dependencias / Spring)
 - Maven (build y tests)
 - JUnit para tests (`src/test/java/tasktracker`)
 - Lanterna (`com.googlecode.lanterna:lanterna`) para la TUI: ventanas, paneles,
@@ -17,7 +17,7 @@ datos (definido en `provider`).
   de escritorio.
 - Lenguaje visual definido en `visual-style`: tema oscuro único, bordes redondeados,
   lista con íconos de estado y barra de estado inferior fija.
-- Logo ASCII "Task Manager" en la cabecera (`app-logo`), generado con caracteres de
+- Logo ASCII "TaskMaster" en la cabecera (`app-logo`), generado con caracteres de
   bloque (sin recursos gráficos externos) y adaptado al ancho del terminal.
 
 ## Architecture

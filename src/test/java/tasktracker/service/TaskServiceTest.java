@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -123,8 +124,7 @@ class TaskServiceTest {
 
         Task task = service.addTask(listId, "Entregar", "2026-08-28");
 
-        assertEquals("2026-08-28T00:00:00.000Z", task.getDue());
-        assertEquals("2026-08-28", task.getDueDate());
+        assertEquals(LocalDate.of(2026, 8, 28), task.getDue());
     }
 
     @Test
@@ -303,7 +303,7 @@ class TaskServiceTest {
         Task task = service.addTask(inboxId(), "Original");
 
         service.setTaskDue(task.getId(), "2026-08-28");
-        assertEquals("2026-08-28T00:00:00.000Z", task.getDue());
+        assertEquals(LocalDate.of(2026, 8, 28), task.getDue());
 
         service.setTaskDue(task.getId(), "");
         assertNull(task.getDue());

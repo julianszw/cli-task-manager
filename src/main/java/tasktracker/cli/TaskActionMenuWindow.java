@@ -97,7 +97,6 @@ public class TaskActionMenuWindow extends BasicWindow {
         if (count == 0) {
             return;
         }
-        int next = ((actions.getSelectedIndex() + delta) % count + count) % count;
-        actions.setSelectedIndex(next);
+        actions.setSelectedIndex(MenuNavigation.cycle(actions.getSelectedIndex(), delta, count));
     }
 }

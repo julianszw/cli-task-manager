@@ -67,7 +67,7 @@ class EditTaskWindowTest {
         window.handleInput(new KeyStroke(KeyType.Enter));
 
         assertTrue(window.isUpdated());
-        assertEquals("2026-08-28", service.listTasks(listId).get(0).getDueDate());
+        assertEquals(LocalDate.of(2026, 8, 28), service.listTasks(listId).get(0).getDue());
     }
 
     @Test

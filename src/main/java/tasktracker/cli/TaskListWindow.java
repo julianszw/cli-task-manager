@@ -125,95 +125,111 @@ public class TaskListWindow extends BasicWindow {
     @Override
     public boolean handleInput(KeyStroke key) {
         if (key.isCtrlDown() && key.getKeyType() == KeyType.Character) {
-            Character c = key.getCharacter();
-            if (c != null) {
-                switch (c) {
-                    case '=' -> {
-                        zoomIn();
-                        return true;
-                    }
-                    case '-' -> {
-                        zoomOut();
-                        return true;
-                    }
-                    case '0' -> {
-                        zoomReset();
-                        return true;
-                    }
-                    default -> {
-                    }
-                }
+            if (handleZoom(key.getCharacter())) {
+                return true;
             }
         }
         if (key.getKeyType() == KeyType.Character) {
-            Character c = key.getCharacter();
-            if (c != null) {
-                switch (c) {
-                    case 'h' -> {
-                        hideEmptyLists = !hideEmptyLists;
-                        refresh();
-                        return true;
-                    }
-                    case 'k' -> {
-                        moveUp();
-                        return true;
-                    }
-                    case 'j' -> {
-                        moveDown();
-                        return true;
-                    }
-                    case 'a' -> {
-                        openAddTask();
-                        return true;
-                    }
-                    case 'n' -> {
-                        openNewList();
-                        return true;
-                    }
-                    case 'c' -> {
-                        completeSelected();
-                        return true;
-                    }
-                    case 'r' -> {
-                        reopenSelected();
-                        return true;
-                    }
-                    case 'd' -> {
-                        deleteSelected();
-                        return true;
-                    }
-                    case 'p' -> {
-                        purgeCompleted();
-                        return true;
-                    }
-                    case 'q' -> {
-                        requestExit();
-                        return true;
-                    }
-                    default -> {
-                    }
-                }
-            }
-        } else if (key.getKeyType() == KeyType.Tab) {
-            nextList();
-            return true;
-        } else if (key.getKeyType() == KeyType.ReverseTab) {
-            previousList();
-            return true;
-        } else if (key.getKeyType() == KeyType.Enter) {
-            openActionMenu();
-            return true;
-        } else if (key.getKeyType() == KeyType.ArrowUp) {
-            moveUp();
-            return true;
-        } else if (key.getKeyType() == KeyType.ArrowDown) {
-            moveDown();
-            return true;
-        } else if (key.getKeyType() == KeyType.Escape) {
-            requestExit();
-            return true;
+            return handleChar(key.getCharacter());
         }
-        return super.handleInput(key);
+        return switch (key.getKeyType()) {
+            case Tab -> {
+                nextList();
+                yield true;
+            }
+            case ReverseTab -> {
+                previousList();
+                yield true;
+            }
+            case Enter -> {
+                openActionMenu();
+                yield true;
+            }
+            case ArrowUp -> {
+                moveUp();
+                yield true;
+            }
+            case ArrowDown -> {
+                moveDown();
+                yield true;
+            }
+            case Escape -> {
+                requestExit();
+                yield true;
+            }
+            default -> super.handleInput(key);
+        };
+    }
+
+    private boolean handleZoom(Character c) {
+        if (c == null) {
+            return false;
+        }
+        return switch (c) {
+            case '=' -> {
+                zoomIn();
+                yield true;
+            }
+            case '-' -> {
+                zoomOut();
+                yield true;
+            }
+            case '0' -> {
+                zoomReset();
+                yield true;
+            }
+            default -> false;
+        };
+    }
+
+    private boolean handleChar(Character c) {
+        if (c == null) {
+            return false;
+        }
+        return switch (c) {
+            case 'h' -> {
+                hideEmptyLists = !hideEmptyLists;
+                refresh();
+                yield true;
+            }
+            case 'k' -> {
+                moveUp();
+                yield true;
+            }
+            case 'j' -> {
+                moveDown();
+                yield true;
+            }
+            case 'a' -> {
+                openAddTask();
+                yield true;
+            }
+            case 'n' -> {
+                openNewList();
+                yield true;
+            }
+            case 'c' -> {
+                completeSelected();
+                yield true;
+            }
+            case 'r' -> {
+                reopenSelected();
+                yield true;
+            }
+            case 'd' -> {
+                deleteSelected();
+                yield true;
+            }
+            case 'p' -> {
+                purgeCompleted();
+                yield true;
+            }
+            case 'q' -> {
+                requestExit();
+                yield true;
+            }
+            default -> false;
+        };
     }
 
     private void moveUp() {
@@ -368,8 +384,7 @@ public class TaskListWindow extends BasicWindow {
             return;
         }
         Task task = tasks.get(selected);
-        LocalDate initial = task.getDueDate() != null ? Dates.parse(task.getDueDate()) : LocalDate.now();
-        if (initial == null) initial = LocalDate.now();
+        LocalDate initial = task.getDue() != null ? task.getDue() : LocalDate.now();
         String picked = pickDate(initial);
         if (picked != null) {
             try {
