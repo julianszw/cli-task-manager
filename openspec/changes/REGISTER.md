@@ -45,3 +45,4 @@ _(ninguno)_
 | `029-restore-date-field-calendar` | `29bd543` | abrir calendario al posicionarse en el campo de fecha |
 | `030-add-task-list-field` | `c9b9190` | agregar campo de lista en nueva tarea |
 | `031-cyclic-menu-navigation` | `85a3df7` | navegación cíclica en menúes y calendario |
+| `032-code-review-hardening` | `34ac5c7` | aplicar hallazgos del code review (cacheo, paginación, dead code y docs) |
